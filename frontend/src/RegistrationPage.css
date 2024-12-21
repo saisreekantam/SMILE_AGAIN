@@ -1,0 +1,70 @@
+.registration-container {
+    background-color: #222;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.registration-container::-webkit-scrollbar {
+    display: none;
+}
+
+.registration-container h2 {
+    margin-bottom: 20px;
+    color: white;
+}
+
+.registration-container input[type="text"],
+.registration-container input[type="email"],
+.registration-container input[type="password"],
+.registration-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid white;
+    background-color: #333;
+    color: white;
+    border-radius: 5px;
+    appearance: none;
+}
+
+.registration-container select {
+    color: gray; /* Placeholder color for select dropdown */
+}
+
+.registration-container button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.registration-container button:hover {
+    background-color: #444;
+    color: white;
+}
+
+.registration-container a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.registration-container a:hover {
+    text-decoration: underline;
+}
