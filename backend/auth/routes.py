@@ -1,6 +1,6 @@
 from flask import request, jsonify, session, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-from backend.models import User, SessionLog, UserProblem
+from backend.models import User,SessionLog,UserProblem
 from .utils import hash_password, check_password
 
 def auth_routes(auth_bp, db, bcrypt, login_manager):

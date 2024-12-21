@@ -16,6 +16,7 @@ login_manager.login_view = 'auth.login'
 create_auth_routes(app, db, bcrypt, login_manager)
 
 if __name__ == '__main__':
+    app.run(port=8000)
     with app.app_context():
         db.create_all()  
     app.run(debug=True)
