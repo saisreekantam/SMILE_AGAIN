@@ -1,0 +1,61 @@
+/* ProblemDescriptionForm.css */
+
+/* Form Container */
+.formContainer {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text color */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 1300px;
+    margin: auto;
+    height: 1000px;
+  }
+  
+  /* Labels */
+  label {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  /* Input Fields */
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #555; /* Gray border */
+    border-radius: 4px;
+    background-color: #222; /* Dark gray background for input */
+    color: #fff; /* White text */
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  /* Input Focus State */
+  input:focus {
+    border-color: #fff; /* White border when focused */
+    outline: none;
+    background-color: #333; /* Slightly lighter gray background */
+  }
+  
+  /* Submit Button */
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #333; /* Dark gray background */
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Submit Button Hover State */
+  button[type="submit"]:hover {
+    background-color: #555; /* Lighter gray on hover */
+  }
+  
