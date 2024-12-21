@@ -19,7 +19,7 @@ function RegistrationPage() {
             password:password
         };
         try{
-           const response = await axios.post("http://localhost:8000/register",data,{headers: { 'Content-Type' : 'application/json'}});
+           const response = await axios.post("http://localhost:8000/auth/register",data,{headers: { 'Content-Type' : 'application/json'}});
            console.log(response.data.message);
            navigate('/home');
         } catch (err){
