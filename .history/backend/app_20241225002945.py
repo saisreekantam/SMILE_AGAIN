@@ -14,7 +14,6 @@ app.config.from_object('config')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 

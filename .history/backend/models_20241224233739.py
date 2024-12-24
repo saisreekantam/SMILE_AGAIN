@@ -41,22 +41,3 @@ class Blog(db.Model):
     content = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=True)
-    content = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
-
-class Group(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True)
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    members = db.relationship('User', secondary='group_members', backref='groups')
-
-group_members = db.Table('group_members',
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
-)

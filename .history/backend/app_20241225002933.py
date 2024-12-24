@@ -14,14 +14,12 @@ app.config.from_object('config')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 
 # Register auth routes
 create_auth_routes(app, db, bcrypt, login_manager)
 create_user_routes(app, db)
-create_chat_routes(app, db, socketio)
 
 if __name__ == '__main__':
     with app.app_context():
