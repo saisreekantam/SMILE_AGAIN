@@ -21,7 +21,11 @@ function RegistrationPage() {
         try{
            const response = await axios.post("http://localhost:8000/auth/register",data,{headers: { 'Content-Type' : 'application/json'}});
            console.log(response.data.message);
-           navigate('/home');
+           if(response.status===200){
+            const { name } = data;
+            localStorage.setItem("username",name);
+            navigate('/home');
+           }
         } catch (err){
             console.error('Error Saving workout: ',err);
         }

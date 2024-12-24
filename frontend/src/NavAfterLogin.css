@@ -1,0 +1,43 @@
+.TopNavBar {
+    display: flex;
+    justify-content: space-between; /* Space out Logo and Links */
+    align-items: center; /* Vertically center the elements */
+    height: 80px;
+    width: 100%; /* Ensure it takes full width of the parent */
+    padding: 0 20px; /* Optional: padding to add some space on the sides */
+    color: black;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+  }
+  .Smile{
+    color: gray;
+  }
+  .Again{
+    color: white;
+  }
+  
+  .Logo {
+    font-size: 24px;
+    font-weight: bold;
+    white-space: nowrap; /* Prevent logo text from wrapping */
+  }
+  
+  
+  .Links {
+    display: flex; /* Align links horizontally */
+    gap: 15px; /* Space between the links */
+    margin-left: auto; /* Push Links div to the right */
+    flex-wrap: nowrap; /* Ensure no wrapping of links */
+    color: white;
+  }
+  
+  .Links a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap; /* Prevent links from wrapping */
+  }
+  
+  .TopNavBar {
+    overflow: hidden; /* Prevent horizontal scroll */
+  }

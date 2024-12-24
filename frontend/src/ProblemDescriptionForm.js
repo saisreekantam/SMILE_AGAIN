@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import "./ProblemDescriptionFile.css";
+import NavAfterLogin from "./NavAfterLogin";
 const ProblemDescriptionForm=() => {
     const [currentStep,setCurrentStep] = useState(0);
     const [formData,setFormData] = useState({
@@ -40,6 +41,7 @@ const ProblemDescriptionForm=() => {
     };
     return(
         <div className="formContainer">
+            <NavAfterLogin />
             <form onSubmit={handleSubmit}>
                 {formFields.map((field,index) => (
                     <div key={field.id} style={{ display:index <= currentStep ? "block" : "none"}}>
