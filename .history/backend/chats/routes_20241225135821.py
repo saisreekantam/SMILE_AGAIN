@@ -184,11 +184,11 @@ def chat_routes(chats_bp, db, socketio):
         if not recipient:
             return jsonify({'error': 'Recipient not found'}), 404
 
-        
+        # Check for hate language
         if contains_hate_speech(message_text):
             return jsonify({'error': 'Message contains inappropriate content'}), 403
 
-        
+        # Save message
         message = Message(
             sender_id=current_user.id,
             recipient_id=recipient_id,

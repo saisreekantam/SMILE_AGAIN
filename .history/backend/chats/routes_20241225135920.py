@@ -188,7 +188,7 @@ def chat_routes(chats_bp, db, socketio):
         if contains_hate_speech(message_text):
             return jsonify({'error': 'Message contains inappropriate content'}), 403
 
-        
+        # Save message
         message = Message(
             sender_id=current_user.id,
             recipient_id=recipient_id,

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from backend.models import Group, group_members, User, ChatRequest, Message
 import nltk
 
-
+# Load NLTK data for hate speech detection
 nltk.download('stopwords')
 nltk.download('punkt')
 
@@ -47,7 +47,7 @@ def chat_routes(chats_bp, db, socketio):
         if not group or group.created_by != current_user.id:
             return jsonify({'error': 'Unauthorized or group not found'}), 403
 
-        if friend_id and friend in current_user.friends: 
+        if friend_id and friend in current_user.friends:  # Assuming `friends` is a relationship on User
             db.session.execute(group_members.insert().values(group_id=group_id, user_id=friend_id))
             db.session.commit()
             
@@ -69,7 +69,7 @@ def chat_routes(chats_bp, db, socketio):
         if not group:
             return jsonify({'error': 'Group not found'}), 404
 
-        
+        # Notify the creator about the join request
         socketio.emit(
             'group_notification',
             {'message': f'{current_user.name} has requested to join the group {group.name}', 'group_id': group_id},
@@ -184,11 +184,11 @@ def chat_routes(chats_bp, db, socketio):
         if not recipient:
             return jsonify({'error': 'Recipient not found'}), 404
 
-        
+        # Check for hate language
         if contains_hate_speech(message_text):
             return jsonify({'error': 'Message contains inappropriate content'}), 403
 
-        
+        # Save message
         message = Message(
             sender_id=current_user.id,
             recipient_id=recipient_id,
