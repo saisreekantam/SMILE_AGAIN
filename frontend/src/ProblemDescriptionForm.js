@@ -1,15 +1,16 @@
 import React,{useState} from "react";
 import "./ProblemDescriptionFile.css";
 import NavAfterLogin from "./NavAfterLogin";
+import axios from "axios";
 const ProblemDescriptionForm=() => {
     const [currentStep,setCurrentStep] = useState(0);
     const [formData,setFormData] = useState({
-       When:"",
-       Why: "", 
+       smile_last_time:"",
+       smile_reason: "", 
     });
     const formFields = [
-        {id:"When", label:"When did you smile last time",type:"text",required:"true"},
-        {id:"Why", label:"Why Did you lose your smile",type:"text",required:"true"}
+        {id:"smile_last_time", label:"When did you smile last time(press enter after you type this)",type:"text",required:"true"},
+        {id:"smile_reason", label:"Why Did you lose your smile",type:"text",required:"true"}
     ]
 
     const handleChange=(e) => {
@@ -35,9 +36,16 @@ const ProblemDescriptionForm=() => {
     }
     
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Form Submitted: ",formData);
+        try{
+            const response= await axios.post("http:localhost:8000/auth/problem-page",formData,{headers:{'Content-Type' : 'application/json'}});
+            const message=response.data.message;
+            console.log(message);
+        } catch(err){
+            console.error("Error posting problem: ",err);
+        }
     };
     return(
         <div className="formContainer">

@@ -6,8 +6,10 @@ import image3 from './assets/Image3.jpg'
 import image4 from './assets/Image4.jpg'
 import image5 from './assets/Image5.jpg'
 import chatbot from './assets/Chatbot.jpg'
+import { useAuth } from './contexts/AuthContext'
 
 function LandingPage() {
+  const { isLoggedIn } = useAuth();
   useEffect(() => {
     const scrollContainer = document.querySelector('.ImagesContainer');
   
@@ -95,7 +97,7 @@ function LandingPage() {
           "Smiling isn't just an option; it's a true expression of happiness.Learn from those who lost their smiles and bravely brought them back."
         </div>
         <div className='ChatbotImageContainer'>
-          <a href=""><img src={chatbot} className='ChatbotImage'></img></a>
+          <a href="/chatbot_page"><img src={chatbot} className='ChatbotImage'></img></a>
         </div>
       </div>
       <div className='WorkshopPage'>

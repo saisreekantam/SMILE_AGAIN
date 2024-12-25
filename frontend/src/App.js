@@ -4,6 +4,7 @@ import { Routes,Route } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
 import ProblemDescriptionForm from './ProblemDescriptionForm';
+import ChatBotPage from './ChatBotPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegistrationPage />} />
         <Route path='/auth/problem_page' element={<ProblemDescriptionForm />} />
+        <Route path='/chatbot_page' element={<ChatBotPage />} />
       </Routes>
     </>
   );

@@ -7,6 +7,7 @@
     padding: 0 20px; /* Optional: padding to add some space on the sides */
     color: black;
     box-sizing: border-box; /* Ensures padding doesn't affect width */
+    background-color: black;
   }
   .Smile{
     color: gray;

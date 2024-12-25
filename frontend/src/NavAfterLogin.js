@@ -11,7 +11,7 @@ const NavAfterLogin=() => {
                     <span className="Again">Again</span>
                 </div>
                 <div className="Links">
-                    <a href="">Home</a>
+                    <a href="/">Home</a>
                     <a href="">Blogs</a>
                     <a href="">Workshops</a>
                     <a href="">Chats</a>
