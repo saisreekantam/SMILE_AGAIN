@@ -16,7 +16,7 @@ const NavAfterLogin=() => {
                     <a href="">Workshops</a>
                     <a href="">Chats</a>
                     <a href="">About us</a>
-                    <a href="/profile">{userName}</a>
+                    <a href="/myProfile">{userName}</a>
                 </div>
             </nav>
         </div>

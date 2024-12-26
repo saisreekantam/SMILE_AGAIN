@@ -5,6 +5,7 @@ import LoginPage from './LoginPage';
 import RegistrationPage from './RegistrationPage';
 import ProblemDescriptionForm from './ProblemDescriptionForm';
 import ChatBotPage from './ChatBotPage';
+import ProfilePage from './ProfilePage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path='/register' element={<RegistrationPage />} />
         <Route path='/auth/problem_page' element={<ProblemDescriptionForm />} />
         <Route path='/chatbot_page' element={<ChatBotPage />} />
+        <Route path='/myProfile' element={<ProfilePage />} />
       </Routes>
     </>
   );
