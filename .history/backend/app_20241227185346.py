@@ -7,7 +7,6 @@ from flask_socketio import SocketIO
 from auth import create_auth_routes
 from users import create_user_routes
 from chats import create_chat_routes
-from workshops import create_workshop_routes
 
 app = Flask(__name__)
 CORS(app,origins="http://localhost:3000")
@@ -23,7 +22,7 @@ login_manager.login_view = 'auth.login'
 create_auth_routes(app, db, bcrypt, login_manager)
 create_user_routes(app, db)
 create_chat_routes(app, db, socketio)
-create_workshop_routes(app, db)
+
 
 if __name__ == '__main__':
     with app.app_context():

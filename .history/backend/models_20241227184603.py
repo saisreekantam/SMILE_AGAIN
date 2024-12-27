@@ -89,25 +89,4 @@ class group_members(db.Model):
 
     def __repr__(self):
         return f"<GroupMembers group_id={self.group_id} user_id={self.user_id} role={self.role}>"
-class Workshop(db.Model):
-    __tablename__ = 'workshop'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    banner_url = db.Column(db.String(500), nullable=False)
-    meet_link = db.Column(db.String(500), nullable=False)
-    price = db.Column(db.Float, default=0.0)  # Free if price = 0
-    is_paid = db.Column(db.Boolean, default=False)
-    sponsored = db.Column(db.Boolean, default=False)
-    tag = db.Column(db.String(100), nullable=False)
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-
-class Feedback(db.Model):
-    __tablename__ = 'feedback'
-    id = db.Column(db.Integer, primary_key=True)
-    workshop_id = db.Column(db.Integer, db.ForeignKey('workshop.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    comments = db.Column(db.Text, nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  
-    timestamp = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    

@@ -7,7 +7,7 @@ from flask_socketio import SocketIO
 from auth import create_auth_routes
 from users import create_user_routes
 from chats import create_chat_routes
-from workshops import create_workshop_routes
+from works
 
 app = Flask(__name__)
 CORS(app,origins="http://localhost:3000")

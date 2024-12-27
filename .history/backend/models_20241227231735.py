@@ -109,5 +109,5 @@ class Feedback(db.Model):
     workshop_id = db.Column(db.Integer, db.ForeignKey('workshop.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     comments = db.Column(db.Text, nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  
+    rating = db.Column(db.Integer, nullable=False)  # Rating from 1 to 5
     timestamp = db.Column(db.DateTime, default=db.func.now(), nullable=False)
