@@ -73,8 +73,8 @@ class ChatRequest(db.Model):
     message = db.Column(db.LargeBinary)  # Encrypted message
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-class group_members(db.Model):
-    
+class GroupMembers(db.Model):
+    __tablename__ = 'group_members'
 
     id = db.Column(db.Integer, primary_key=True)  
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)

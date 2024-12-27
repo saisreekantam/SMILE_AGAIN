@@ -73,15 +73,15 @@ class ChatRequest(db.Model):
     message = db.Column(db.LargeBinary)  # Encrypted message
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-class group_members(db.Model):
-    
+class GroupMembers(db.Model):
+    __tablename__ = 'group_members'
 
     id = db.Column(db.Integer, primary_key=True)  
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  
     role = db.Column(db.String(50), nullable=True)  
-    last_interaction = db.Column(db.DateTime, nullable=True)  
+    last_interaction = db.Column(db.DateTime, nullable=True)  # Tracks last interaction in the group
 
     # Relationships
     group = db.relationship('Group', backref=db.backref('group_members', lazy='dynamic'))
