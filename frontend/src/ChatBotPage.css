@@ -1,0 +1,133 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    width: 100vw;
+  }
+  
+  .ChatBotPage {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* overflow-y: scroll; */
+  }
+  
+  .QuoteContainer,
+  .chat-container,
+  .ColorDonation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 700px;
+    width: 100%;
+    scroll-snap-align: start;
+  }
+  .QuoteContainer{
+    height: 650px;
+  }
+  
+  .QuoteContainer {
+    background-color: black;
+    color: white;
+    text-align: center;
+    position: relative;
+    font-size: 1.5em;
+  }
+  
+  .scroll-to-chat {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .chat-container {
+    background-color: #1a1a1a;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 96%;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid white;
+    border-radius: 5px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 60%;
+    word-wrap: break-word;
+  }
+  
+  .chat-message.user {
+    align-self: flex-end;
+    right: 0;
+    background-color: #333;
+    color: white;
+    max-width: fit-content;
+  }
+  
+  .chat-message.bot {
+    align-self: flex-start;
+    background-color: white;
+    color: black;
+    max-width: 500px;
+  }
+  
+  .chat-input {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid white;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+  }
+  
+  .chat-input button {
+    padding: 10px;
+    border: none;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    border-radius: 5px;
+    height: 38.4px;
+  }
+  
+  .ColorDonation {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .ColorDonationMessage {
+    max-width: 600px;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+  

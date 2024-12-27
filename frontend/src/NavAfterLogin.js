@@ -11,12 +11,12 @@ const NavAfterLogin=() => {
                     <span className="Again">Again</span>
                 </div>
                 <div className="Links">
-                    <a href="">Home</a>
+                    <a href="/">Home</a>
                     <a href="">Blogs</a>
                     <a href="">Workshops</a>
                     <a href="">Chats</a>
                     <a href="">About us</a>
-                    <a href="/profile">{userName}</a>
+                    <a href="/myProfile">{userName}</a>
                 </div>
             </nav>
         </div>

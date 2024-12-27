@@ -1,10 +1,9 @@
 import axios from "axios";
 import { useState } from "react"
+import NavAfterLogin from "./NavAfterLogin";
 
 const RelatedBlogs=() => {
-    const [blogs,setBlogs]=useState({
-
-    });
+    const [blogs,setBlogs]=useState(null);
     const fetchBlogs=async () =>{
         try{
             const response=await axios.get("http://localhost:8000/blogs",{
@@ -19,4 +18,12 @@ const RelatedBlogs=() => {
 
         }
     }
+    return (
+        <div className="BlogPageContainer">
+            <NavAfterLogin />
+            <div className="BlogsConatiner">
+                {blogs && blogs.map((blog,index))}
+            </div>
+        </div>
+    );
 }

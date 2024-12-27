@@ -59,15 +59,24 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
                 'smile_reason': problem.smile_reason if problem else ''
             })
 
+        # For non-GET requests
         data = request.json
         problem = UserProblem.query.filter_by(user_id=current_user.id).first()
         if not problem:
-            problem = UserProblem(user_id=current_user.id, smile_last_time=data['smile_last_time'])
+            problem = UserProblem(
+                user_id=current_user.id, 
+                smile_last_time=data.get('smile_last_time', ''), 
+                smile_reason=data.get('smile_reason', '')
+            )
         else:
-            problem.smile_last_time = data['smile_last_time']
+            problem.smile_last_time = data.get('smile_last_time', problem.smile_last_time)
+            problem.smile_reason = data.get('smile_reason', problem.smile_reason)
+            
         db.session.add(problem)
         db.session.commit()
+        
         return jsonify({'message': 'Answer saved successfully'})
+
 
     @auth_bp.route('/update-smile-reason', methods=['POST'])
     @login_required

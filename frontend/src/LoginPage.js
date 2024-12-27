@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import "./LoginPage.css";
+import { useAuth } from "./contexts/AuthContext";
 import axios from "axios";
 
 
 function LoginPage() {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
+    const { login } = useAuth();
     const handleSubmit=async (e) => {
         e.preventDefault();
         const data={
@@ -14,6 +16,9 @@ function LoginPage() {
         };
         try{
             const response=await axios.post("http://localhost:8000/auth/login",data,{headers: { 'Content-Type' : 'application/json'}});
+            if(response.request.responseURL.includes('problem_page')){
+                login({email});
+            }
             console.log(response.data);
         }
         catch(err){
