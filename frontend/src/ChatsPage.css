@@ -1,0 +1,54 @@
+/* Overall page styling */
+.chats-page {
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    background-color: #000;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Navigation styling */
+  .navigation {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background-color: #111;
+    border-bottom: 2px solid #333;
+  }
+  
+  .nav-button {
+    background: #222;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  
+  .nav-button:hover {
+    background: #444;
+    transform: scale(1.05);
+  }
+  
+  .nav-button.active {
+    background: #555;
+    border-color: #777;
+    font-weight: bold;
+  }
+  
+  /* Content area styling */
+  .content {
+    flex-grow: 1;
+    padding: 2rem;
+    background-color: #111;
+    overflow-y: auto;
+  }
+  
+  .content > * {
+    margin: auto;
+    max-width: 800px;
+  }
+  

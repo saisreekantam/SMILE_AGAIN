@@ -1,0 +1,160 @@
+/* General styles for the GroupPage */
+.group-page {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: #fff; /* White text */
+    background-color: #000; /* Black background */
+  }
+  
+  .group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .group-header h2 {
+    margin: 0;
+  }
+  
+  .group-header button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .group-header button:hover {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .group-messages {
+    background-color: #333; /* Dark gray background */
+    padding: 10px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+  
+  .message {
+    margin-bottom: 10px;
+  }
+  
+  .message.user {
+    text-align: right;
+    color: #fff; /* White text for user messages */
+  }
+  
+  .message.bot {
+    text-align: left;
+    color: #ccc; /* Light gray text for bot messages */
+  }
+  
+  .group-input {
+    display: flex;
+    align-items: center;
+  }
+  
+  .group-input input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #000;
+    color: #fff;
+  }
+  
+  .group-input button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .group-input button:hover {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  /* Styles for the popup */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Black overlay with slight transparency */
+    z-index: 1000;
+  }
+  
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000; /* Black background */
+    width: 400px;
+    max-width: 90%;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #fff; /* White border */
+    text-align: center;
+    z-index: 1001;
+    color: #fff; /* White text */
+  }
+  
+  .popup h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  
+  .popup div {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+  
+  .popup input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  
+  .popup label {
+    color: #fff; /* White text for labels */
+  }
+  
+  .popup button {
+    margin: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    border: 1px solid #fff; /* White border */
+    border-radius: 5px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .popup button:first-of-type:hover {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .popup button:last-of-type:hover {
+    background-color: #fff;
+    color: #000;
+  }
+  
