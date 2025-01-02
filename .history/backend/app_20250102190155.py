@@ -25,7 +25,7 @@ create_auth_routes(app, db, bcrypt, login_manager)
 create_user_routes(app, db)
 create_chat_routes(app, db, socketio)
 create_workshop_routes(app, db)
-create_blog_routes(app,db)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  

@@ -121,7 +121,7 @@ class Community(db.Model):
     tag = db.Column(db.String(100), nullable=False)  # Similar to Smile Reason
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-
+# Blog Model
 class Blog(db.Model):
     __tablename__ = 'blog'
     id = db.Column(db.Integer, primary_key=True)
