@@ -86,8 +86,7 @@ def register_routes(app):
             title=title,
             content=content,
             community_id=community_id,
-            created_by=current_user.id,
-            image_url = image_url
+            created_by=current_user.id
         )
         db.session.add(blog)
         db.session.commit()

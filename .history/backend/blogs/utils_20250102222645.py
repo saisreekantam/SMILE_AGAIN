@@ -9,6 +9,7 @@ def admin_required(f):
     return decorated_function
 
 def get_online_users():
+    """Fetches all online users except the current user."""
     return [
         {"id": user.id, "name": user.name}
         for user in User.query.filter_by(is_online=True).all()

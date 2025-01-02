@@ -71,14 +71,13 @@ def register_routes(app):
         community_id = data.get('community_id')
         title = data.get('title')
         content = data.get('content')
-        image_url = data.get('image_url', None)
 
         if not (community_id and title and content):
             return jsonify({'error': 'All fields are required'}), 400
 
         community = Community.query.get_or_404(community_id)
 
-        
+        # Check if the user is a member of the community
         if current_user not in community.members:
             return jsonify({'error': 'You must be a member of this community to post a blog'}), 403
 
@@ -86,8 +85,7 @@ def register_routes(app):
             title=title,
             content=content,
             community_id=community_id,
-            created_by=current_user.id,
-            image_url = image_url
+            created_by=current_user.id
         )
         db.session.add(blog)
         db.session.commit()

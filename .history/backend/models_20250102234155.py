@@ -9,7 +9,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     gender = db.Column(db.String(10))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    smile_reason = db.Column(db.String(100))
+    smile_
 
 class SessionLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,7 +40,6 @@ class Blog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     title = db.Column(db.String(100))
     content = db.Column(db.Text)
-    image_url = db.Column(db.String(500), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Message(db.Model):

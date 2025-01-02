@@ -4,13 +4,13 @@ from backend.models import Community, Blog, Comment, User
 from app import db
 from .utils import get_online_users
 
-blogs_bp = Blueprint('main', __name__)
+_bp = Blueprint('main', __name__)
 
 def register_routes(app):
-    app.register_blueprint(blogs_bp, url_prefix='/main')
+    app.register_blueprint(main_bp, url_prefix='/main')
 
-    
-    @blogs_bp.route('/blogs/communities/create', methods=['POST'])
+    # Create a new community
+    @main_bp.route('/communities/create', methods=['POST'])
     @login_required
     def create_community():
         data = request.json
@@ -34,7 +34,8 @@ def register_routes(app):
 
         return jsonify({'message': 'Community created successfully', 'community_id': community.id})
 
-    @blogs_bp.route('/blogs/communities/<int:community_id>/join', methods=['POST'])
+    # Join an existing community
+    @main_bp.route('/communities/<int:community_id>/join', methods=['POST'])
     @login_required
     def join_community(community_id):
         community = Community.query.get_or_404(community_id)
@@ -44,8 +45,8 @@ def register_routes(app):
         db.session.commit()
         return jsonify({'message': 'You have successfully joined the community'})
 
-    
-    @blogs_bp.route('/blogs/communities', methods=['GET'])
+    # List all communities
+    @main_bp.route('/communities', methods=['GET'])
     @login_required
     def list_communities():
         user_tag = current_user.smile_reason
@@ -64,21 +65,20 @@ def register_routes(app):
         return jsonify(communities_data)
 
     # Create a new blog
-    @blogs_bp.route('/blogs/create', methods=['POST'])
+    @main_bp.route('/blogs/create', methods=['POST'])
     @login_required
     def create_blog():
         data = request.json
         community_id = data.get('community_id')
         title = data.get('title')
         content = data.get('content')
-        image_url = data.get('image_url', None)
 
         if not (community_id and title and content):
             return jsonify({'error': 'All fields are required'}), 400
 
         community = Community.query.get_or_404(community_id)
 
-        
+        # Check if the user is a member of the community
         if current_user not in community.members:
             return jsonify({'error': 'You must be a member of this community to post a blog'}), 403
 
@@ -86,15 +86,14 @@ def register_routes(app):
             title=title,
             content=content,
             community_id=community_id,
-            created_by=current_user.id,
-            image_url = image_url
+            created_by=current_user.id
         )
         db.session.add(blog)
         db.session.commit()
         return jsonify({'message': 'Blog created successfully', 'blog_id': blog.id})
 
     # Add a comment to a blog
-    @blogs_bp.route('/blogs/<int:blog_id>/comments', methods=['POST'])
+    @main_bp.route('/blogs/<int:blog_id>/comments', methods=['POST'])
     @login_required
     def add_comment(blog_id):
         data = request.json
@@ -117,7 +116,7 @@ def register_routes(app):
         return jsonify({'message': 'Comment added successfully', 'comment_id': comment.id})
 
     # Get all comments for a blog
-    @blogs_bp.route('/blogs/<int:blog_id>/comments', methods=['GET'])
+    @main_bp.route('/blogs/<int:blog_id>/comments', methods=['GET'])
     @login_required
     def get_comments(blog_id):
         blog = Blog.query.get_or_404(blog_id)
@@ -135,7 +134,7 @@ def register_routes(app):
         return jsonify({'comments': comments_data})
 
     # Display all blogs of the user's community
-    @blogs_bp.route('/blogs', methods=['GET'])
+    @main_bp.route('/blogs', methods=['GET'])
     @login_required
     def display_blogs():
         user_tag = current_user.smile_reason
@@ -167,7 +166,7 @@ def register_routes(app):
         return jsonify({'blogs': blogs_data})
 
     # Get the list of online users
-    @blogs_bp.route('/online-users', methods=['GET'])
+    @main_bp.route('/online-users', methods=['GET'])
     @login_required
     def online_users():
         online_users = get_online_users()

@@ -40,7 +40,7 @@ class Blog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     title = db.Column(db.String(100))
     content = db.Column(db.Text)
-    image_url = db.Column(db.String(500), nullable=False)
+    banner_url = db.Column(db.String(500), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Message(db.Model):
