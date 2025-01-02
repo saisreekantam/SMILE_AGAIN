@@ -1,0 +1,75 @@
+/* GroupChatPage.css */
+
+/* General page styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Dark background */
+    color: #ffffff; /* White text */
+  }
+  
+  .group-chat-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* Group list container */
+  .group-list {
+    width: 80%;
+    max-width: 600px;
+    background-color: #1e1e1e; /* Slightly lighter black for contrast */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .group-list h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #ffffff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+  }
+  
+  /* Group item styling */
+  .group-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #2b2b2b; /* Slightly lighter than the container */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .group-item:hover {
+    background-color: #3b3b3b;
+    transform: translateY(-3px);
+  }
+  
+  .group-item:active {
+    transform: translateY(0);
+  }
+  
+  .group-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .group-item span {
+    font-size: 18px;
+  }
+  
+  /* Media queries for responsiveness */
+  @media (max-width: 768px) {
+    .group-list {
+      width: 90%;
+    }
+  
+    .group-item {
+      font-size: 16px;
+    }
+  }
+  
