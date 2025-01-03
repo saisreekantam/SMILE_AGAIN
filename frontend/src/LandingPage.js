@@ -58,12 +58,16 @@ function LandingPage() {
       </nav>
       <div className="ImagesContainer">
         <div className="LeftImages">
-          <div className='ImageContainer' style={{top:'70px', bottom:'100px'}}>
+          <div className='ImageContainer' style={{top:'70px', bottom:'100px', left:'50px'}}>
             <img src={image1} alt='Person Image' className='DisplayImages'></img>
             <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
           </div>
-          <div className='ImageContainer' style={{bottom:'140px'}}>
+          <div className='ImageContainer' style={{bottom:'140px', left:'50px'}}>
             <img src={image2} alt='Person Image' className='DisplayImages'></img>
+            <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
+          </div>
+          <div className='ImageContainer' style={{top:'380px'}}> 
+            <img src={image5} alt='Person Image' className='DisplayImages'></img>
             <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
           </div>
         </div>
@@ -72,20 +76,16 @@ function LandingPage() {
           <h2>Who want their</h2>
           <h2>Smile Back</h2>
         </div>
-        <div className="RightImages">
+        <div className="RightImages" style={{width:'700px'}}>
           <div className='ImageContainer' style={{bottom:'140px'}}>
               <img src={image3} alt='Person Image' className='DisplayImages'></img>
               <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
           </div>
-          <div className='ImageContainer' style={{top:'70px'}}>
+          <div className='ImageContainer' style={{top:'90px', left:'150px'}}>
             <img src={image4} alt='Person Image' className='DisplayImages'></img>
             <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
           </div>
           <div className='ImageContainer' style={{top:'380px', right:'500px'}}>
-            <img src={image5} alt='Person Image' className='DisplayImages'></img>
-            <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
-          </div>
-          <div className='ImageContainer' style={{top:'380px', right:'1250px'}}>
             <img src={image5} alt='Person Image' className='DisplayImages'></img>
             <div className='Description'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius alias qui quod enim? Sunt praesentium est molestias voluptatem, neque quam sit accusamus deserunt nobis architecto, sapiente itaque totam nihil repellat?</div>
           </div>

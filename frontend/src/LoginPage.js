@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import "./LoginPage.css";
 import { useAuth } from "./contexts/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 
 function LoginPage() {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
     const { login } = useAuth();
+    const navigate=useNavigate();
     const handleSubmit=async (e) => {
         e.preventDefault();
         const data={
@@ -20,6 +22,7 @@ function LoginPage() {
                 login({email});
             }
             console.log(response.data);
+            navigate('/problem_page');
         }
         catch(err){
             if (err.response && err.response.status === 401) {

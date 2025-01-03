@@ -7,6 +7,8 @@ import ProblemDescriptionForm from './ProblemDescriptionForm';
 import ChatBotPage from './ChatBotPage';
 import ProfilePage from './ProfilePage';
 import ViewFriends from './FriendsPage';
+import CommentsPage from './CommentsPage';
+import BlogsPage from './BlogsPage';
 
 function App() {
   return (
@@ -16,9 +18,11 @@ function App() {
         <Route path='/friends' element={<ViewFriends />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegistrationPage />} />
-        <Route path='/auth/problem_page' element={<ProblemDescriptionForm />} />
+        <Route path='/problem_page' element={<ProblemDescriptionForm />} />
         <Route path='/chatbot_page' element={<ChatBotPage />} />
         <Route path='/myProfile' element={<ProfilePage />} />
+        <Route path='/blogs' element={<BlogsPage />} />
+        <Route path='/blogs/:blogId/comments' element={<CommentsPage />} />
       </Routes>
     </>
   );

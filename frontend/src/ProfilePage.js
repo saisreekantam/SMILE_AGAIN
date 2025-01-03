@@ -7,7 +7,8 @@ import NavAfterLogin from './NavAfterLogin';
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
 
-  useEffect(async () => {
+  useEffect(() => {
+    const fetchProfile = async () => {
     try{
         const response=await axios.get("http:localhost:8000/user/profile",{ headers: {'Content-Type' : 'application/json'}});
         console.log(response.data);
@@ -15,6 +16,8 @@ const ProfilePage = () => {
     } catch(err){
         console.error("Error fetching profile details: ",err);
     }
+    };
+    fetchProfile();
 
   }, []);
 
