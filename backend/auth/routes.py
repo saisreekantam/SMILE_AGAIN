@@ -1,10 +1,16 @@
 from flask import request, jsonify, session, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-from backend.models import User,SessionLog,UserProblem
+from backend.models import User, SessionLog, UserProblem
 from .utils import hash_password, check_password
 
-def auth_routes(auth_bp, db, bcrypt, login_manager):
-    @auth_bp.route('/register', methods=['POST'])
+def register_routes(bp, db, bcrypt, login_manager):
+    """Register routes with the blueprint"""
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    @bp.route('/register', methods=['POST'])
     def register():
         data = request.json
         hashed_password = hash_password(bcrypt, data['password'])
@@ -18,7 +24,7 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
         db.session.commit()
         return jsonify({'message': 'User registered successfully'}), 201
 
-    @auth_bp.route('/login', methods=['POST'])
+    @bp.route('/login', methods=['POST'])
     def login():
         data = request.json
         user = User.query.filter_by(email=data['email']).first()
@@ -30,7 +36,7 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
             return redirect(url_for('auth.problem_page'))
         return jsonify({'message': 'Invalid credentials'}), 401
 
-    @auth_bp.route('/google-login', methods=['POST'])
+    @bp.route('/google-login', methods=['POST'])
     def google_login():
         data = request.json
         user = User.query.filter_by(email=data['email']).first()
@@ -49,7 +55,7 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
         db.session.commit()
         return redirect(url_for('auth.problem_page'))
 
-    @auth_bp.route('/problem-page', methods=['GET', 'POST'])
+    @bp.route('/problem-page', methods=['GET', 'POST'])
     @login_required
     def problem_page():
         if request.method == 'GET':
@@ -59,7 +65,6 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
                 'smile_reason': problem.smile_reason if problem else ''
             })
 
-        # For non-GET requests
         data = request.json
         problem = UserProblem.query.filter_by(user_id=current_user.id).first()
         if not problem:
@@ -77,8 +82,7 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
         
         return jsonify({'message': 'Answer saved successfully'})
 
-
-    @auth_bp.route('/update-smile-reason', methods=['POST'])
+    @bp.route('/update-smile-reason', methods=['POST'])
     @login_required
     def update_smile_reason():
         data = request.json
@@ -89,7 +93,7 @@ def auth_routes(auth_bp, db, bcrypt, login_manager):
             return jsonify({'message': 'Smile reason updated successfully'})
         return jsonify({'message': 'Problem data not found'}), 404
 
-    @auth_bp.route('/logout', methods=['POST'])
+    @bp.route('/logout', methods=['POST'])
     @login_required
     def logout():
         logout_user()
