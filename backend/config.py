@@ -4,7 +4,7 @@ from datetime import timedelta
 
 class Config:
     # Base configuration
-    SECRET_KEY = os.environ.get('SECRET_KEY', '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')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'YOUR-SECRET-KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
