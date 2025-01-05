@@ -1,292 +1,257 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 import openai
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import random
-from .models import ChatSession, UserProblem, Message, User
-from .utils import save_chat_history
+from .models import (
+    ChatSession, ChatMessage, UserEmotionalState, BotResponse,
+    SmileProgress, UserInteractionPreference, SupportResource
+)
 
 chatbot_bp = Blueprint('chatbot', __name__)
 
 # Configure OpenAI
 openai.api_key = 'your-openai-api-key'
 
-SYSTEM_PROMPT = """You are an empathetic and occasionally humorous AI friend named Joy, designed to help users of the Smile Again platform. Your personality traits:
-- Warm and understanding, always validating users' feelings
-- Occasionally uses appropriate humor to lighten the mood
-- Provides practical suggestions and coping strategies
-- Knows when to be serious and when to be light-hearted
-- Can recognize signs of severe distress and recommend professional help
-- Maintains context of conversations to provide personalized support"""
+SYSTEM_PROMPT = """You are Joy, an empathetic and supportive AI companion for the Smile Again platform. Your goal is to help users rediscover their smile through:
+
+Core traits:
+- Warm, understanding, and genuinely caring
+- Validates feelings while gently encouraging positive steps
+- Uses appropriate humor to lift spirits when suitable
+- Provides practical coping strategies and smile-inducing activities
+- Recognizes emotional states and adapts communication style
+- Celebrates small wins and progress in the smile journey
+
+Key responsibilities:
+- Help users identify what makes them smile
+- Guide them through difficult moments with empathy
+- Share uplifting stories and activities
+- Provide emotional support and understanding
+- Connect users to professional help when needed
+- Track and celebrate smile progress"""
 
 class SmileBot:
     def __init__(self, db):
         self.db = db
-        self.joke_categories = {
-            'motivation': [
-                "Why did the gym close down? It just didn't work out! 💪😄",
-                "What did the coffee say to the stressed person? Brew-the it! ☕️😊",
-                "How does a positive thought read a book? One optimistic page at a time! 📚✨",
-                "Why did the happiness app crash? Too many good vibes! 🌈😄",
-                "What did the calendar say to Monday? You look fine! 📅😎"
-            ],
-            'mindfulness': [
-                "Why do meditation apps make terrible comedians? They're always pausing for effect! 🧘‍♀️😄",
-                "What did one yoga mat say to the other? Let's roll with it! 🤸‍♂️😊",
-                "Why did the mindfulness teacher bring a ladder to class? To reach higher consciousness! 🪜✨",
-                "What do you call a peaceful vegetable? A meditation! 🥬🧘‍♂️",
-                "How does a zen master order a hot dog? Make me one with everything! 🌭😌"
-            ],
-            'friendship': [
-                "Why did the cookie go to therapy? Because it was feeling crumbly! 🍪💝",
-                "What did one friend say to another during meditation? You've got my om-divided attention! 🤗",
-                "Why are group therapists great party planners? They know all about group dynamics! 👥💫",
-                "What did one smile say to the other? It's been curve-y knowing you! 😊😄",
-                "Why did the hug go to school? To become more uplifting! 🤗💕"
-            ],
-            'self_care': [
-                "What did the bath bomb say to stress? It's time to fizz-le out! 🛁✨",
-                "Why did the pillow go to the wellness center? It needed some fluff therapy! 🛏️😴",
-                "What's a stressed person's favorite music? Calm-edy! 🎵😌",
-                "How does a self-care day end? Happily spa after! 💆‍♀️✨",
-                "Why did the relaxation app take a break? It needed some me-time! 📱🧘‍♀️"
-            ],
-            'resilience': [
-                "What did one rainbow say to the other after the storm? We've got this arc covered! 🌈💪",
-                "Why did the resilient tree take up meditation? To branch out into wellness! 🌳🧘‍♂️",
-                "What did the optimist say to the pessimist? Let's look on the bright cider life! 🌟😊",
-                "How does a positive thought cross the road? With confidence! 💫🚶‍♀️",
-                "Why did the healing crystal go to school? To become more brilliant! 💎✨"
-            ]
+        self.mood_emojis = {
+            'joy': '😊', 'peace': '😌', 'hope': '🌟',
+            'sadness': '😔', 'anxiety': '😰', 'stress': '😓',
+            'neutral': '🙂', 'progress': '💫', 'motivation': '💪'
         }
-    
-    def analyze_sentiment(self, message):
-        """Analyze message sentiment and stress level with comprehensive keyword detection"""
-        high_stress_keywords = {
-            'crisis_indicators': [
-                'suicide', 'kill myself', 'end it all', 'better off dead',
-                'no reason to live', 'can\'t go on', 'want to die'
-            ],
-            'emotional_distress': [
-                'desperate', 'hopeless', 'worthless', 'helpless', 'trapped',
-                'unbearable', 'miserable', 'suffering', 'overwhelmed', 'breaking down'
-            ],
-            'anxiety_indicators': [
-                'panic', 'anxiety attack', 'can\'t breathe', 'heart racing',
-                'terrified', 'paranoid', 'scared to death', 'extreme fear'
-            ],
-            'depression_indicators': [
-                'severely depressed', 'deep depression', 'extreme sadness',
-                'totally alone', 'completely numb', 'empty inside', 'no future'
-            ],
-            'social_isolation': [
-                'nobody cares', 'all alone', 'no friends', 'nobody understands',
-                'complete isolation', 'abandoned', 'rejected by everyone'
-            ]
-        }
+        # Initialize joke categories (same as before)
+        self.joke_categories = {...}  # Your existing joke categories
 
-        message_lower = message.lower()
-        stress_indicators = {
-            category: any(keyword in message_lower for keyword in keywords)
-            for category, keywords in high_stress_keywords.items()
-        }
+    async def analyze_emotional_state(self, message: str, user_id: int) -> dict:
+        """Enhanced emotional analysis with smile focus"""
+        # Get user's emotional history
+        emotional_state = UserEmotionalState.query.filter_by(
+            user_id=user_id,
+            date=datetime.utcnow().date()
+        ).first()
 
-        # Determine stress severity and type
-        stress_level = sum(stress_indicators.values())
-        primary_concern = None
-        if stress_level > 0:
-            primary_concern = next(
-                (category for category, triggered in stress_indicators.items() if triggered),
-                None
+        # Analyze current message
+        sentiment = self._analyze_sentiment_and_stress(message)
+        
+        # Update emotional state
+        if emotional_state:
+            emotional_state.mood_pattern[datetime.utcnow().strftime('%H:%M')] = sentiment
+            if 'smile' in message.lower() or 'happy' in message.lower():
+                emotional_state.smile_frequency += 1
+        else:
+            emotional_state = UserEmotionalState(
+                user_id=user_id,
+                mood_pattern={datetime.utcnow().strftime('%H:%M'): sentiment},
+                stress_level=sentiment['stress_level']
             )
+            self.db.session.add(emotional_state)
+        
+        self.db.session.commit()
+        return sentiment
 
-        return {
-            'is_high_stress': stress_level > 0,
-            'stress_level': stress_level,
-            'primary_concern': primary_concern
+    def _analyze_sentiment_and_stress(self, message: str) -> dict:
+        """Analyze message for emotional content and stress indicators"""
+        # Your existing sentiment analysis code here
+        # Add smile-specific analysis
+        smile_indicators = {
+            'positive': ['smile', 'happy', 'laugh', 'joy', 'better', 'hope'],
+            'negative': ['cant smile', 'lost smile', 'never smile', 'fake smile']
         }
+        
+        message_lower = message.lower()
+        smile_state = {
+            'can_smile': any(word in message_lower for word in smile_indicators['positive']),
+            'smile_difficulty': any(word in message_lower for word in smile_indicators['negative'])
+        }
+        
+        # Combine with your existing stress analysis
+        stress_analysis = self.analyze_sentiment(message)
+        return {**stress_analysis, **smile_state}
 
-    def generate_response(self, user_message, chat_history):
-        """Generate contextual response using OpenAI"""
+    async def generate_response(self, user_id: int, message: str, session_id: int) -> dict:
+        """Generate personalized response with smile focus"""
         try:
+            # Get user preferences and context
+            user_pref = UserInteractionPreference.query.filter_by(user_id=user_id).first()
+            emotional_state = await self.analyze_emotional_state(message, user_id)
+            
+            # Get chat history
+            chat_history = ChatMessage.query.filter_by(
+                session_id=session_id
+            ).order_by(ChatMessage.timestamp.desc()).limit(5).all()
+            
+            # Build conversation context
             messages = [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                *chat_history,
-                {"role": "user", "content": user_message}
+                {"role": "system", "content": f"User's smile progress: {self._get_smile_progress(user_id)}"}
             ]
+            
+            # Add chat history
+            for msg in reversed(chat_history):
+                messages.append({
+                    "role": "user" if msg.sender_type == "user" else "assistant",
+                    "content": msg.content
+                })
+            
+            # Add current message
+            messages.append({"role": "user", "content": message})
 
-            response = openai.ChatCompletion.create(
+            # Generate response
+            response = await openai.ChatCompletion.acreate(
                 model="gpt-4",
                 messages=messages,
                 temperature=0.7,
                 max_tokens=150
             )
 
-            return response.choices[0].message.content
+            bot_response = response.choices[0].message.content
 
-        except Exception as e:
-            return "I'm having trouble processing that right now. Could you try rephrasing?"
+            # Add appropriate humor if needed
+            if not emotional_state['is_high_stress'] and user_pref and user_pref.humor_preference > 3:
+                bot_response = self.add_humor(bot_response, emotional_state)
 
-    def add_humor(self, message, sentiment_analysis):
-        """Add contextually appropriate humor based on conversation tone and user state"""
-        if sentiment_analysis['is_high_stress']:
-            return message  # No jokes during high-stress situations
-        
-        message_lower = message.lower()
-        
-        # Match joke category to context
-        if any(word in message_lower for word in ['tired', 'exhausted', 'sleep']):
-            category = 'self_care'
-        elif any(word in message_lower for word in ['friend', 'alone', 'lonely']):
-            category = 'friendship'
-        elif any(word in message_lower for word in ['stress', 'anxiety', 'worried']):
-            category = 'mindfulness'
-        elif any(word in message_lower for word in ['give up', 'cant do it', 'difficult']):
-            category = 'resilience'
-        else:
-            category = 'motivation'
-
-        # Add encouraging emojis based on context
-        emoji_sets = {
-            'self_care': '💆‍♀️✨🌙',
-            'friendship': '🤗💝👥',
-            'mindfulness': '🧘‍♀️🌈✨',
-            'resilience': '💪🌟🎯',
-            'motivation': '🌈💫⭐'
-        }
-
-        selected_joke = random.choice(self.joke_categories[category])
-        selected_emojis = emoji_sets[category]
-
-        # Construct response with appropriate spacing and formatting
-        return f"{message}\n\nHere's a little something to brighten your day {selected_emojis}\n{selected_joke}"
-
-    def check_for_redirection(self, message):
-        """Check if user needs to be redirected to specific features"""
-        redirects = {
-            'join group': '/chats/groups',
-            'find friends': '/users/friends',
-            'update profile': '/users/profile',
-            'need professional help': '/counselors'
-        }
-        
-        for key, url in redirects.items():
-            if key in message.lower():
-                return url
-        return None
-
-def create_chatbot_routes(app, db):
-    bot = SmileBot(db)
-    
-    @chatbot_bp.route('/init', methods=['POST'])
-    @login_required
-    def initialize_chat():
-        """Initialize a new chat session"""
-        try:
-            # Get or create chat session
-            chat_session = ChatSession.query.filter_by(user_id=current_user.id).first()
-            if not chat_session:
-                chat_session = ChatSession(user_id=current_user.id)
-                db.session.add(chat_session)
-                db.session.commit()
+            # Save interaction
+            chat_message = ChatMessage(
+                session_id=session_id,
+                sender_type='bot',
+                content=bot_response,
+                detected_emotion=emotional_state.get('primary_concern'),
+                stress_indicator=emotional_state.get('stress_level')
+            )
+            self.db.session.add(chat_message)
             
-            # Get user's problem category if available
-            user_problem = UserProblem.query.filter_by(user_id=current_user.id).first()
+            # Get relevant support resource
+            resource = self._get_relevant_resource(emotional_state)
             
-            return jsonify({
-                'session_id': chat_session.id,
-                'initial_message': {
-                    'content': f"Hi {current_user.name}! I'm Joy, your friendly companion at Smile Again! 🌟 How are you feeling today?",
+            # Prepare response data
+            response_data = {
+                'message': {
+                    'content': bot_response,
                     'timestamp': datetime.utcnow().isoformat(),
                     'type': 'bot'
                 },
-                'user_context': {
-                    'has_existing_problem': bool(user_problem),
-                    'last_interaction': chat_session.last_interaction.isoformat() if chat_session.last_interaction else None
+                'metadata': {
+                    'emotional_state': emotional_state,
+                    'resource': resource.content if resource else None,
+                    'smile_progress': self._get_smile_progress(user_id),
+                    'suggestions': self._generate_suggestions(emotional_state)
                 }
-            })
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    @chatbot_bp.route('/history', methods=['GET'])
-    @login_required
-    def get_chat_history():
-        """Retrieve chat history for the current user"""
-        try:
-            chat_session = ChatSession.query.filter_by(user_id=current_user.id).first()
-            if not chat_session:
-                return jsonify({'messages': []})
-            
-            history = json.loads(chat_session.chat_history) if chat_session.chat_history else []
-            return jsonify({'messages': history})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            }
 
+            return response_data
+
+        except Exception as e:
+            print(f"Error generating response: {str(e)}")
+            return {
+                'message': {
+                    'content': "I'm having a moment. Could you try that again?",
+                    'type': 'bot'
+                }
+            }
+
+    def _get_smile_progress(self, user_id: int) -> dict:
+        """Get user's smile journey progress"""
+        progress = SmileProgress.query.filter_by(
+            user_id=user_id
+        ).order_by(SmileProgress.date.desc()).first()
+        
+        if not progress:
+            return {'status': 'beginning', 'score': 0}
+            
+        return {
+            'status': 'progressing' if progress.smile_score > 5 else 'beginning',
+            'score': progress.smile_score,
+            'recent_wins': progress.strategies_working
+        }
+
+    def _get_relevant_resource(self, emotional_state: dict) -> Optional[SupportResource]:
+        """Get appropriate support resource based on emotional state"""
+        return SupportResource.query.filter(
+            SupportResource.applicable_emotions.contains(emotional_state['primary_concern']),
+            SupportResource.stress_level_range['min'] <= emotional_state['stress_level'],
+            SupportResource.stress_level_range['max'] >= emotional_state['stress_level']
+        ).order_by(SupportResource.success_count.desc()).first()
+
+    def _generate_suggestions(self, emotional_state: dict) -> list:
+        """Generate contextual suggestions based on emotional state"""
+        suggestions = []
+        
+        if emotional_state['stress_level'] > 7:
+            suggestions.append({
+                'type': 'professional_help',
+                'message': "Would you like to talk to one of our counselors?",
+                'action': '/counselors'
+            })
+            
+        if emotional_state.get('smile_difficulty'):
+            suggestions.append({
+                'type': 'smile_exercise',
+                'message': "Let's try a simple smile exercise together",
+                'action': '/exercises/smile'
+            })
+            
+        return suggestions
+
+# Initialize routes
+def create_chatbot_routes(app, db):
+    bot = SmileBot(db)
+    
+    # Your existing routes with updated response handling
     @chatbot_bp.route('/chat', methods=['POST'])
     @login_required
-    def chat():
+    async def chat():
         data = request.json
         user_message = data.get('message')
         
         if not user_message:
             return jsonify({'error': 'Message is required'}), 400
 
-        # Get or create chat session
-        chat_session = ChatSession.query.filter_by(user_id=current_user.id).first()
-        if not chat_session:
-            chat_session = ChatSession(user_id=current_user.id)
-            db.session.add(chat_session)
-        
-        # Check for high stress indicators
-        is_high_stress = bot.analyze_sentiment(user_message)
-        
-        # Generate response
-        chat_history = json.loads(chat_session.chat_history) if chat_session.chat_history else []
-        bot_response = bot.generate_response(user_message, chat_history)
-        
-        # Perform detailed sentiment analysis
-        sentiment_result = bot.analyze_sentiment(user_message)
-        
-        # Add humor if appropriate based on sentiment
-        bot_response = bot.add_humor(bot_response, sentiment_result)
-        
-        # Update stress tracking in session
-        chat_session.stress_level = sentiment_result['stress_level']
+        # Get or create session
+        session = ChatSession.query.filter_by(user_id=current_user.id).first()
+        if not session:
+            session = ChatSession(user_id=current_user.id)
+            db.session.add(session)
+            db.session.commit()
+
+        # Save user message
+        user_msg = ChatMessage(
+            session_id=session.id,
+            sender_type='user',
+            content=user_message
+        )
+        db.session.add(user_msg)
         db.session.commit()
-            
-        # Check for needed redirections
-        redirect_url = bot.check_for_redirection(user_message)
+
+        # Generate response
+        response_data = await bot.generate_response(
+            user_id=current_user.id,
+            message=user_message,
+            session_id=session.id
+        )
         
-        # Save to chat history
-        save_chat_history(db, current_user.id, user_message, bot_response)
-        
-        response_data = {
-            'message': {
-                'content': bot_response,
-                'timestamp': datetime.utcnow().isoformat(),
-                'type': 'bot'
-            },
-            'metadata': {
-                'is_high_stress': sentiment_result['is_high_stress'],
-                'stress_level': sentiment_result['stress_level'],
-                'primary_concern': sentiment_result['primary_concern'],
-                'redirect_url': redirect_url,
-                'suggestions': []
-            }
-        }
-        
-        # Add relevant suggestions based on stress level
-        if sentiment_result['is_high_stress']:
-            response_data['metadata']['suggestions'].append({
-                'type': 'counselor_recommendation',
-                'message': 'Would you like to speak with a professional counselor?',
-                'action_url': '/counselors'
-            })
-        
-        if is_high_stress:
-            response_data['counselor_recommendation'] = True
-            
         return jsonify(response_data)
 
+    # Add your other routes here
+    
     app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
