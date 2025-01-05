@@ -3,7 +3,6 @@ from flask_login import login_required, current_user
 from backend.models import Group, group_members, User, ChatRequest, Message
 import nltk
 
-
 nltk.download('stopwords')
 nltk.download('punkt')
 
@@ -12,31 +11,49 @@ def contains_hate_speech(text):
     tokens = nltk.word_tokenize(text.lower())
     return any(word in hate_words for word in tokens)
 
-def chat_routes(chats_bp, db, socketio):
-    @chats_bp.route('/active', methods=['GET'])
+def register_routes(bp, db, socketio):
+    """Register routes with the chats blueprint"""
+
+    @bp.route('/active', methods=['GET'])
     @login_required
     def active_users():
         active_users = User.query.filter(User.is_online == True).all()
         active_list = [{'id': user.id, 'name': user.name} for user in active_users]
         return jsonify(active_list)
 
-    @chats_bp.route('/groups', methods=['GET', 'POST'])
+    @bp.route('/groups', methods=['GET', 'POST'])
     @login_required
     def groups():
         if request.method == 'GET':
-            user_groups = Group.query.join(group_members).filter(group_members.c.user_id == current_user.id).all()
-            group_list = [{'id': group.id, 'name': group.name, 'created_by': group.created_by} for group in user_groups]
+            user_groups = Group.query.join(group_members).filter(
+                group_members.c.user_id == current_user.id
+            ).all()
+            group_list = [{
+                'id': group.id,
+                'name': group.name,
+                'created_by': group.created_by
+            } for group in user_groups]
             return jsonify(group_list)
 
         data = request.json
         new_group = Group(name=data['name'], created_by=current_user.id)
         db.session.add(new_group)
         db.session.commit()
-        db.session.execute(group_members.insert().values(group_id=new_group.id, user_id=current_user.id))
+        
+        db.session.execute(
+            group_members.insert().values(
+                group_id=new_group.id,
+                user_id=current_user.id
+            )
+        )
         db.session.commit()
-        return jsonify({'message': 'Group created successfully', 'group_id': new_group.id})
+        
+        return jsonify({
+            'message': 'Group created successfully',
+            'group_id': new_group.id
+        })
 
-    @chats_bp.route('/groups/<int:group_id>/add', methods=['POST'])
+    @bp.route('/groups/<int:group_id>/add', methods=['POST'])
     @login_required
     def add_to_group(group_id):
         data = request.json
@@ -45,23 +62,34 @@ def chat_routes(chats_bp, db, socketio):
         group = Group.query.get(group_id)
 
         if not group or group.created_by != current_user.id:
-            return jsonify({'error': 'Unauthorized or group not found'}), 403
+            return jsonify({
+                'error': 'Unauthorized or group not found'
+            }), 403
 
-        if friend_id and friend in current_user.friends: 
-            db.session.execute(group_members.insert().values(group_id=group_id, user_id=friend_id))
+        if friend_id and friend in current_user.friends:
+            db.session.execute(
+                group_members.insert().values(
+                    group_id=group_id,
+                    user_id=friend_id
+                )
+            )
             db.session.commit()
             
-            
+            # Notify the group creator about the new member
             socketio.emit(
                 'group_notification',
-                {'message': f'{friend.name} has joined the group {group.name}', 'group_id': group_id},
+                {
+                    'message': f'{friend.name} has joined the group {group.name}',
+                    'group_id': group_id
+                },
                 to=group.created_by
             )
             
             return jsonify({'message': f'{friend.name} added to the group'})
+            
         return jsonify({'error': 'Friend not found or not authorized'}), 404
 
-    @chats_bp.route('/groups/<int:group_id>/request', methods=['POST'])
+    @bp.route('/groups/<int:group_id>/request', methods=['POST'])
     @login_required
     def request_to_join(group_id):
         group = Group.query.get(group_id)
@@ -69,16 +97,18 @@ def chat_routes(chats_bp, db, socketio):
         if not group:
             return jsonify({'error': 'Group not found'}), 404
 
-        
         socketio.emit(
             'group_notification',
-            {'message': f'{current_user.name} has requested to join the group {group.name}', 'group_id': group_id},
+            {
+                'message': f'{current_user.name} has requested to join the group {group.name}',
+                'group_id': group_id
+            },
             to=group.created_by
         )
 
         return jsonify({'message': 'Request to join sent to the group creator'})
 
-    @chats_bp.route('/groups/<int:group_id>/leave', methods=['POST'])
+    @bp.route('/groups/<int:group_id>/leave', methods=['POST'])
     @login_required
     def leave_group(group_id):
         group = Group.query.get(group_id)
@@ -87,14 +117,18 @@ def chat_routes(chats_bp, db, socketio):
             return jsonify({'error': 'Group not found'}), 404
 
         if current_user.id in [member.id for member in group.members]:
-            db.session.execute(group_members.delete().where(
-                (group_members.c.group_id == group_id) & (group_members.c.user_id == current_user.id)
-            ))
+            db.session.execute(
+                group_members.delete().where(
+                    (group_members.c.group_id == group_id) & 
+                    (group_members.c.user_id == current_user.id)
+                )
+            )
             db.session.commit()
             return jsonify({'message': 'You have left the group'})
+            
         return jsonify({'error': 'You are not a member of this group'}), 403
 
-    @chats_bp.route('/groups/<int:group_id>/remove', methods=['POST'])
+    @bp.route('/groups/<int:group_id>/remove', methods=['POST'])
     @login_required
     def remove_from_group(group_id):
         data = request.json
@@ -106,14 +140,18 @@ def chat_routes(chats_bp, db, socketio):
             return jsonify({'error': 'Unauthorized or group not found'}), 403
 
         if user and user in group.members:
-            db.session.execute(group_members.delete().where(
-                (group_members.c.group_id == group_id) & (group_members.c.user_id == user_id)
-            ))
+            db.session.execute(
+                group_members.delete().where(
+                    (group_members.c.group_id == group_id) & 
+                    (group_members.c.user_id == user_id)
+                )
+            )
             db.session.commit()
             return jsonify({'message': f'{user.name} removed from the group'})
+            
         return jsonify({'error': 'User not found or not a member of the group'}), 404
 
-    @chats_bp.route('/chat-request', methods=['POST'])
+    @bp.route('/chat-request', methods=['POST'])
     @login_required
     def send_chat_request():
         data = request.json
@@ -142,7 +180,7 @@ def chat_routes(chats_bp, db, socketio):
 
         return jsonify({'message': 'Chat request sent successfully'})
 
-    @chats_bp.route('/chat-request/<int:request_id>/accept', methods=['POST'])
+    @bp.route('/chat-request/<int:request_id>/accept', methods=['POST'])
     @login_required
     def accept_chat_request(request_id):
         chat_request = ChatRequest.query.get(request_id)
@@ -157,7 +195,7 @@ def chat_routes(chats_bp, db, socketio):
 
         return jsonify({'message': f'{sender.name} is now your friend'})
 
-    @chats_bp.route('/chat-request/<int:request_id>/reject', methods=['POST'])
+    @bp.route('/chat-request/<int:request_id>/reject', methods=['POST'])
     @login_required
     def reject_chat_request(request_id):
         chat_request = ChatRequest.query.get(request_id)
@@ -170,7 +208,7 @@ def chat_routes(chats_bp, db, socketio):
 
         return jsonify({'message': 'Chat request rejected'})
 
-    @chats_bp.route('/messages', methods=['POST'])
+    @bp.route('/messages', methods=['POST'])
     @login_required
     def send_message():
         data = request.json
@@ -184,11 +222,9 @@ def chat_routes(chats_bp, db, socketio):
         if not recipient:
             return jsonify({'error': 'Recipient not found'}), 404
 
-        
         if contains_hate_speech(message_text):
             return jsonify({'error': 'Message contains inappropriate content'}), 403
 
-        
         message = Message(
             sender_id=current_user.id,
             recipient_id=recipient_id,
@@ -199,7 +235,7 @@ def chat_routes(chats_bp, db, socketio):
 
         return jsonify({'message': 'Message sent successfully'})
 
-    @chats_bp.route('/messages', methods=['GET'])
+    @bp.route('/messages', methods=['GET'])
     @login_required
     def get_messages():
         messages = Message.query.filter_by(recipient_id=current_user.id).all()
