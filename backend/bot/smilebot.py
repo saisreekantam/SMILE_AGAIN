@@ -1,10 +1,11 @@
+from typing import Optional
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 import openai
 from datetime import datetime, timedelta
 import json
 import random
-from .models import (
+from .database_bot import (
     ChatSession, ChatMessage, UserEmotionalState, BotResponse,
     SmileProgress, UserInteractionPreference, SupportResource
 )

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './GroupChatPage.css';
+import './GroupChats.css';
 
 const GroupChatPage = () => {
   const [groups, setGroups] = useState([]);
-  const navigate = useNavigate(); // For navigating to the group page
+  const navigate = useNavigate(); 
 
   // Fetch groups on mount
   useEffect(() => {

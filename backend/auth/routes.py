@@ -1,6 +1,6 @@
 from flask import request, jsonify, session, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-from backend.models import User, SessionLog, UserProblem
+from models import User, SessionLog, UserProblem
 from .utils import hash_password, check_password
 
 def register_routes(bp, db, bcrypt, login_manager):
@@ -12,17 +12,28 @@ def register_routes(bp, db, bcrypt, login_manager):
 
     @bp.route('/register', methods=['POST'])
     def register():
-        data = request.json
-        hashed_password = hash_password(bcrypt, data['password'])
-        user = User(
-            name=data['name'],
-            email=data['email'],
-            password=hashed_password,
-            gender=data['gender']
-        )
-        db.session.add(user)
-        db.session.commit()
-        return jsonify({'message': 'User registered successfully'}), 201
+        try:
+            data = request.get_json()
+            print("Received data:", data)  # Debug print
+            
+            if not all(key in data for key in ['name', 'email', 'password', 'gender']):
+                return jsonify({'error': 'Missing required fields'}), 400
+                
+            hashed_password = hash_password(bcrypt, data['password'])
+            user = User(
+                name=data['name'],
+                email=data['email'],
+                password=hashed_password,
+                gender=data['gender']
+            )
+            db.session.add(user)
+            db.session.commit()
+            return jsonify({'message': 'User registered successfully'}), 201
+            
+        except Exception as e:
+            print("Registration error:", str(e))  # Debug print
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
     @bp.route('/login', methods=['POST'])
     def login():

@@ -26,17 +26,17 @@ const ChatsPage = () => {
           Chat Requests
         </button>
         <button
-          className={`nav-button ${activeSection === 'unread' ? 'active' : ''}`}
+          className={`nav-button ${activeSection === 'groups' ? 'active' : ''}`}
           onClick={() => setActiveSection('unread')}
         >
-          Unread
+        Groups
         </button>
       </nav>
 
       <div className="content">
         {activeSection === 'active' && <ActiveChats />}
         {activeSection === 'requests' && <ChatRequests />}
-        {activeSection === 'unread' && <GroupChats />}
+        {activeSection === 'groups' && <GroupChats />}
       </div>
     </div>
   );

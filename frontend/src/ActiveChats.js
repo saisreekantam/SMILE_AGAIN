@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './ActiveChats.css';
+import './ActiveChasts.css';
 import axios from 'axios'
 
 const ActiveChats = () => {

@@ -9,6 +9,9 @@ import ProfilePage from './ProfilePage';
 import ViewFriends from './FriendsPage';
 import CommentsPage from './CommentsPage';
 import BlogsPage from './BlogsPage';
+import ChatsPage from './ChatsPage';
+import GroupChatPage from './GroupChat';
+import GroupPage from './GroupPage';
 
 function App() {
   return (
@@ -19,10 +22,13 @@ function App() {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegistrationPage />} />
         <Route path='/problem_page' element={<ProblemDescriptionForm />} />
+        <Route path='/chats' element={<ChatsPage />} />
         <Route path='/chatbot_page' element={<ChatBotPage />} />
         <Route path='/myProfile' element={<ProfilePage />} />
         <Route path='/blogs' element={<BlogsPage />} />
         <Route path='/blogs/:blogId/comments' element={<CommentsPage />} />
+        <Route path='/groups' element={<GroupChatPage />} />
+        <Route path='/groups/:groupId' element={<GroupPage />} />
       </Routes>
     </>
   );

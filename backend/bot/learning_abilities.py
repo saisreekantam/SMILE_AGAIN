@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import func
 import json
-from .models import (
+from backend.models import (
     ChatSession, ChatMessage, EmotionalPattern, 
     ResponseTemplate, ConversationFlow, UserPreference,
     BotLearning, SupportiveResource

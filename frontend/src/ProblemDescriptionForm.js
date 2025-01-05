@@ -40,7 +40,7 @@ const ProblemDescriptionForm=() => {
         e.preventDefault();
         console.log("Form Submitted: ",formData);
         try{
-            const response= await axios.post("http:localhost:8000/auth/problem-page",formData,{headers:{'Content-Type' : 'application/json'}});
+            const response= await axios.post("http://localhost:8000/auth/problem-page",formData,{headers:{'Content-Type' : 'application/json'}});
             const message=response.data.message;
             console.log(message);
         } catch(err){

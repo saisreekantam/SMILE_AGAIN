@@ -4,53 +4,114 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
 function RegistrationPage() {
-    const [name,setName]=useState("");
-    const [email,setEmail]=useState("");
-    const [gender,setGender]=useState("");
-    const [password,setPassword]=useState("");
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        gender: "",
+        password: "",
+        confirmPassword: ""
+    });
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
-    const navigate=useNavigate();
-    const handleSubmit=async (e) => {
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const data = {
-            name:name,
-            email:email,
-            gender:gender,
-            password:password
-        };
-        try{
-           const response = await axios.post("http://localhost:8000/auth/register",data,{headers: { 'Content-Type' : 'application/json'}});
-           console.log(response.data.message);
-           if(response.status===201){
-            const { name } = data;
-            localStorage.setItem("username",name);
-            navigate('/auth/problem_page');
-           }
-        } catch (err){
-            console.error('Error Registering: ',err);
+        setError("");
+
+        // Password validation
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match!");
+            return;
         }
 
-    }
+        try {
+            const response = await axios.post(
+                "http://localhost:8000/auth/register",
+                {
+                    name: formData.name,
+                    email: formData.email,
+                    gender: formData.gender,
+                    password: formData.password
+                },
+                {
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                }
+            );
+
+            if (response.status === 201) {
+                localStorage.setItem("username", formData.name);
+                navigate('/problem_page');
+            }
+        } catch (err) {
+            console.error('Error Registering: ', err);
+            setError(err.response?.data?.error || "Registration failed. Please try again.");
+        }
+    };
+
     return (
         <div className="registration-container">
             <h2>Registration Page</h2>
+            {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
-                <input type="text" name="name" placeholder="Full Name" required onChange={(e) => setName(e.target.value)}/>
-                <input type="email" name="email" placeholder="Email" required  onChange={(e) => setEmail(e.target.value)}/>
-                <select name="gender" required onChange={(e) => setGender(e.target.value)}>
-                    <option value="" disabled selected>
-                        Select Gender
-                    </option>
+                <input 
+                    type="text" 
+                    name="name" 
+                    placeholder="Full Name" 
+                    value={formData.name}
+                    onChange={handleChange}
+                    required 
+                />
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Email" 
+                    value={formData.email}
+                    onChange={handleChange}
+                    required 
+                />
+                <select 
+                    name="gender" 
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="" disabled>Select Gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
                 </select>
-                <input type="password" name="password" placeholder="Password" required />
-                <input type="password" name="confirmPassword" placeholder="Confirm Password" required onChange={(e) => setPassword(e.target.value)}/>
+                <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Password" 
+                    value={formData.password}
+                    onChange={handleChange}
+                    required 
+                />
+                <input 
+                    type="password" 
+                    name="confirmPassword" 
+                    placeholder="Confirm Password" 
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required 
+                />
                 <button type="submit">Register</button>
             </form>
-            <a href="/login">Already have an account? Login here</a>
-            <a href="/">Go back to homepage</a>
+            <div className="links">
+                <a href="/login">Already have an account? Login here</a>
+                <a href="/">Go back to homepage</a>
+            </div>
         </div>
     );
 }

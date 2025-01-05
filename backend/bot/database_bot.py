@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import JSON
-from .app import db
+from backend.app import db
 
 class ChatSession(db.Model):
     """Stores information about chat sessions"""

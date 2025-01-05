@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_login import login_required, current_user
-from backend.models import Group, group_members, User, ChatRequest, Message
+from models import Group, group_members, User, ChatRequest, Message
 import nltk
 
 nltk.download('stopwords')

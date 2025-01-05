@@ -1,7 +1,7 @@
 from flask import request, jsonify, current_app, url_for
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-from backend.models import Profile, Friendship, Blog, User
+from models import Profile, Friendship, Blog, User
 
 def register_routes(bp, db):
     """Register routes with the users blueprint"""
