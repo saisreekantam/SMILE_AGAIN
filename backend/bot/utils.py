@@ -80,7 +80,7 @@ class EmotionDetector:
 class SmileBot:
     def __init__(self):
         self.emotion_detector = EmotionDetector()
-        openai.api_key = 'YOUR-API-KEY'
+        openai.api_key = ''
 
     async def generate_response(self, text: str, image_data: Optional[str], chat_history: List[Dict]) -> Dict:
         """Generate response based on text and facial emotions"""
