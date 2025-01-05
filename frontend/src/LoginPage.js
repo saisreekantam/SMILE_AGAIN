@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 function LoginPage() {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
-    const { login } = useAuth();
+    const { login,isLoggedIn } = useAuth();
     const navigate=useNavigate();
     const handleSubmit=async (e) => {
         e.preventDefault();
@@ -18,10 +18,11 @@ function LoginPage() {
         };
         try{
             const response=await axios.post("http://localhost:8000/auth/login",data,{headers: { 'Content-Type' : 'application/json'}});
-            if(response.request.responseURL.includes('problem_page')){
+            if(response.data.success){
                 login({email});
             }
             console.log(response.data);
+            console.log(isLoggedIn);
             navigate('/problem_page');
         }
         catch(err){

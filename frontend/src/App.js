@@ -23,7 +23,7 @@ function App() {
         <Route path='/register' element={<RegistrationPage />} />
         <Route path='/problem_page' element={<ProblemDescriptionForm />} />
         <Route path='/chats' element={<ChatsPage />} />
-        <Route path='/chatbot_page' element={<ChatBotPage />} />
+        <Route path='/home' element={<ChatBotPage />} />
         <Route path='/myProfile' element={<ProfilePage />} />
         <Route path='/blogs' element={<BlogsPage />} />
         <Route path='/blogs/:blogId/comments' element={<CommentsPage />} />

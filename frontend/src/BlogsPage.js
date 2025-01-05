@@ -28,7 +28,15 @@ const BlogsPage = () => {
         <div className="blogs-container">
             {blogs.map(blog => (
                 <div key={blog.blog_id} className="blog-card">
-                    <h3 className="user-community">{`${blog.created_by}/${blog.community_name}`}</h3>
+                    <h3 className="user-community">
+                        <a href={`/user/${blog.created_by}`} className="created-by-link">
+                            {blog.created_by}
+                        </a>
+                        /
+                        <a href={`/community/${blog.community_name}`} className="community-name-link">
+                            {blog.community_name}
+                        </a>
+                    </h3>
                     <h2 className="blog-title">{blog.title}</h2>
                     <p className="blog-content">{blog.content}</p>
                     <div className="blog-meta">

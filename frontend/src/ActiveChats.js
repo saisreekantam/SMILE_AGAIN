@@ -14,7 +14,7 @@ const ActiveChats = () => {
         setActiveChats(response.data);
 
       } catch (err) {
-        setError(err.message);
+        console.error("Error Loading Active Chats: ",err);
       } finally {
         setLoading(false);
       }
@@ -22,13 +22,8 @@ const ActiveChats = () => {
 
     fetchActiveChats();
   }, []);
-
   if (loading) {
     return <div className="loading">Loading active chats...</div>;
-  }
-
-  if (error) {
-    return <div className="error">Error: {error}</div>;
   }
 
   return (

@@ -10,7 +10,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
     try{
-        const response=await axios.get("http:localhost:8000/user/profile",{ headers: {'Content-Type' : 'application/json'}});
+        const response=await axios.get("http:localhost:8000/users/profile",{ headers: {'Content-Type' : 'application/json'}});
         console.log(response.data);
         setProfile(response.data);
     } catch(err){

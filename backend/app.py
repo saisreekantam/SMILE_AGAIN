@@ -1,82 +1,101 @@
+# app.py
 import os
-from flask import Flask
-from extensions import db, bcrypt, socketio, login_manager
+import logging
+from flask import Flask, request, jsonify, Blueprint, make_response
 from flask_cors import CORS
+from extensions import db, bcrypt, socketio, login_manager
+from datetime import timedelta
+import asyncio
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
     
-    # Configure CORS for the application
+    # Single CORS configuration
     CORS(app, 
          resources={
-             r"/auth/*": {
-                 "origins": "http://localhost:3000",
-                 "methods": ["GET", "POST", "OPTIONS"],
+             r"/*": {
+                 "origins": ["http://localhost:3000"],
+                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                  "allow_headers": ["Content-Type", "Authorization"],
-                 "supports_credentials": True
-             },
-             r"/smilebot/*": {  # Add CORS for smilebot routes
-                 "origins": "http://localhost:3000",
-                 "methods": ["GET", "POST", "OPTIONS"],
-                 "allow_headers": ["Content-Type", "Authorization"],
-                 "supports_credentials": True
+                 "supports_credentials": True,
+                 "expose_headers": ["Access-Control-Allow-Origin"],
+                 "max_age": 3600
              }
-         }
-    )
+         })
 
     # Configure application
     basedir = os.path.abspath(os.path.dirname(__file__))
     app.config.update(
         SQLALCHEMY_DATABASE_URI='sqlite:///' + os.path.join(basedir, 'users.db'),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        SECRET_KEY=os.urandom(24),
-        # Add configurations for file uploads (needed for facial analysis)
-        MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
-        UPLOAD_FOLDER=os.path.join(basedir, 'uploads')
+        SECRET_KEY='your-secret-key-here',
+        MAX_CONTENT_LENGTH=16 * 1024 * 1024,
+        UPLOAD_FOLDER=os.path.join(basedir, 'uploads'),
+        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=timedelta(days=7),
+        JSON_SORT_KEYS=False
     )
-
-    # Ensure upload directory exists
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="http://localhost:3000")
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
+    # Remove any custom CORS handlers from here
+    # We'll let Flask-CORS handle everything
+
     with app.app_context():
         # Import models
-        from models import User, SessionLog, UserProblem, Profile
+        from models import (
+            User, SessionLog, UserProblem, Profile, 
+            Message, Group, ChatRequest, GroupJoinRequest
+        )
         
-        # Import and register blueprints
-        from auth import create_auth_routes
-        from users import create_user_routes
-        from chats import create_chat_routes
-        from smilebot import create_smilebot_routes  # Import smilebot routes
+        # Create database tables
+        db.create_all()
+        
+        # Create and register blueprints
+        from auth.routes import register_routes as register_auth_routes
+        from users.routes import register_routes as register_user_routes
+        from chats.routes import register_routes as register_chat_routes
+        from bot.routes import register_routes as register_bot_routes
 
         # Initialize blueprints
-        create_auth_routes(app, db, bcrypt, login_manager)
-        create_user_routes(app, db)
-        create_chat_routes(app, db, socketio)
-        create_smilebot_routes(app, db)  # Initialize smilebot routes
+        auth_bp = Blueprint('auth', __name__)
+        users_bp = Blueprint('users', __name__)
+        chats_bp = Blueprint('chats', __name__)
+        bot_bp = Blueprint('bot', __name__)
 
-        # Create tables if they don't exist
-        db.create_all()
+        # Register routes
+        register_auth_routes(auth_bp, db, bcrypt, login_manager)
+        register_user_routes(users_bp, db)
+        register_chat_routes(chats_bp, db, socketio)
+        register_bot_routes(bot_bp, db)
 
-        # Register error handlers
-        @app.errorhandler(413)
-        def too_large(e):
-            return {"error": "File is too large"}, 413
+        # Register blueprints
+        app.register_blueprint(auth_bp, url_prefix='/auth')
+        app.register_blueprint(users_bp, url_prefix='/users')
+        app.register_blueprint(chats_bp, url_prefix='/chats')
+        app.register_blueprint(bot_bp, url_prefix='/bot')
 
-        @app.errorhandler(500)
-        def internal_error(e):
-            db.session.rollback()
-            return {"error": "Internal server error"}, 500
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({'error': 'Resource not found'}), 404
 
-        @app.errorhandler(404)
-        def not_found(e):
-            return {"error": "Resource not found"}, 404
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return jsonify({'error': 'Internal server error'}), 500
 
     return app
 
@@ -84,5 +103,14 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    # Run the application with debugging enabled on port 8000
-    socketio.run(app, debug=True, port=8000, cors_allowed_origins="http://localhost:3000")
+    try:
+        socketio.run(
+            app,
+            debug=True,
+            port=8000,
+            host='127.0.0.1',
+            allow_unsafe_werkzeug=True
+        )
+    except Exception as e:
+        logger.error(f"Error starting server: {str(e)}")
+        raise

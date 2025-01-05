@@ -39,6 +39,16 @@ body {
   color: #aaa; /* Light gray for contrast */
   margin-bottom: 10px;
 }
+.created-by-link,
+.community-name-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.created-by-link:hover,
+.community-name-link:hover {
+  text-decoration: underline;
+}
 
 /* Blog title */
 .blog-title {

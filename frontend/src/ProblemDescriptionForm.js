@@ -38,10 +38,10 @@ const ProblemDescriptionForm=() => {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Submitted: ",formData);
         try{
-            const response= await axios.post("http://localhost:8000/auth/problem-page",formData,{headers:{'Content-Type' : 'application/json'}});
+            const response= await axios.post("http://localhost:8000/auth/problem-page",formData,{headers:{'Content-Type' : 'application/json'},withCredentials:true,});
             const message=response.data.message;
+            console.log("Form Submitted: ",formData);
             console.log(message);
         } catch(err){
             console.error("Error posting problem: ",err);

@@ -1,133 +1,243 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    width: 100vw;
+/* ChatBotPage.css */
+.chatbot-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.quote-container {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.quote-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.quote {
+  font-size: 1.2rem;
+  font-style: italic;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.chat-section {
+  flex: 1;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-container {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow-y: auto;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  max-width: 80%;
+  padding: 0.8rem 1rem;
+  border-radius: 15px;
+  position: relative;
+  animation: messageAppear 0.3s ease-out;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  
-  .ChatBotPage {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    /* overflow-y: scroll; */
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .QuoteContainer,
-  .chat-container,
-  .ColorDonation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 700px;
-    width: 100%;
-    scroll-snap-align: start;
+}
+
+.user-message {
+  background-color: #007bff;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+
+.bot-message {
+  background-color: #f0f2f5;
+  color: #1a1a1a;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-top: 0.3rem;
+  text-align: right;
+}
+
+.chat-input-container {
+  display: flex;
+  gap: 0.5rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  max-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.send-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+}
+
+.send-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  .QuoteContainer{
-    height: 650px;
+  to {
+    transform: rotate(360deg);
   }
-  
-  .QuoteContainer {
-    background-color: black;
-    color: white;
-    text-align: center;
-    position: relative;
-    font-size: 1.5em;
+}
+
+.error-banner {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-banner button {
+  background: none;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.support-message {
+  text-align: center;
+  padding: 2rem;
+  background-color: #e3f2fd;
+  margin-top: 2rem;
+}
+
+.support-message h3 {
+  color: #1976d2;
+  margin-bottom: 0.5rem;
+}
+
+.support-message p {
+  color: #333;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quote-container h1 {
+    font-size: 2rem;
   }
-  
-  .scroll-to-chat {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: white;
-    color: black;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
+
+  .quote {
+    font-size: 1rem;
   }
-  
+
+  .message {
+    max-width: 90%;
+  }
+
+  .chat-section {
+    margin: 1rem auto;
+  }
+
   .chat-container {
-    background-color: #1a1a1a;
-    color: white;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    width: 96%;
+    max-height: 400px;
   }
-  
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid white;
-    border-radius: 5px;
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .quote-container {
+    padding: 1rem;
   }
-  
-  .chat-message {
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 60%;
-    word-wrap: break-word;
+
+  .quote-container h1 {
+    font-size: 1.5rem;
   }
-  
-  .chat-message.user {
-    align-self: flex-end;
-    right: 0;
-    background-color: #333;
-    color: white;
-    max-width: fit-content;
+
+  .chat-section {
+    margin: 0.5rem auto;
   }
-  
-  .chat-message.bot {
-    align-self: flex-start;
-    background-color: white;
-    color: black;
-    max-width: 500px;
+
+  .message {
+    max-width: 95%;
   }
-  
-  .chat-input {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .chat-input input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid white;
-    border-radius: 5px;
-    background-color: black;
-    color: white;
-  }
-  
-  .chat-input button {
-    padding: 10px;
-    border: none;
-    background-color: white;
-    color: black;
-    cursor: pointer;
-    border-radius: 5px;
-    height: 38.4px;
-  }
-  
-  .ColorDonation {
-    background-color: black;
-    color: white;
-    text-align: center;
-    padding: 20px;
-  }
-  
-  .ColorDonationMessage {
-    max-width: 600px;
-  }
-  
-  a {
-    text-decoration: none;
-  }
-  
+}
