@@ -78,14 +78,7 @@ class Profile(db.Model):
     profile_pic = db.Column(db.String(200), default='static/default.jpg')
     description = db.Column(db.Text, nullable=True)
 
-class Friendship(db.Model):
-    __tablename__ = 'friendship'
-    __table_args__ = {'extend_existing': True}
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    status = db.Column(db.String(20), default='pending')
 
 class Blog(db.Model):
     __tablename__ = 'blog'
