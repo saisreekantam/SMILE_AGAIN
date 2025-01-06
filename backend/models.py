@@ -13,8 +13,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     gender = db.Column(db.String(20))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    is_online = db.Column(db.Boolean, default=False)
     
     # Define the many-to-many relationship for friends
     friends = db.relationship(
