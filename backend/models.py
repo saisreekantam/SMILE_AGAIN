@@ -13,6 +13,46 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     gender = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_online = db.Column(db.Boolean, default=False)
+    
+    # Define the many-to-many relationship for friends
+    friends = db.relationship(
+        'User', 
+        secondary='friendship',
+        primaryjoin='User.id==Friendship.user_id',
+        secondaryjoin='User.id==Friendship.friend_id',
+        backref=db.backref('friend_of', lazy='dynamic')
+    )
+
+class Friendship(db.Model):
+    """Model for managing friendships between users"""
+    __tablename__ = 'friendship'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, accepted, rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class FriendRequest(db.Model):
+    """Model for managing friend requests between users"""
+    __tablename__ = 'friend_request'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(500))  # Optional message with friend request
+    status = db.Column(db.String(20), default='pending')  # pending, accepted, rejected
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Define relationships
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_requests')
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_requests')
 
 class SessionLog(db.Model):
     __tablename__ = 'session_log'
@@ -40,14 +80,7 @@ class Profile(db.Model):
     profile_pic = db.Column(db.String(200), default='static/default.jpg')
     description = db.Column(db.Text, nullable=True)
 
-class Friendship(db.Model):
-    __tablename__ = 'friendship'
-    __table_args__ = {'extend_existing': True}
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    friend_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    status = db.Column(db.String(20), default='pending')
 
 class Blog(db.Model):
     """

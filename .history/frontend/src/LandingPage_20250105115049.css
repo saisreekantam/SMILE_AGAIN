@@ -50,7 +50,7 @@
   .ImagesContainer{
     display: flex;
     justify-content: space-between;
-    height: 800px;
+    height: 1200px;
     width: 100%;
     position: relative;
     z-index: 1000;
