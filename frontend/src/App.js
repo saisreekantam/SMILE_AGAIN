@@ -12,6 +12,7 @@ import BlogsPage from './BlogsPage';
 import ChatsPage from './ChatsPage';
 import GroupChatPage from './GroupChat';
 import GroupPage from './GroupPage';
+import AddBlog from './AddBlog';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path='/blogs/:blogId/comments' element={<CommentsPage />} />
         <Route path='/groups' element={<GroupChatPage />} />
         <Route path='/groups/:groupId' element={<GroupPage />} />
+        <Route path='/add-blog' element={<AddBlog />} />
       </Routes>
     </>
   );

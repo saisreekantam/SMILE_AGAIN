@@ -2,6 +2,7 @@ import React,{useState} from "react";
 import "./ProblemDescriptionFile.css";
 import NavAfterLogin from "./NavAfterLogin";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const ProblemDescriptionForm=() => {
     const [currentStep,setCurrentStep] = useState(0);
     const [formData,setFormData] = useState({
@@ -12,7 +13,7 @@ const ProblemDescriptionForm=() => {
         {id:"smile_last_time", label:"When did you smile last time(press enter after you type this)",type:"text",required:"true"},
         {id:"smile_reason", label:"Why Did you lose your smile",type:"text",required:"true"}
     ]
-
+    const navigate=useNavigate();
     const handleChange=(e) => {
         const { id,value } =e.target;
         setFormData((prevData) => ({ ...prevData,[id]:value}));
@@ -43,6 +44,7 @@ const ProblemDescriptionForm=() => {
             const message=response.data.message;
             console.log("Form Submitted: ",formData);
             console.log(message);
+            navigate('/home');
         } catch(err){
             console.error("Error posting problem: ",err);
         }

@@ -1,8 +1,11 @@
 import React from "react";
 import "./NavAfterLogin.css"
+import { useAuth } from "./contexts/AuthContext";
 
 const NavAfterLogin=() => {
-    const userName=localStorage.getItem("username");
+    const { username } = useAuth();
+    const userName=username.username || "User";
+    console.log(userName);
     return(
         <div className="navContainer">
             <nav className="TopNavBar">

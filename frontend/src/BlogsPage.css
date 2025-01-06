@@ -1,9 +1,9 @@
 /* General styling for the page */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
   background-color: #000; /* Black background */
-  color: #fff; /* White text */
+  color: #f5f5f5; /* Off-white text for a softer look */
 }
 
 /* Container for the blogs */
@@ -12,57 +12,61 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  gap: 20px;
+  gap: 30px;
 }
 
 /* Blog card styling */
 .blog-card {
-  background-color: #111; /* Dark gray for the card */
-  border: 1px solid #333; /* Subtle border */
-  border-radius: 10px;
-  padding: 20px;
+  background-color: #121212; /* Deep black-gray for card */
+  border: 2px solid #222; /* Subtle dark border */
+  border-radius: 15px;
+  padding: 25px;
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2); /* Subtle shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.1); /* Softer shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .blog-card:hover {
-  transform: scale(1.02); /* Slightly enlarge on hover */
-  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.4); /* Enhance shadow on hover */
+  transform: translateY(-5px); /* Smooth hover lift */
+  box-shadow: 0 12px 24px rgba(255, 255, 255, 0.2); /* Enhanced shadow on hover */
+  background-color: #1c1c1c; /* Slightly lighter on hover */
 }
 
-/* User and community text */
+/* User and community links */
 .user-community {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #aaa; /* Light gray for contrast */
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #aaa; /* Light gray */
   margin-bottom: 10px;
 }
+
 .created-by-link,
 .community-name-link {
-  color: #007bff;
+  color: #e5e5e5; /* Soft white */
   text-decoration: none;
+  font-weight: bold;
 }
 
 .created-by-link:hover,
 .community-name-link:hover {
   text-decoration: underline;
+  color: #fff; /* Brighter white on hover */
 }
 
 /* Blog title */
 .blog-title {
-  font-size: 1.5rem;
-  margin: 10px 0;
-  color: #fff; /* White for emphasis */
+  font-size: 1.6rem;
+  margin: 15px 0;
+  color: #f5f5f5; /* Bright white for emphasis */
 }
 
 /* Blog content */
 .blog-content {
   font-size: 1rem;
-  line-height: 1.6;
-  color: #ddd; /* Light gray for readability */
-  margin-bottom: 20px;
+  line-height: 1.8;
+  color: #dcdcdc; /* Light gray for better readability */
+  margin-bottom: 25px;
 }
 
 /* Blog meta information */
@@ -70,30 +74,62 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: #888; /* Gray text for meta information */
-  margin-bottom: 20px;
+  font-style: italic;
+  color: #b3b3b3; /* Subtle gray */
+  margin-bottom: 15px;
 }
 
 /* Comments button */
 .comments-button button {
-  background-color: #333; /* Dark button background */
-  color: #fff; /* White text */
-  border: 1px solid #555; /* Border to define button edges */
-  border-radius: 5px;
-  padding: 10px 15px;
-  font-size: 0.9rem;
+  background-color: transparent; /* Transparent background */
+  color: #f5f5f5; /* White text */
+  border: 1px solid #444; /* Define edges with subtle border */
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
 .comments-button button:hover {
-  background-color: #555; /* Lighter gray on hover */
-  transform: scale(1.05); /* Slight enlargement */
+  background-color: #333; /* Dark gray on hover */
+  color: #fff; /* Bright white text */
+  transform: scale(1.08); /* Slight enlargement on hover */
+}
+
+/* Add blog form */
+.add-blog-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-blog-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.no-blogs-message {
+  font-size: 1.2rem;
+  color: #888;
+  margin-top: 20px;
+  text-align: center;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .blog-card {
-      width: 95%; /* Reduce width on smaller screens */
+  .blog-card, .add-blog-form {
+      width: 95%; /* Full width on smaller screens */
+  }
+
+  .blog-meta {
+      flex-direction: column;
+      gap: 5px;
   }
 }

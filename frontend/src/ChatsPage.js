@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import './ChatsPage.css';
 import ActiveChats from './ActiveChats';
 import ChatRequests from './ChatRequests';
-import GroupChats from './GroupChat';
+import GroupChatPage from './GroupChat';
 import NavAfterLogin from './NavAfterLogin';
+import { useAuth } from './contexts/AuthContext';
 
 const ChatsPage = () => {
   const [activeSection, setActiveSection] = useState('active');
+  // const { login,user } = useAuth();
+  // login(user.username);
 
   return (
     <div className="chats-page">
@@ -27,7 +30,7 @@ const ChatsPage = () => {
         </button>
         <button
           className={`nav-button ${activeSection === 'groups' ? 'active' : ''}`}
-          onClick={() => setActiveSection('unread')}
+          onClick={() => setActiveSection('groups')}
         >
         Groups
         </button>
@@ -36,7 +39,7 @@ const ChatsPage = () => {
       <div className="content">
         {activeSection === 'active' && <ActiveChats />}
         {activeSection === 'requests' && <ChatRequests />}
-        {activeSection === 'groups' && <GroupChats />}
+        {activeSection === 'groups' && <GroupChatPage />}
       </div>
     </div>
   );

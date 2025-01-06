@@ -1,0 +1,60 @@
+.add-blog-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-blog-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.add-blog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #111; /* Dark background for form */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Soft shadow */
+    width: 90%;
+    max-width: 600px;
+  }
+  
+  .add-blog-form input,
+  .add-blog-form textarea {
+    background-color: #222; /* Dark gray input field */
+    border: 1px solid #444; /* Subtle border */
+    color: #fff; /* White text */
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .add-blog-form input:focus,
+  .add-blog-form textarea:focus {
+    border-color: #888; /* Highlight border on focus */
+    outline: none;
+  }
+  
+  .add-blog-form button {
+    background-color: #333; /* Dark button background */
+    color: #fff; /* White text */
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .add-blog-form button:hover {
+    background-color: #555; /* Lighter gray on hover */
+    transform: scale(1.05); /* Slight hover effect */
+  }
+  

@@ -52,7 +52,7 @@ def register_routes(bp, db, bcrypt, login_manager):
                 'success': True,
                 'message': 'Login successful',
                 'user_id': user.id,  # Optional: Include user details if needed
-                # 'username': user.username  # Example
+                'username': user.name  # Example
             }), 200
 
         # Respond with an error if login fails
