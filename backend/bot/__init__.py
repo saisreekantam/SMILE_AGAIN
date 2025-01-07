@@ -1,11 +1,34 @@
 from flask import Blueprint
 from flask_cors import CORS
 
-emotionalbot_bp = Blueprint('emotionalbot', __name__)
-CORS(emotionalbot_bp, resources={r"/emotionalbot/*": {"origins": "*"}})
+# Create blueprint for the bot routes
+bot_bp = Blueprint('bot', __name__)
 
-def create_emotionalbot_routes(app, db, socketio):
-    """Initialize emotional bot routes and WebSocket handlers"""
-    from .routes import emotionalbot_routes
-    emotionalbot_routes(emotionalbot_bp, db, socketio)
-    app.register_blueprint(emotionalbot_bp, url_prefix='/emotionalbot')
+# Configure CORS specifically for bot routes
+CORS(bot_bp, resources={
+    r"/bot/*": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "max_age": 3600
+    }
+})
+
+def create_bot_routes(app, db):
+    """
+    Register bot routes with the Flask application.
+    
+    Args:
+        app: Flask application instance
+        db: SQLAlchemy database instance
+    """
+    from .routes import register_routes
+    register_routes(bot_bp, db)
+    app.register_blueprint(bot_bp, url_prefix='/bot')
+    
+    # Initialize any required bot components
+    from .utils import WebEmpatheticChatbot
+    app.chatbot = WebEmpatheticChatbot(db)
+    
+    return app.chatbot
