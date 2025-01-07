@@ -1,10 +1,11 @@
 from flask import Blueprint
 from flask_cors import CORS
 
-smilebot_bp = Blueprint('smilebot', __name__)
-CORS(smilebot_bp, resources={r"/smilebot/*": {"origins": "http://localhost:3000"}})
+emotionalbot_bp = Blueprint('emotionalbot', __name__)
+CORS(emotionalbot_bp, resources={r"/emotionalbot/*": {"origins": "*"}})
 
-def create_smilebot_routes(app, db):
-    from .routes import smilebot_routes
-    smilebot_routes(smilebot_bp, db)
-    app.register_blueprint(smilebot_bp, url_prefix='/smilebot')
+def create_emotionalbot_routes(app, db, socketio):
+    """Initialize emotional bot routes and WebSocket handlers"""
+    from .routes import emotionalbot_routes
+    emotionalbot_routes(emotionalbot_bp, db, socketio)
+    app.register_blueprint(emotionalbot_bp, url_prefix='/emotionalbot')
