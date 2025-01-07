@@ -1,103 +1,104 @@
-# bot/routes.py
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
-from .utils import SmileBot
-from models import Message
+from .utils import EmotionalChatbot
 import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def register_routes(bp, db):
-    bot = SmileBot()
+def emotionalbot_routes(bp, db, socketio):
+    """Register emotional bot routes and WebSocket handlers"""
+    
+    # Initialize the chatbot
+    bot = EmotionalChatbot()
     
     @bp.route('/chat', methods=['POST'])
     @login_required
     async def chat():
         """Handle chat interactions with emotion detection"""
-
-
         try:
             data = request.get_json()
             user_message = data.get('message')
-            image_data = data.get('image_data')  # Base64 encoded image from webcam
             
             if not user_message:
                 return jsonify({'error': 'Message is required'}), 400
-
-            logger.debug(f"Received message: {user_message}")
-
-            # Save user message
-            user_msg = Message(
-                sender_id=current_user.id,
-                content=user_message,
-                timestamp=datetime.utcnow()
-            )
-            db.session.add(user_msg)
-            db.session.commit()
-
-            # Get recent chat history
-            chat_history = Message.query.filter(
-                (Message.sender_id == current_user.id) | (Message.receiver_id == current_user.id)
-            ).order_by(Message.timestamp.desc()).limit(5).all()
-
-            history_formatted = [
-                {
-                    'content': msg.content,
-                    'sender_type': 'user' if msg.sender_id == current_user.id else 'bot',
-                    'timestamp': msg.timestamp.isoformat()
-                }
-                for msg in reversed(chat_history)
-            ]
-
-            # Generate bot response with emotion analysis
-            response_data = await bot.generate_response(
-                text=user_message,
-                image_data=image_data,
-                chat_history=history_formatted
+                
+            # Get response from bot
+            response = await bot.generate_response(
+                user_id=str(current_user.id),
+                text=user_message
             )
             
-            # Save bot response
-            bot_msg = Message(
-                receiver_id=current_user.id,
-                content=response_data['message']['content'],
-                timestamp=datetime.utcnow()
-            )
-            db.session.add(bot_msg)
-            db.session.commit()
+            # Save interaction to database if needed
+            # This could be useful for tracking emotional states over time
             
-            return jsonify(response_data)
-
+            return jsonify(response)
+            
         except Exception as e:
             logger.error(f"Error in chat endpoint: {str(e)}")
-            db.session.rollback()
-            return jsonify({'error': 'Internal server error'}), 500
-
-    @bp.route('/chat/history', methods=['GET', 'OPTIONS'])
+            return jsonify({
+                'error': 'Internal server error',
+                'timestamp': datetime.utcnow().isoformat()
+            }), 500
+    
+    @bp.route('/chat/history', methods=['GET'])
     @login_required
     def get_chat_history():
         """Get user's chat history"""
-        if request.method == 'OPTIONS':
-            return jsonify({"message": "OK"}), 200
-
         try:
-            messages = Message.query.filter(
-                (Message.sender_id == current_user.id) | (Message.receiver_id == current_user.id)
-            ).order_by(Message.timestamp).all()
-
-            chat_history = [
-                {
-                    'content': msg.content,
-                    'type': 'user' if msg.sender_id == current_user.id else 'bot',
-                    'timestamp': msg.timestamp.isoformat()
-                }
-                for msg in messages
-            ]
-
-            return jsonify(chat_history)
-
+            # Get the user's conversation memory
+            memory = bot.get_memory(str(current_user.id))
+            
+            # Format the history
+            history = []
+            if memory.buffer:
+                for message in memory.buffer:
+                    history.append({
+                        'content': message.content,
+                        'type': 'user' if message.type == 'human' else 'bot',
+                        'timestamp': datetime.utcnow().isoformat()
+                    })
+            
+            return jsonify(history)
+            
         except Exception as e:
             logger.error(f"Error getting chat history: {str(e)}")
             return jsonify({'error': 'Failed to retrieve chat history'}), 500
-
-    return bp
+    
+    @socketio.on('connect')
+    def handle_connect():
+        """Handle WebSocket connection"""
+        if current_user.is_authenticated:
+            logger.info(f"WebSocket connected for user {current_user.id}")
+            socketio.emit(
+                'bot_message',
+                {
+                    'content': "Hello! I'm Joy, your emotional support companion. How are you feeling today?",
+                    'type': 'greeting',
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                room=request.sid
+            )
+    
+    @socketio.on('user_message')
+    async def handle_message(message):
+        """Handle WebSocket messages"""
+        if current_user.is_authenticated:
+            try:
+                # Get response from bot
+                response = await bot.generate_response(
+                    user_id=str(current_user.id),
+                    text=message.get('content', '')
+                )
+                
+                # Emit response
+                socketio.emit('bot_response', response, room=request.sid)
+                
+            except Exception as e:
+                logger.error(f"Error handling WebSocket message: {str(e)}")
+                socketio.emit('bot_error', {
+                    'error': 'Failed to process message',
+                    'timestamp': datetime.utcnow().isoformat()
+                }, room=request.sid)
