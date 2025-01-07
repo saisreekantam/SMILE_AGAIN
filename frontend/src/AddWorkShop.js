@@ -1,147 +1,170 @@
-import React, { useState } from "react";
-import "./AddWorkshop.css";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import './AddWorkshop.css';
 
-const AddWorkshop = () => {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    banner_url: "",
-    meet_link: "",
-    price: "",
-    sponsored: false,
-    tag: "",
-  });
-
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
+const CreateWorkshop = () => {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        banner_url: '',
+        meet_link: '',
+        price: 0,
+        tag: ''
     });
-  };
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(null);
+        setLoading(true);
 
-    const { title, description, banner_url, meet_link, tag } = formData;
-    if (!title || !description || !banner_url || !meet_link || !tag) {
-      setError("All fields are required.");
-      return;
-    }
+        try {
+            const response = await axios.post(
+                'http://localhost:8000/workshops/create',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                }
+            );
 
-    try {
-      const response = await axios.post("http://localhost:8000/workshops/create", formData, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-      setSuccess("Workshop created successfully!");
-      setTimeout(() => navigate("/workshops"), 2000);
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to create workshop. Please try again.");
-    }
-  };
+            if (response.data.workshop_id) {
+                navigate('/workshops');  // Redirect to workshops list
+            }
+        } catch (err) {
+            // Handle different types of errors
+            if (err.response) {
+                const { status, data } = err.response;
+                
+                if (status === 401) {
+                    setError('Please log in to create workshops');
+                    // Optional: Redirect to login page
+                    // navigate('/login');
+                }
+                else if (status === 403) {
+                    if (data.code === 'ADMIN_REQUIRED') {
+                        setError('Only administrators can create workshops. Please contact support if you believe this is an error.');
+                    } else {
+                        setError('You do not have permission to create workshops');
+                    }
+                }
+                else {
+                    setError(data.message || 'Failed to create workshop');
+                }
+            } else {
+                setError('Failed to connect to the server. Please try again later.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <div className="add-workshop-container">
-      <h1 className="header">Add Workshop</h1>
-      <form className="add-workshop-form" onSubmit={handleSubmit}>
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Enter workshop title"
-          />
+    return (
+        <div className="create-workshop-container">
+            <h2>Create New Workshop</h2>
+            
+            {error && (
+                <div className="error-message">
+                    {error}
+                </div>
+            )}
+            
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="title">Title:</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="description">Description:</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="banner_url">Banner URL:</label>
+                    <input
+                        type="text"
+                        id="banner_url"
+                        name="banner_url"
+                        value={formData.banner_url}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="meet_link">Meeting Link:</label>
+                    <input
+                        type="text"
+                        id="meet_link"
+                        name="meet_link"
+                        value={formData.meet_link}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="price">Price:</label>
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        min="0"
+                        step="0.01"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="tag">Tag:</label>
+                    <input
+                        type="text"
+                        id="tag"
+                        name="tag"
+                        value={formData.tag}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <button 
+                    type="submit" 
+                    disabled={loading}
+                    className={loading ? 'loading' : ''}
+                >
+                    {loading ? 'Creating...' : 'Create Workshop'}
+                </button>
+            </form>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Enter workshop description"
-          ></textarea>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="banner_url">Banner URL</label>
-          <input
-            type="text"
-            id="banner_url"
-            name="banner_url"
-            value={formData.banner_url}
-            onChange={handleChange}
-            placeholder="Enter banner URL"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="meet_link">Meet Link</label>
-          <input
-            type="text"
-            id="meet_link"
-            name="meet_link"
-            value={formData.meet_link}
-            onChange={handleChange}
-            placeholder="Enter meet link"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="price">Price</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            placeholder="Enter price (0 for free)"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="sponsored">Sponsored</label>
-          <input
-            type="checkbox"
-            id="sponsored"
-            name="sponsored"
-            checked={formData.sponsored}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="tag">Tag</label>
-          <input
-            type="text"
-            id="tag"
-            name="tag"
-            value={formData.tag}
-            onChange={handleChange}
-            placeholder="Enter workshop tag"
-          />
-        </div>
-
-        <button type="submit" className="submit-btn">Create Workshop</button>
-      </form>
-    </div>
-  );
+    );
 };
 
-export default AddWorkshop;
+export default CreateWorkshop;

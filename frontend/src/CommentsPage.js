@@ -15,9 +15,11 @@ const CommentsPage = () => {
         const fetchComments = async () => {
             try {
                 const response = await axios.get(`http://localhost:8000/blogs/${blogId}/comments`);
-                setComments(response.data.comments);
+                console.log(response.data)
+                setComments(response.data || []);
             } catch (error) {
                 console.error('Error fetching comments:', error);
+                setComments([])
             } finally {
                 setLoading(false);
             }
@@ -39,7 +41,7 @@ const CommentsPage = () => {
             const response = await axios.post(`http://localhost:8000/blogs/${blogId}/comments`, {
                 content: newComment,
                 image_url: imageURL
-            });
+            },{headers:{"Content-Type" : "application/json"},withCredentials:true});
 
             // Update the comments list with the new comment
             setComments(prevComments => [...prevComments, response.data.comment]);

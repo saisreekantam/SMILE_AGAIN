@@ -29,6 +29,7 @@ def register_routes(bp, db, bcrypt, login_manager):
             )
             db.session.add(user)
             db.session.commit()
+         
             return jsonify({'message': 'User registered successfully'}), 201
             
         except Exception as e:
@@ -126,7 +127,6 @@ def register_routes(bp, db, bcrypt, login_manager):
 
         # Default case for unsupported methods
         return jsonify({'error': 'Method not allowed'}), 405
-    
     @bp.route('/update-smile-reason', methods=['POST'])
     @login_required
     def update_smile_reason():

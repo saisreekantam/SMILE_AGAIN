@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './BlogsPage.css';
 import axios from 'axios';
+import NavAfterLogin from './NavAfterLogin';
 
 const BlogsPage = () => {
     const [blogs, setBlogs] = useState([]);
@@ -23,39 +24,42 @@ const BlogsPage = () => {
     }, []);
 
     return (
-        <div className="blogs-container">
-            <h2>Blogs</h2>
-            <button className="add-blog-button" onClick={() => navigate('/add-blog')}>
-                Add Blog
-            </button>
-            {blogs.length === 0 ? (
-                <p className="no-blogs-message">No blogs available to display.</p>
-            ) : (
-                blogs.map(blog => (
-                    <div key={blog.blog_id} className="blog-card">
-                        <h3 className="user-community">
-                            <a href={`/user/${blog.created_by}`} className="created-by-link">
-                                {blog.created_by}
-                            </a>
-                            /
-                            <a href={`/community/${blog.community_name}`} className="community-name-link">
-                                {blog.community_name}
-                            </a>
-                        </h3>
-                        <h2 className="blog-title">{blog.title}</h2>
-                        <p className="blog-content">{blog.content}</p>
-                        <div className="blog-meta">
-                            <span>Likes: {blog.likes}</span>
-                            <span>Dislikes: {blog.dislikes}</span>
+        <div className="Blogs-container">
+            <NavAfterLogin />
+            <div className='blogs-container'>
+                <h2>Blogs</h2>
+                <button className="add-blog-button" onClick={() => navigate('/add-blog')}>
+                    Add Blog
+                </button>
+                {blogs.length === 0 ? (
+                    <p className="no-blogs-message">No blogs available to display.</p>
+                ) : (
+                    blogs.map(blog => (
+                        <div key={blog.blog_id} className="blog-card">
+                            <h3 className="user-community">
+                                <a href={`/user/${blog.created_by}`} className="created-by-link">
+                                    {blog.author_name}
+                                </a>
+                                
+                                {/* <a href={`/community/${blog.community_name}`} className="community-name-link">
+                                    {blog.community_name}
+                                </a> */}
+                            </h3>
+                            <h2 className="blog-title">{blog.title}</h2>
+                            <p className="blog-content">{blog.content}</p>
+                            <div className="blog-meta">
+                                <span>Likes: {blog.likes}</span>
+                                <span>Dislikes: {blog.dislikes}</span>
+                            </div>
+                            <div className="comments-button">
+                                <button onClick={() => navigate(`/blogs/${blog.blog_id}/comments`)}>
+                                    View Comments
+                                </button>
+                            </div>
                         </div>
-                        <div className="comments-button">
-                            <button onClick={() => navigate(`/blogs/${blog.blog_id}/comments`)}>
-                                View Comments
-                            </button>
-                        </div>
-                    </div>
-                ))
-            )}
+                    ))
+                )}
+            </div>
         </div>
     );
 };

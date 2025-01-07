@@ -1,26 +1,15 @@
 from flask import Blueprint
-from flask_cors import CORS
 
-friends_bp = Blueprint('friends', __name__)
-CORS(friends_bp, resources={r"/friends/*": {"origins": "*"}})
+profile_bp = Blueprint('profile', __name__)
 
-def create_friend_routes(app, db, socketio):
+def create_profile_routes(app, db):
     """
-    Initialize and register friend request routes
+    Register profile routes with the Flask application.
     
     Args:
         app: Flask application instance
         db: SQLAlchemy database instance
-        socketio: Flask-SocketIO instance for real-time notifications
     """
-    from .routes import register_routes
-    from .events import register_friend_events
-    
-    # Register HTTP routes
-    register_routes(app)
-    
-    # Register WebSocket events
-    register_friend_events(socketio)
-    
-    # Register the blueprint with the application
-    app.register_blueprint(friends_bp, url_prefix='/friends')
+    from .routes import register_profile_routes
+    register_profile_routes(profile_bp)
+    app.register_blueprint(profile_bp, url_prefix='/profile')

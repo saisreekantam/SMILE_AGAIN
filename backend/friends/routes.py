@@ -1,217 +1,136 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
-from backend.models import User, Friendship, FriendRequest
-from backend.extensions import db
-from datetime import datetime
-import logging
+from models import User, UserProblem, Profile, Friendship, Blog
+from extensions import db
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-friends_bp = Blueprint('friends', __name__)
-
-def register_routes(app):
-    """Register friend-related routes with the application"""
-    app.register_blueprint(friends_bp, url_prefix='/friends')
-
-@friends_bp.route('/request', methods=['POST'])
-@login_required
-def send_friend_request():
-    """Send a friend request to another user"""
-    try:
-        data = request.get_json()
-        recipient_id = data.get('recipient_id')
-        message = data.get('message', '')
-
-        # Validate request
-        if not recipient_id:
-            return jsonify({'error': 'Recipient ID is required'}), 400
-
-        if recipient_id == current_user.id:
-            return jsonify({'error': 'Cannot send friend request to yourself'}), 400
-
-        recipient = User.query.get(recipient_id)
-        if not recipient:
-            return jsonify({'error': 'Recipient not found'}), 404
-
-        # Check if they are already friends
-        existing_friendship = Friendship.query.filter(
-            ((Friendship.user_id == current_user.id) & (Friendship.friend_id == recipient_id)) |
-            ((Friendship.user_id == recipient_id) & (Friendship.friend_id == current_user.id))
-        ).first()
-
-        if existing_friendship:
-            return jsonify({'error': 'Already friends with this user'}), 400
-
-        # Check for existing pending request
-        existing_request = FriendRequest.query.filter_by(
-            sender_id=current_user.id,
-            recipient_id=recipient_id,
-            status='pending'
-        ).first()
-
-        if existing_request:
-            return jsonify({'error': 'Friend request already sent'}), 400
-
-        # Create new friend request
-        friend_request = FriendRequest(
-            sender_id=current_user.id,
-            recipient_id=recipient_id,
-            message=message
-        )
-        db.session.add(friend_request)
-        db.session.commit()
-
-        return jsonify({
-            'message': 'Friend request sent successfully',
-            'request_id': friend_request.id
-        }), 201
-
-    except Exception as e:
-        logger.error(f"Error in send_friend_request: {str(e)}")
-        db.session.rollback()
-        return jsonify({'error': 'Internal server error'}), 500
-
-@friends_bp.route('/requests', methods=['GET'])
-@login_required
-def get_friend_requests():
-    """Get all friend requests for the current user"""
-    try:
-        # Get received pending requests
-        received_requests = FriendRequest.query.filter_by(
-            recipient_id=current_user.id,
-            status='pending'
-        ).all()
-
-        # Get sent pending requests
-        sent_requests = FriendRequest.query.filter_by(
-            sender_id=current_user.id,
-            status='pending'
-        ).all()
-
-        requests_data = {
-            'received': [{
-                'id': req.id,
-                'sender_id': req.sender_id,
-                'sender_name': req.sender.name,
-                'message': req.message,
-                'created_at': req.created_at.isoformat()
-            } for req in received_requests],
-            'sent': [{
-                'id': req.id,
-                'recipient_id': req.recipient_id,
-                'recipient_name': req.recipient.name,
-                'message': req.message,
-                'created_at': req.created_at.isoformat()
-            } for req in sent_requests]
-        }
-
-        return jsonify(requests_data), 200
-
-    except Exception as e:
-        logger.error(f"Error in get_friend_requests: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@friends_bp.route('/request/<int:request_id>', methods=['POST'])
-@login_required
-def handle_friend_request(request_id):
-    """Accept or reject a friend request"""
-    try:
-        data = request.get_json()
-        action = data.get('action')  # 'accept' or 'reject'
-
-        if action not in ['accept', 'reject']:
-            return jsonify({'error': 'Invalid action'}), 400
-
-        friend_request = FriendRequest.query.get_or_404(request_id)
-
-        # Verify request recipient
-        if friend_request.recipient_id != current_user.id:
-            return jsonify({'error': 'Unauthorized'}), 403
-
-        if friend_request.status != 'pending':
-            return jsonify({'error': 'Request already processed'}), 400
-
-        if action == 'accept':
-            # Create friendship records
-            friendship1 = Friendship(
-                user_id=friend_request.sender_id,
-                friend_id=friend_request.recipient_id,
-                status='accepted'
-            )
-            friendship2 = Friendship(
-                user_id=friend_request.recipient_id,
-                friend_id=friend_request.sender_id,
-                status='accepted'
-            )
-            db.session.add(friendship1)
-            db.session.add(friendship2)
+def register_profile_routes(users_bp):
+    @users_bp.route('/profile/<int:user_id>', methods=['GET'])
+    @login_required
+    def get_user_profile(user_id):
+        """Get public profile information for a specific user"""
+        try:
+            # Get user and their problem info
+            user = User.query.get(user_id)
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+                
+            user_problem = UserProblem.query.filter_by(user_id=user_id).first()
+            profile = Profile.query.filter_by(user_id=user_id).first()
             
-            friend_request.status = 'accepted'
-            db.session.commit()
+            # Check if they are already friends
+            friendship = Friendship.query.filter(
+                ((Friendship.user_id == current_user.id) & (Friendship.friend_id == user_id)) |
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == current_user.id))
+            ).first()
+            
+            # Get their blog posts
+            blogs = Blog.query.filter_by(user_id=user_id).order_by(Blog.created_at.desc()).limit(5).all()
+            
+            return jsonify({
+                'id': user.id,
+                'name': user.name,
+                'gender': user.gender,
+                'smile_last_time': user_problem.smile_last_time if user_problem else None,
+                'smile_reason': user_problem.smile_reason if user_problem else None,
+                'profile_pic': profile.profile_pic if profile else 'static/default.jpg',
+                'description': profile.description if profile else '',
+                'friendship_status': friendship.status if friendship else 'none',
+                'recent_blogs': [{
+                    'id': blog.id,
+                    'title': blog.title,
+                    'created_at': blog.created_at.isoformat()
+                } for blog in blogs]
+            })
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
-            return jsonify({'message': 'Friend request accepted'}), 200
-
-        elif action == 'reject':
-            friend_request.status = 'rejected'
-            db.session.commit()
-            return jsonify({'message': 'Friend request rejected'}), 200
-
-    except Exception as e:
-        logger.error(f"Error in handle_friend_request: {str(e)}")
-        db.session.rollback()
-        return jsonify({'error': 'Internal server error'}), 500
-
-@friends_bp.route('/list', methods=['GET'])
-@login_required
-def get_friends():
-    """Get list of current user's friends"""
-    try:
-        # Get all accepted friendships
-        friendships = Friendship.query.filter_by(
-            user_id=current_user.id,
-            status='accepted'
-        ).all()
-
-        friends_list = [{
-            'id': friendship.friend_id,
-            'name': User.query.get(friendship.friend_id).name,
-            'since': friendship.created_at.isoformat()
-        } for friendship in friendships]
-
-        return jsonify({'friends': friends_list}), 200
-
-    except Exception as e:
-        logger.error(f"Error in get_friends: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@friends_bp.route('/unfriend/<int:friend_id>', methods=['POST'])
-@login_required
-def unfriend_user(friend_id):
-    """Remove a friend from the current user's friend list"""
-    try:
-        if friend_id == current_user.id:
-            return jsonify({'error': 'Cannot unfriend yourself'}), 400
-
-        # Delete both friendship records
-        deleted_count = Friendship.query.filter(
-            (
-                (Friendship.user_id == current_user.id) & 
-                (Friendship.friend_id == friend_id)
-            ) | (
-                (Friendship.user_id == friend_id) & 
-                (Friendship.friend_id == current_user.id)
+    @users_bp.route('/send-friend-request/<int:user_id>', methods=['POST'])
+    @login_required
+    def send_friend_request(user_id):
+        """Send a friend request to another user"""
+        try:
+            if user_id == current_user.id:
+                return jsonify({'error': 'Cannot send friend request to yourself'}), 400
+                
+            target_user = User.query.get(user_id)
+            if not target_user:
+                return jsonify({'error': 'User not found'}), 404
+                
+            # Check if friendship already exists
+            existing_friendship = Friendship.query.filter(
+                ((Friendship.user_id == current_user.id) & (Friendship.friend_id == user_id)) |
+                ((Friendship.user_id == user_id) & (Friendship.friend_id == current_user.id))
+            ).first()
+            
+            if existing_friendship:
+                return jsonify({'error': 'Friend request already exists or users are already friends'}), 400
+                
+            # Create new friendship request
+            friendship = Friendship(
+                user_id=current_user.id,
+                friend_id=user_id,
+                status='pending'
             )
-        ).delete()
+            
+            db.session.add(friendship)
+            db.session.commit()
+            
+            return jsonify({'message': 'Friend request sent successfully'})
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
-        if deleted_count == 0:
-            return jsonify({'error': 'Friendship not found'}), 404
+    @users_bp.route('/respond-friend-request/<int:friendship_id>', methods=['POST'])
+    @login_required
+    def respond_friend_request(friendship_id):
+        """Accept or reject a friend request"""
+        try:
+            data = request.get_json()
+            action = data.get('action')
+            
+            if action not in ['accept', 'reject']:
+                return jsonify({'error': 'Invalid action'}), 400
+                
+            friendship = Friendship.query.get(friendship_id)
+            if not friendship or friendship.friend_id != current_user.id:
+                return jsonify({'error': 'Friend request not found'}), 404
+                
+            if friendship.status != 'pending':
+                return jsonify({'error': 'Friend request already processed'}), 400
+                
+            if action == 'accept':
+                friendship.status = 'accepted'
+                db.session.commit()
+                return jsonify({'message': 'Friend request accepted'})
+            else:
+                db.session.delete(friendship)
+                db.session.commit()
+                return jsonify({'message': 'Friend request rejected'})
+                
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
 
-        db.session.commit()
-        return jsonify({'message': 'Friend removed successfully'}), 200
-
-    except Exception as e:
-        logger.error(f"Error in unfriend_user: {str(e)}")
-        db.session.rollback()
-        return jsonify({'error': 'Internal server error'}), 500
+    @users_bp.route('/pending-friend-requests', methods=['GET'])
+    @login_required
+    def get_pending_requests():
+        """Get list of pending friend requests"""
+        try:
+            pending_requests = Friendship.query.filter_by(
+                friend_id=current_user.id,
+                status='pending'
+            ).all()
+            
+            requests_data = [{
+                'id': req.id,
+                'user_id': req.user_id,
+                'user_name': User.query.get(req.user_id).name,
+                'timestamp': req.created_at.isoformat() if hasattr(req, 'created_at') else None
+            } for req in pending_requests]
+            
+            return jsonify(requests_data)
+            
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500

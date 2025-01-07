@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
         secondaryjoin='User.id==Friendship.friend_id',
         backref=db.backref('friend_of', lazy='dynamic')
     )
-
+ 
 class Friendship(db.Model):
     """Model for managing friendships between users"""
     __tablename__ = 'friendship'
@@ -79,68 +79,89 @@ class Profile(db.Model):
     description = db.Column(db.Text, nullable=True)
 
 
+# Add these to backend_models.py
+
+# backend_models.py
+from datetime import datetime
+from typing import Dict, Any, List
+from sqlalchemy.orm import relationship
+from extensions import db
+from flask_login import UserMixin
 
 class Blog(db.Model):
     """
-    Blog model for storing user blog posts with essential fields
+    Blog model for storing user blog posts.
+    
+    This model represents the core blog functionality, matching the existing
+    database schema exactly to prevent migration issues.
+    
+    Attributes:
+        id (int): Primary key for the blog post
+        user_id (int): Foreign key reference to the user table
+        title (str): Title of the blog post
+        content (str): Main content of the blog post
+        created_at (datetime): Timestamp of post creation
     """
     __tablename__ = 'blog'
     __table_args__ = {'extend_existing': True}
-
-    # Primary key
-    id = db.Column(db.Integer, primary_key=True)
     
-    # Required fields
-    title = db.Column(db.String(200), nullable=False, index=True)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    user = db.relationship('User', backref=db.backref('blogs', lazy=True))
-
-    def __init__(self, title: str, content: str, user_id: int) -> None:
-        """
-        Initialize a new blog post
-        
-        Args:
-            title (str): The blog post title
-            content (str): The blog post content
-            user_id (int): The ID of the user who created the post
-        """
-        self.title = title
-        self.content = content
-        self.user_id = user_id
-
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert blog post to dictionary representation
-        
-        Returns:
-            Dict[str, Any]: Dictionary containing blog post data
-        """
-        return {
-            'id': self.id,
-            'title': self.title,
-            'content': self.content,
-            'user_id': self.user_id,
-            'created_at': self.created_at.isoformat() if self.created_at else None
-        }
-
-   
-class Comment(db.Model):
-    __tablename__ = 'comment'
-    __table_args__ = {'extend_existing': True}
-
     id = db.Column(db.Integer, primary_key=True)
-    blog_id = db.Column(db.Integer, db.ForeignKey('blog.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    title = db.Column(db.String(100))
     content = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    likes = db.Column(db.Integer, default=0)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert blog post to dictionary representation."""
+        return {
+            'blog_id': self.id,
+            'title': self.title,
+            'content': self.content,
+            'created_at': self.created_at.isoformat(),
+            'created_by': self.user_id
+        }
+
+class Comment(db.Model):
+    """
+    Comment model for storing blog comments.
     
-    # Add relationship to User model
-    author = db.relationship('User', backref='comments')
+    Attributes:
+        id (int): Primary key for the comment
+        content (str): Content of the comment
+        created_at (datetime): Timestamp of comment creation
+        user_id (int): Foreign key reference to user table
+        blog_id (int): Foreign key reference to blog table
+    """
+    __tablename__ = 'comment'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    blog_id = db.Column(db.Integer, db.ForeignKey('blog.id'), nullable=False)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert comment to dictionary representation."""
+        return {
+            'comment_id': self.id,
+            'content': self.content,
+            'created_at': self.created_at.isoformat(),
+            'user_id': self.user_id,
+            'blog_id': self.blog_id
+        }
+class BlogInteraction(db.Model):
+    _tablename_ = 'blog_interaction'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    blog_id = db.Column(db.Integer, db.ForeignKey('blog.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    interaction_type = db.Column(db.String(10), nullable=False)  # 'like' or 'dislike'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    _table_args_ = (
+        db.UniqueConstraint('blog_id', 'user_id', name='unique_blog_interaction'),
+    )
 
 class Like(db.Model):
     __tablename__ = 'like'
@@ -188,7 +209,42 @@ class GroupJoinRequest(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class Workshop(db.Model):
+    __tablename__ = 'workshop'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    banner_url = db.Column(db.String(200), nullable=False)
+    meet_link = db.Column(db.String(200), nullable=False)
+    price = db.Column(db.Float, default=0.0)
+    is_paid = db.Column(db.Boolean, default=False)
+    sponsored = db.Column(db.Boolean, default=False)
+    tag = db.Column(db.String(50), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    creator = db.relationship('User', backref='created_workshops')
+    feedback = db.relationship('Feedback', backref='workshop', lazy='dynamic')
 
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    workshop_id = db.Column(db.Integer, db.ForeignKey('workshop.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    comments = db.Column(db.Text)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 rating scale
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Add unique constraint to ensure one feedback per user per workshop
+    __table_args__ = (
+        db.UniqueConstraint('workshop_id', 'user_id', name='unique_workshop_feedback'),
+        {'extend_existing': True}
+    )
 class ChatRequest(db.Model):
     __tablename__ = 'chat_request'
     __table_args__ = {'extend_existing': True}

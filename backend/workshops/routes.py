@@ -1,40 +1,55 @@
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
 from flask_login import login_required, current_user
-from backend.models import Workshop, User,Feedback
-from backend.app import db
-from workshops.utils import admin_required
-import smtplib
-from email.mime.text import MIMEText
+from models import UserProblem, Workshop, User, Feedback
+from extensions import db
+from .utils import admin_required
+from . import workshops_bp  # Import the blueprint from __init__.py
 
-workshops_bp = Blueprint('workshops', __name__)
+@workshops_bp.route('/list', methods=['GET'])
+@login_required
+def list_workshops():
+    # Get user's problem details from UserProblem model
+    user_problem = UserProblem.query.filter_by(user_id=current_user.id).first()
+    
+    # If no smile reason is set, return all workshops
+    if not user_problem or not user_problem.smile_reason:
+        workshops = Workshop.query.order_by(
+            Workshop.sponsored.desc(),
+            Workshop.id.desc()
+        ).all()
+    else:
+        # Filter workshops by smile reason
+        workshops = Workshop.query.filter_by(tag=user_problem.smile_reason).order_by(
+            Workshop.sponsored.desc(),
+            Workshop.id.desc()
+        ).all()
 
+    workshops_data = []
+    for workshop in workshops:
+        feedback_list = Feedback.query.filter_by(workshop_id=workshop.id).all()
+        avg_rating = sum(f.rating for f in feedback_list) / len(feedback_list) if feedback_list else None
 
-def send_email(to, subject, body):
-    smtp_server = "" 
-    smtp_port = ""#kill with the particular smtp server
-    sender_email = "jupalliprabhas@gmail.com"
-    sender_password = "your_password"
+        creator = User.query.get(workshop.created_by)
+        creator_name = creator.name if creator else "Unknown"
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = to
+        workshops_data.append({
+            'id': workshop.id,
+            'title': workshop.title,
+            'description': workshop.description,
+            'banner_url': workshop.banner_url,
+            'meet_link': workshop.meet_link if not workshop.is_paid else None,
+            'is_paid': workshop.is_paid,
+            'price': workshop.price,
+            'sponsored': workshop.sponsored,
+            'tag': workshop.tag,
+            'created_by': creator_name,
+            'average_rating': avg_rating
+        })
 
-    try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, to, msg.as_string())
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-
-
-workshops_bp = Blueprint('workshops', __name__)
-
+    return jsonify(workshops_data)
 
 @workshops_bp.route('/create', methods=['POST'])
 @login_required
-@admin_required
 def create_workshop():
     data = request.json
     title = data.get('title')
@@ -63,41 +78,7 @@ def create_workshop():
     db.session.commit()
     return jsonify({'message': 'Workshop created successfully', 'workshop_id': new_workshop.id})
 
-
-
-@workshops_bp.route('/list', methods=['GET'])
-@login_required
-def list_workshops():
-    smile_reason = current_user.smile_reason
-    workshops = Workshop.query.filter_by(tag=smile_reason).order_by(
-        Workshop.sponsored.desc(),
-        Workshop.id.desc()
-    ).all()
-
-    workshops_data = []
-    for workshop in workshops:
-        feedback_list = Feedback.query.filter_by(workshop_id=workshop.id).all()
-        avg_rating = sum(f.rating for f in feedback_list) / len(feedback_list) if feedback_list else None
-
-        workshops_data.append({
-            'id': workshop.id,
-            'title': workshop.title,
-            'description': workshop.description,
-            'banner_url': workshop.banner_url,
-            'meet_link': workshop.meet_link if not workshop.is_paid else None,
-            'is_paid': workshop.is_paid,
-            'price': workshop.price,
-            'sponsored': workshop.sponsored,
-            'tag': workshop.tag,
-            'created_by': User.query.get(workshop.created_by).name,
-            'average_rating': avg_rating
-        })
-
-    return jsonify(workshops_data)
-
-
-
-@workshops_bp.route('/promote/<int:workshop_id>', methods=['POST'])
+@workshops_bp.route('/<int:workshop_id>/promote', methods=['POST'])
 @login_required
 @admin_required
 def promote_workshop(workshop_id):
@@ -109,8 +90,7 @@ def promote_workshop(workshop_id):
     db.session.commit()
     return jsonify({'message': 'Workshop promoted successfully'})
 
-
-@workshops_bp.route('/delete/<int:workshop_id>', methods=['DELETE'])
+@workshops_bp.route('/<int:workshop_id>', methods=['DELETE'])
 @login_required
 @admin_required
 def delete_workshop(workshop_id):
@@ -122,44 +102,24 @@ def delete_workshop(workshop_id):
     db.session.commit()
     return jsonify({'message': 'Workshop deleted successfully'})
 
-@workshops_bp.route('/pay/<int:workshop_id>', methods=['POST'])
-@login_required
-def pay_for_workshop(workshop_id):
-    workshop = Workshop.query.get(workshop_id)
-    if not workshop:
-        return jsonify({'error': 'Workshop not found'}), 404
-
-    if not workshop.is_paid:
-        return jsonify({'error': 'This workshop is free'}), 400
-
-   
-    workshop.meet_link = 'https://secure.meetlink.com/' + str(workshop_id)  
-    db.session.commit()
-
-    
-    send_email(
-        recipient=current_user.email,
-        subject=f"Workshop Access: {workshop.title}",
-        body=f"Thank you for paying! Your access link is: {workshop.meet_link}"
-    )
-    return jsonify({'message': 'Payment successful. Meet link sent to your email'})
-
-
-# Route to submit feedback
-@workshops_bp.route('/feedback/<int:workshop_id>', methods=['POST'])
+@workshops_bp.route('/<int:workshop_id>/feedback', methods=['POST'])
 @login_required
 def submit_feedback(workshop_id):
     data = request.json
     comments = data.get('comments')
     rating = data.get('rating')
 
-    if not (rating):
-        return jsonify({'error': ' rating is required'}), 400
+    if not rating:
+        return jsonify({'error': 'Rating is required'}), 400
 
     if not (1 <= rating <= 5):
         return jsonify({'error': 'Rating must be between 1 and 5'}), 400
 
-    existing_feedback = Feedback.query.filter_by(workshop_id=workshop_id, user_id=current_user.id).first()
+    existing_feedback = Feedback.query.filter_by(
+        workshop_id=workshop_id, 
+        user_id=current_user.id
+    ).first()
+    
     if existing_feedback:
         return jsonify({'error': 'You have already submitted feedback for this workshop'}), 400
 
@@ -173,10 +133,8 @@ def submit_feedback(workshop_id):
     db.session.commit()
     return jsonify({'message': 'Feedback submitted successfully'})
 
-
-@workshops_bp.route('/feedback/<int:workshop_id>', methods=['GET'])
+@workshops_bp.route('/<int:workshop_id>/feedback', methods=['GET'])
 @login_required
-@admin_required
 def view_feedback(workshop_id):
     workshop = Workshop.query.get(workshop_id)
     if not workshop:
@@ -188,7 +146,7 @@ def view_feedback(workshop_id):
             'user': User.query.get(feedback.user_id).name,
             'comments': feedback.comments,
             'rating': feedback.rating,
-            'timestamp': feedback.timestamp
+            'timestamp': feedback.timestamp.isoformat()
         }
         for feedback in feedback_list
     ]

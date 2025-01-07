@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './ProfilePage.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NavAfterLogin from './NavAfterLogin';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
+  const navigate=useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -20,6 +21,16 @@ const ProfilePage = () => {
     fetchProfile();
 
   }, []);
+
+  const handleLogout = async () => {
+    try{
+      const response=await axios.post("http://localhost:8000/auth/logout",[],{headers:{"Content-Type" : "application/json"},withCredentials:true});
+      navigate('/')
+    }
+    catch(err){
+      console.log("Error while logging in ",err)
+    }
+  };
 
   if (!profile) {
     return <div className="loading">Loading profile...</div>;
@@ -44,6 +55,7 @@ const ProfilePage = () => {
       <div className="friends-link">
         <Link to="/friends">View Friends</Link>
       </div>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };

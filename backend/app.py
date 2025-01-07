@@ -75,23 +75,26 @@ def create_app():
         from chats.routes import register_routes as register_chat_routes
         from bot.routes import register_routes as register_bot_routes
         from blogs.routes import blogs_bp
-
+        from workshops.routes import workshops_bp
+        from friends.routes import register_profile_routes
+        
         auth_bp = Blueprint('auth', __name__)
         users_bp = Blueprint('users', __name__)
         chats_bp = Blueprint('chats', __name__)
         bot_bp = Blueprint('bot', __name__)
-
+        profile_bp=Blueprint('friends',__name__)
         register_auth_routes(auth_bp, db, bcrypt, login_manager)
         register_user_routes(users_bp, db)
         register_chat_routes(chats_bp, db, socketio)
         register_bot_routes(bot_bp, db)
-
+        register_profile_routes(profile_bp)
         app.register_blueprint(auth_bp, url_prefix='/auth')
         app.register_blueprint(users_bp, url_prefix='/users')
         app.register_blueprint(chats_bp, url_prefix='/chats')
         app.register_blueprint(bot_bp, url_prefix='/bot')
         app.register_blueprint(blogs_bp)
-
+        app.register_blueprint(workshops_bp, url_prefix='/workshops')
+        app.register_blueprint(profile_bp, url_prefix='/profile')
     @app.errorhandler(404)
     def not_found_error(error):
         return jsonify({'error': 'Resource not found'}), 404
@@ -128,7 +131,7 @@ def create_app():
     return app
 
 app = create_app()
-
+print(app.url_map)
 if __name__ == '__main__':
     try:
         socketio.run(app, debug=True, port=8000, host='127.0.0.1', allow_unsafe_werkzeug=True)
