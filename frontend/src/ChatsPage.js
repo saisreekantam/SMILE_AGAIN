@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './ChatsPage.css';
-import ActiveChats from './ActiveChats';
+import Chats from './ActiveChats';
 import ChatRequests from './ChatRequests';
 import GroupChatPage from './GroupChat';
 import NavAfterLogin from './NavAfterLogin';
@@ -37,7 +37,7 @@ const ChatsPage = () => {
       </nav>
 
       <div className="content">
-        {activeSection === 'active' && <ActiveChats />}
+        {activeSection === 'active' && <Chats />}
         {activeSection === 'requests' && <ChatRequests />}
         {activeSection === 'groups' && <GroupChatPage />}
       </div>

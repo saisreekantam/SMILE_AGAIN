@@ -1,54 +1,72 @@
+/* Container Styling */
 .container {
-    background-color: #000;
-    color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
-  }
-  
-  .header {
-    font-size: 24px;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  .list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .list-item {
-    background-color: #333;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-  
-  .user-name {
-    font-size: 18px;
-  }
-  
-  .no-chats {
-    text-align: center;
-    font-style: italic;
-    color: #aaa;
-  }
-  
-  .loading {
-    text-align: center;
-    font-size: 18px;
-    color: #fff;
-  }
-  
-  .error {
-    text-align: center;
-    font-size: 18px;
-    color: red;
-  }
-  
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff; /* White background */
+  color: #000000; /* Black text */
+  font-family: Arial, sans-serif;
+  border: 1px solid #ddd; /* Subtle border for the container */
+  border-radius: 8px;
+}
+
+/* Header Styling */
+.header {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #000000; /* Black text for header */
+}
+
+/* List Styling */
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background-color: #f8f9fa; /* Light gray background */
+  border-radius: 5px;
+  border: 1px solid #ddd; /* Subtle gray border */
+  color: #000000; /* Black text */
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.list-item:hover {
+  transform: scale(1.02); /* Slightly enlarge on hover */
+  background-color: #e0e0e0; /* Darker gray on hover */
+}
+
+.list-item.active {
+  background-color: #ffffff; /* Keep background white for active chats */
+  border-color: #4caf50; /* Green border for active chats */
+}
+
+/* User Name Styling */
+.user-name {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Active Indicator */
+.active-indicator {
+  color: #4caf50; /* Green dot for active indicator */
+  font-size: 18px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+/* Loading and No-Chats Styling */
+.loading,
+.no-chats {
+  text-align: center;
+  font-size: 18px;
+  color: #000000; /* Black text */
+  margin-top: 20px;
+}

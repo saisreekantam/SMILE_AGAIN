@@ -1,41 +1,56 @@
 import React, { useEffect, useState } from 'react';
 import './ActiveChasts.css';
-import axios from 'axios'
+import axios from 'axios';
 
-const ActiveChats = () => {
-  const [activeChats, setActiveChats] = useState([]);
+const Chats = () => {
+  const [Chats, setChats] = useState([]);
+  const [activeUsers, setActiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchActiveChats = async () => {
+    const fetchChatsAndActiveUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/chats/active',{headers: { 'Content-Type' : 'application/json'}});
-        setActiveChats(response.data);
+        // Fetch all chats
+        const chatsResponse = await axios.get('http://localhost:8000/chats/messages', {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        });
+        setChats(chatsResponse.data);
 
+        // Fetch active users
+        const activeUsersResponse = await axios.get('http://localhost:8000/chats/active', {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        });
+        setActiveUsers(activeUsersResponse.data.map((user) => user.id));
       } catch (err) {
-        console.error("Error Loading Active Chats: ",err);
+        console.error('Error loading chats or active users:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchActiveChats();
+    fetchChatsAndActiveUsers();
   }, []);
+
   if (loading) {
     return <div className="loading">Loading active chats...</div>;
   }
 
   return (
     <div className="container">
-      <h2 className="header">Active Chats</h2>
-      {activeChats.length === 0 ? (
-        <div className="no-chats">No active chats available.</div>
+      <h2 className="header">Chats</h2>
+      {Chats.length === 0 ? (
+        <div className="no-chats">No chats available.</div>
       ) : (
         <ul className="list">
-          {activeChats.map((chat) => (
-            <li key={chat.id} className="list-item">
-              <span className="user-name">{chat.name}</span>
+          {Chats.map((chat) => (
+            <li
+              key={chat.id}
+              className={`list-item ${activeUsers.includes(chat.id) ? 'active' : ''}`}
+            >
+              <span className="user-name">{chat.sender}</span>
+              {activeUsers.includes(chat.id) && <span className="active-indicator">●</span>}
             </li>
           ))}
         </ul>
@@ -44,4 +59,4 @@ const ActiveChats = () => {
   );
 };
 
-export default ActiveChats;
+export default Chats;

@@ -1,0 +1,84 @@
+.add-workshop-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #000000;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #000000;
+  }
+  
+  .add-workshop-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  input,
+  textarea {
+    padding: 10px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #000000;
+  }
+  
+  textarea {
+    resize: none;
+    height: 80px;
+  }
+  
+  input[type="checkbox"] {
+    width: auto;
+  }
+  
+  .submit-btn {
+    padding: 10px 20px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .submit-btn:hover {
+    background-color: #444444;
+  }
+  
+  .error-message,
+  .success-message {
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  
+  .error-message {
+    background-color: #ffcccc;
+    color: #cc0000;
+  }
+  
+  .success-message {
+    background-color: #ccffcc;
+    color: #006600;
+  }
+  

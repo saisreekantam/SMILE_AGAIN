@@ -1,0 +1,143 @@
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Header */
+  .header {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #000000;
+  }
+  
+  /* Workshops List */
+  .workshops-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  /* Workshop Card */
+  .workshop-card {
+    flex: 1 1 calc(45% - 20px);
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: #000000;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .workshop-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Sponsored Tag */
+  .sponsored-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #4caf50; /* Green */
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  
+  /* Workshop Title */
+  .workshop-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #000000;
+  }
+  
+  /* Workshop Description */
+  .workshop-description {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333333;
+  }
+  
+  /* Workshop Details */
+  .workshop-details {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  /* Workshop Banner */
+  .workshop-banner {
+    width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  
+  /* Buttons */
+  .workshop-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .view-feedback-btn {
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-feedback-btn:hover {
+    background-color: #333333;
+  }
+  
+  .meet-link {
+    background-color: #000000;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .meet-link:hover {
+    background-color: #333333;
+  }
+  
+  /* Create Workshop Button */
+  .create-workshop-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-workshop-btn:hover {
+    background-color: #333333;
+  }
+  
+  /* Loading and Error Messages */
+  .loading,
+  .error {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 20px;
+    color: #000000;
+  }
+  

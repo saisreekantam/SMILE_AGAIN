@@ -13,6 +13,9 @@ import ChatsPage from './ChatsPage';
 import GroupChatPage from './GroupChat';
 import GroupPage from './GroupPage';
 import AddBlog from './AddBlog';
+import WorkshopsList from './WorkshopsList';
+import AddWorkshop from './AddWorkShop';
+import FeedbacksPage from './WorkshopFeedbacks';
 
 function App() {
   return (
@@ -31,6 +34,9 @@ function App() {
         <Route path='/groups' element={<GroupChatPage />} />
         <Route path='/groups/:groupId' element={<GroupPage />} />
         <Route path='/add-blog' element={<AddBlog />} />
+        <Route path='/workshops' element={<WorkshopsList />} />
+        <Route path='/workshops/create' element={<AddWorkshop />} />
+        <Route path="/workshops/:workshopId/feedback" element={<FeedbacksPage />} />
       </Routes>
     </>
   );

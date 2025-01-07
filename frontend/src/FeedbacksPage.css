@@ -1,0 +1,72 @@
+.feedbacks-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #000000;
+    font-family: Arial, sans-serif;
+  }
+  
+  .header {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .feedback-card {
+    border: 1px solid #000000;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .feedback-user,
+  .feedback-comments,
+  .feedback-rating,
+  .feedback-timestamp {
+    margin: 5px 0;
+  }
+  
+  .no-feedback-message {
+    text-align: center;
+    font-size: 18px;
+    color: #000000;
+  }
+  
+  .add-feedback-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .add-feedback-btn:hover {
+    background-color: #444444;
+  }
+  
+  .loading,
+  .error {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 50px;
+  }
+  
+  .error {
+    color: #cc0000;
+  }
+  
