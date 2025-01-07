@@ -1,3 +1,4 @@
+# bot/__init__.py
 from flask import Blueprint
 from flask_cors import CORS
 
@@ -26,9 +27,4 @@ def create_bot_routes(app, db):
     from .routes import register_routes
     register_routes(bot_bp, db)
     app.register_blueprint(bot_bp, url_prefix='/bot')
-    
-    # Initialize any required bot components
-    from .utils import WebEmpatheticChatbot
-    app.chatbot = WebEmpatheticChatbot(db)
-    
-    return app.chatbot
+    return bot_bp

@@ -1,52 +1,42 @@
+# bot/routes.py
 from flask import request, jsonify, current_app
 from flask_login import login_required, current_user
 from datetime import datetime
 import logging
 from models import Message
 from .utils import WebEmpatheticChatbot
-from typing import Dict, Any
-import asyncio
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
 def register_routes(bp, db):
-    """
-    Register bot routes with the blueprint.
-    
-    Args:
-        bp: Flask blueprint instance
-        db: SQLAlchemy database instance
-    """
-    
-    @bp.route('/chat', methods=['POST'])
+    # Initialize chatbot instance
+    chatbot = WebEmpatheticChatbot(db)
+
+    @bp.route('/chat', methods=['POST', 'OPTIONS'])
     @login_required
-    async def chat():
+    def chat():
         """
-        Handle chat interactions with emotion detection and Llama 3 responses.
-        
-        Returns:
-            JSON response containing bot message and metadata
+        Handle chat interactions with emotion detection and response generation.
         """
+        # Handle preflight OPTIONS request
+        if request.method == 'OPTIONS':
+            response = current_app.make_default_options_response()
+            return response
+
         try:
             # Validate request
             data = request.get_json()
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+                
             user_message = data.get('message')
-            
             if not user_message:
                 return jsonify({'error': 'Message is required'}), 400
 
             logger.debug(f"Received message from user {current_user.id}: {user_message}")
             
-            # Get bot instance
-            chatbot = current_app.chatbot
-            
-            # Process message and get response
-            response_data = await chatbot.generate_response(
-                user_message, 
-                current_user.id
-            )
-            
+            # Generate response using chatbot instance
+            response_data = chatbot.generate_response(user_message, current_user.id)
             return jsonify(response_data)
 
         except Exception as e:
@@ -62,12 +52,6 @@ def register_routes(bp, db):
     @bp.route('/chat/history', methods=['GET'])
     @login_required
     def get_chat_history():
-        """
-        Get user's chat history with emotional context.
-        
-        Returns:
-            JSON response containing chat history with metadata
-        """
         try:
             # Get messages with pagination
             page = request.args.get('page', 1, type=int)
@@ -92,11 +76,6 @@ def register_routes(bp, db):
                     'type': 'user' if msg.sender_id == current_user.id else 'bot',
                     'timestamp': msg.timestamp.isoformat()
                 }
-                
-                # Include emotional metadata if available
-                if msg.metadata:
-                    message_data['metadata'] = msg.metadata
-                
                 chat_history.append(message_data)
 
             return jsonify({
@@ -111,4 +90,4 @@ def register_routes(bp, db):
 
         except Exception as e:
             logger.error(f"Error getting chat history: {str(e)}")
-            return jsonify({'error': 'Failed to retrieve chat history
+            return jsonify({'error': 'Failed to retrieve chat history'}), 500

@@ -7,76 +7,119 @@ import NavAfterLogin from './NavAfterLogin';
 import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
 import './ChatBotPage.css';
 
-// Configure axios defaults
-// axios.defaults.withCredentials = true;
-// axios.defaults.baseURL = 'http://localhost:8000';
+// Configure axios defaults for all requests
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:8000';
 
+/**
+ * ChatBotPage Component
+ * Provides an interface for users to interact with the AI chatbot
+ * Features include real-time chat, message history, and stress detection
+ */
 const ChatBotPage = () => {
+  // State management
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Refs for DOM manipulation
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Navigation and authentication
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if not logged in
+  // Effect to redirect if not logged in
   // useEffect(() => {
   //   if (!isLoggedIn) {
   //     navigate('/login');
   //   }
   // }, [isLoggedIn, navigate]);
 
-  // Scroll to bottom when messages update
+  // Effect to scroll to bottom when messages update
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Focus input on mount
+  // Effect to focus input on mount
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
+  /**
+   * Formats timestamp for message display
+   * @param {Date} timestamp - Message timestamp
+   * @returns {string} Formatted time string
+   */
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  /**
+   * Handles sending messages to the chatbot
+   * Includes error handling and loading states
+   */
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     setIsLoading(true);
     setError(null);
 
-    // Add user message immediately
-    const userMessage = { sender: 'user', text: input, timestamp: new Date() };
+    // Add user message immediately for better UX
+    const userMessage = { 
+      sender: 'user', 
+      text: input.trim(), 
+      timestamp: new Date() 
+    };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
 
     try {
-      const response = await axios.post("http://localhost:8000/smilebot/chat", {
-        message: input
+      // Send message to backend
+      const response = await axios.post('/bot/chat', {
+        message: userMessage.text
       }, {
         headers: {
           'Content-Type': 'application/json'
-        },
-        withCredentials:true,
+        }
       });
 
       if (response.data.error) {
         throw new Error(response.data.error);
       }
 
-      // Add bot response
+      // Add bot response to chat
       const botMessage = {
         sender: 'bot',
         text: response.data.message.content,
-        timestamp: new Date()
+        timestamp: new Date(),
+        metadata: response.data.metadata // Include any additional metadata
       };
       setMessages(prev => [...prev, botMessage]);
 
+      // Handle counselor referral if needed
+      if (botMessage.metadata?.counselor_referral) {
+        handleCounselorReferral();
+      }
+
     } catch (err) {
       console.error('Error sending message:', err);
+      
+      // Handle different types of errors
+      if (err.response?.status === 401) {
+        navigate('/login');
+        return;
+      }
+
       setError('Failed to send message. Please try again.');
       setMessages(prev => [...prev, {
         sender: 'bot',
@@ -89,6 +132,10 @@ const ChatBotPage = () => {
     }
   };
 
+  /**
+   * Handles keypress events for message input
+   * @param {KeyboardEvent} e - Keyboard event
+   */
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -96,11 +143,18 @@ const ChatBotPage = () => {
     }
   };
 
-  const formatTimestamp = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  /**
+   * Handles counselor referral process
+   * Triggered when stress levels are high
+   */
+  const handleCounselorReferral = () => {
+    // Implementation for counselor referral
+    setMessages(prev => [...prev, {
+      sender: 'bot',
+      text: 'I notice you might be feeling overwhelmed. Would you like to connect with a professional counselor?',
+      timestamp: new Date(),
+      isReferral: true
+    }]);
   };
 
   return (
@@ -130,7 +184,7 @@ const ChatBotPage = () => {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`message ${message.sender}-message ${message.isError ? 'error-message' : ''}`}
+              className={`message ${message.sender}-message ${message.isError ? 'error-message' : ''} ${message.isReferral ? 'referral-message' : ''}`}
             >
               <div className="message-content">
                 {message.text}
@@ -156,7 +210,7 @@ const ChatBotPage = () => {
         {error && (
           <div className="error-banner">
             {error}
-            <button onClick={() => setError(null)}>✕</button>
+            <button onClick={() => setError(null)} className="error-close">✕</button>
           </div>
         )}
 
@@ -176,6 +230,7 @@ const ChatBotPage = () => {
             onClick={handleSendMessage}
             disabled={isLoading || !input.trim()}
             className="send-button"
+            aria-label="Send message"
           >
             {isLoading ? <FaSpinner className="spinner" /> : <FaPaperPlane />}
           </button>
