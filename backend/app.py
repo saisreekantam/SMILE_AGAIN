@@ -79,6 +79,8 @@ def create_app():
         from workshops.routes import workshops_bp
         from friends.routes import register_profile_routes
         from community import create_community_routes
+        from activity.routes import register_routes as register_activity_routes
+        from activity import create_activity_routes
         auth_bp = Blueprint('auth', __name__)
         users_bp = Blueprint('users', __name__)
         chats_bp = Blueprint('chats', __name__)

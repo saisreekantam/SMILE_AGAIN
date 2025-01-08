@@ -1,252 +1,185 @@
 from flask import request, jsonify
 from flask_login import login_required, current_user
-from models import Group, group_members, User, ChatRequest, Message
+from models import User, Message, Friendship
 import nltk
+from datetime import datetime
+from sqlalchemy import or_, and_
+import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Download required NLTK data
 nltk.download('stopwords')
 nltk.download('punkt')
 
 def contains_hate_speech(text):
+    """
+    Check if text contains hate speech using NLTK
+    
+    Args:
+        text (str): Message text to check
+        
+    Returns:
+        bool: True if hate speech detected, False otherwise
+    """
     hate_words = ["hate", "kill", "abuse"]  
     tokens = nltk.word_tokenize(text.lower())
     return any(word in hate_words for word in tokens)
 
 def register_routes(bp, db, socketio):
-    """Register routes with the chats blueprint"""
-
-    @bp.route('/active', methods=['GET'])
-    @login_required
-    def active_users():
-        active_users = User.query.filter(User.is_online == True).all()
-        active_list = [{'id': user.id, 'name': user.name} for user in active_users]
-        return jsonify(active_list)
-
-    @bp.route('/groups', methods=['GET', 'POST'])
-    @login_required
-    def groups():
-        if request.method == 'GET':
-            user_groups = Group.query.join(group_members).filter(
-                group_members.c.user_id == current_user.id
-            ).all()
-            group_list = [{
-                'id': group.id,
-                'name': group.name,
-                'created_by': group.created_by
-            } for group in user_groups]
-            return jsonify(group_list)
-
-        data = request.json
-        new_group = Group(name=data['name'], created_by=current_user.id)
-        db.session.add(new_group)
-        db.session.commit()
-        
-        db.session.execute(
-            group_members.insert().values(
-                group_id=new_group.id,
-                user_id=current_user.id
+    """
+    Register chat routes with the blueprint
+    
+    Args:
+        bp: Flask blueprint instance
+        db: SQLAlchemy database instance
+        socketio: Socket.IO instance for real-time communication
+    """
+    
+    def is_friend(user_id, friend_id):
+        """Verify friendship status between two users"""
+        friendship = Friendship.query.filter(
+            or_(
+                and_(Friendship.user_id == user_id, 
+                     Friendship.friend_id == friend_id,
+                     Friendship.status == 'accepted'),
+                and_(Friendship.user_id == friend_id,
+                     Friendship.friend_id == user_id,
+                     Friendship.status == 'accepted')
             )
-        )
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Group created successfully',
-            'group_id': new_group.id
-        })
+        ).first()
+        return bool(friendship)
 
-    @bp.route('/groups/<int:group_id>/add', methods=['POST'])
+    @bp.route('/friends/chat/<int:friend_id>', methods=['GET'])
     @login_required
-    def add_to_group(group_id):
-        data = request.json
-        friend_id = data.get('friend_id')
-        friend = User.query.get(friend_id)
-        group = Group.query.get(group_id)
+    def get_chat_history(friend_id):
+        """Get chat history with a specific friend"""
+        try:
+            if not is_friend(current_user.id, friend_id):
+                return jsonify({'error': 'Can only view messages from friends'}), 403
 
-        if not group or group.created_by != current_user.id:
-            return jsonify({
-                'error': 'Unauthorized or group not found'
-            }), 403
-
-        if friend_id and friend in current_user.friends:
-            db.session.execute(
-                group_members.insert().values(
-                    group_id=group_id,
-                    user_id=friend_id
+            # Get messages between current user and friend
+            messages = Message.query.filter(
+                or_(
+                    and_(Message.sender_id == current_user.id,
+                         Message.receiver_id == friend_id),
+                    and_(Message.sender_id == friend_id,
+                         Message.receiver_id == current_user.id)
                 )
-            )
+            ).order_by(Message.timestamp.asc()).all()
+
+            # Mark unread messages as read
+            unread_messages = [msg for msg in messages 
+                             if msg.receiver_id == current_user.id and not msg.is_read]
+            for msg in unread_messages:
+                msg.is_read = True
             db.session.commit()
+
+            return jsonify([{
+                'id': msg.id,
+                'sender_id': msg.sender_id,
+                'sender_name': User.query.get(msg.sender_id).name,
+                'content': msg.content,
+                'timestamp': msg.timestamp.isoformat(),
+                'is_read': msg.is_read
+            } for msg in messages])
+
+        except Exception as e:
+            logger.error(f"Error getting chat history: {str(e)}")
+            return jsonify({'error': 'Failed to retrieve chat history'}), 500
+
+    @bp.route('/friends/send/<int:friend_id>', methods=['POST'])
+    @login_required
+    def send_message(friend_id):
+        """Send a message to a friend"""
+        try:
+            if not is_friend(current_user.id, friend_id):
+                return jsonify({'error': 'Can only send messages to friends'}), 403
+
+            data = request.json
+            if not data or 'message' not in data:
+                return jsonify({'error': 'Message content is required'}), 400
+
+            message_text = data['message']
             
-            # Notify the group creator about the new member
+            # Check for inappropriate content
+            if contains_hate_speech(message_text):
+                return jsonify({'error': 'Message contains inappropriate content'}), 403
+
+            # Create and save message
+            message = Message(
+                sender_id=current_user.id,
+                receiver_id=friend_id,
+                content=message_text,
+                timestamp=datetime.utcnow(),
+                is_read=False
+            )
+            db.session.add(message)
+            db.session.commit()
+
+            # Emit real-time notification
             socketio.emit(
-                'group_notification',
+                'new_message',
                 {
-                    'message': f'{friend.name} has joined the group {group.name}',
-                    'group_id': group_id
+                    'message_id': message.id,
+                    'sender_id': current_user.id,
+                    'sender_name': current_user.name,
+                    'content': message_text,
+                    'timestamp': message.timestamp.isoformat()
                 },
-                to=group.created_by
+                room=str(friend_id)
             )
-            
-            return jsonify({'message': f'{friend.name} added to the group'})
-            
-        return jsonify({'error': 'Friend not found or not authorized'}), 404
 
-    @bp.route('/groups/<int:group_id>/request', methods=['POST'])
-    @login_required
-    def request_to_join(group_id):
-        group = Group.query.get(group_id)
-
-        if not group:
-            return jsonify({'error': 'Group not found'}), 404
-
-        socketio.emit(
-            'group_notification',
-            {
-                'message': f'{current_user.name} has requested to join the group {group.name}',
-                'group_id': group_id
-            },
-            to=group.created_by
-        )
-
-        return jsonify({'message': 'Request to join sent to the group creator'})
-
-    @bp.route('/groups/<int:group_id>/leave', methods=['POST'])
-    @login_required
-    def leave_group(group_id):
-        group = Group.query.get(group_id)
-
-        if not group:
-            return jsonify({'error': 'Group not found'}), 404
-
-        if current_user.id in [member.id for member in group.members]:
-            db.session.execute(
-                group_members.delete().where(
-                    (group_members.c.group_id == group_id) & 
-                    (group_members.c.user_id == current_user.id)
-                )
-            )
-            db.session.commit()
-            return jsonify({'message': 'You have left the group'})
-            
-        return jsonify({'error': 'You are not a member of this group'}), 403
-
-    @bp.route('/groups/<int:group_id>/remove', methods=['POST'])
-    @login_required
-    def remove_from_group(group_id):
-        data = request.json
-        user_id = data.get('user_id')
-        user = User.query.get(user_id)
-        group = Group.query.get(group_id)
-
-        if not group or group.created_by != current_user.id:
-            return jsonify({'error': 'Unauthorized or group not found'}), 403
-
-        if user and user in group.members:
-            db.session.execute(
-                group_members.delete().where(
-                    (group_members.c.group_id == group_id) & 
-                    (group_members.c.user_id == user_id)
-                )
-            )
-            db.session.commit()
-            return jsonify({'message': f'{user.name} removed from the group'})
-            
-        return jsonify({'error': 'User not found or not a member of the group'}), 404
-
-    @bp.route('/chat-request', methods=['POST'])
-    @login_required
-    def send_chat_request():
-        data = request.json
-        recipient_id = data.get('recipient_id')
-        message_text = data.get('message')
-
-        if not recipient_id or not message_text:
-            return jsonify({'error': 'Recipient or message missing'}), 400
-
-        recipient = User.query.get(recipient_id)
-        if not recipient:
-            return jsonify({'error': 'Recipient not found'}), 404
-
-        # Check for hate language
-        if contains_hate_speech(message_text):
-            return jsonify({'error': 'Message contains inappropriate content'}), 403
-
-        # Save chat request
-        chat_request = ChatRequest(
-            sender_id=current_user.id,
-            recipient_id=recipient_id,
-            message=message_text
-        )
-        db.session.add(chat_request)
-        db.session.commit()
-
-        return jsonify({'message': 'Chat request sent successfully'})
-
-    @bp.route('/chat-request/<int:request_id>/accept', methods=['POST'])
-    @login_required
-    def accept_chat_request(request_id):
-        chat_request = ChatRequest.query.get(request_id)
-
-        if not chat_request or chat_request.recipient_id != current_user.id:
-            return jsonify({'error': 'Chat request not found or unauthorized'}), 403
-
-        # Add as friends
-        sender = User.query.get(chat_request.sender_id)
-        current_user.friends.append(sender)
-        db.session.commit()
-
-        return jsonify({'message': f'{sender.name} is now your friend'})
-
-    @bp.route('/chat-request/<int:request_id>/reject', methods=['POST'])
-    @login_required
-    def reject_chat_request(request_id):
-        chat_request = ChatRequest.query.get(request_id)
-
-        if not chat_request or chat_request.recipient_id != current_user.id:
-            return jsonify({'error': 'Chat request not found or unauthorized'}), 403
-
-        db.session.delete(chat_request)
-        db.session.commit()
-
-        return jsonify({'message': 'Chat request rejected'})
-
-    @bp.route('/messages', methods=['POST'])
-    @login_required
-    def send_message():
-        data = request.json
-        recipient_id = data.get('recipient_id')
-        message_text = data.get('message')
-
-        if not recipient_id or not message_text:
-            return jsonify({'error': 'Recipient or message missing'}), 400
-
-        recipient = User.query.get(recipient_id)
-        if not recipient:
-            return jsonify({'error': 'Recipient not found'}), 404
-
-        if contains_hate_speech(message_text):
-            return jsonify({'error': 'Message contains inappropriate content'}), 403
-
-        message = Message(
-            sender_id=current_user.id,
-            recipient_id=recipient_id,
-            content=message_text
-        )
-        db.session.add(message)
-        db.session.commit()
-
-        return jsonify({'message': 'Message sent successfully'})
-
-    @bp.route('/messages', methods=['GET'])
-    @login_required
-    def get_messages():
-        messages = Message.query.filter_by(recipient_id=current_user.id).all()
-        message_list = []
-
-        for message in messages:
-            message_list.append({
-                'id': message.id,
-                'sender': User.query.get(message.sender_id).name,
-                'content': message.content,
-                'timestamp': message.timestamp
+            return jsonify({
+                'message': 'Message sent successfully',
+                'message_id': message.id
             })
 
-        return jsonify(message_list)
+        except Exception as e:
+            logger.error(f"Error sending message: {str(e)}")
+            db.session.rollback()
+            return jsonify({'error': 'Failed to send message'}), 500
+
+    @bp.route('/friends/unread', methods=['GET'])
+    @login_required
+    def get_unread_counts():
+        """Get count of unread messages from each friend"""
+        try:
+            # Get counts of unread messages grouped by sender
+            unread_counts = db.session.query(
+                Message.sender_id,
+                db.func.count(Message.id).label('count')
+            ).filter(
+                Message.receiver_id == current_user.id,
+                Message.is_read == False
+            ).group_by(Message.sender_id).all()
+
+            return jsonify([{
+                'friend_id': sender_id,
+                'friend_name': User.query.get(sender_id).name,
+                'unread_count': count
+            } for sender_id, count in unread_counts if is_friend(current_user.id, sender_id)])
+
+        except Exception as e:
+            logger.error(f"Error getting unread counts: {str(e)}")
+            return jsonify({'error': 'Failed to get unread message counts'}), 500
+
+    # Socket.IO event handlers
+    @socketio.on('connect')
+    def handle_connect():
+        """Handle new WebSocket connection"""
+        if current_user.is_authenticated:
+            # Join a room named after the user's ID for private messages
+            socketio.emit('user_connected', {'user_id': current_user.id})
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        """Handle WebSocket disconnection"""
+        if current_user.is_authenticated:
+            socketio.emit('user_disconnected', {'user_id': current_user.id})
+
+    # Initialize Socket.IO for message events
+    socketio.on_event('join', lambda: socketio.emit('joined', room=str(current_user.id)))
+    socketio.on_event('leave', lambda: socketio.emit('left', room=str(current_user.id)))

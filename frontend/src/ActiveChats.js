@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import './ActiveChasts.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Chats = () => {
   const [Chats, setChats] = useState([]);
   const [activeUsers, setActiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate=useNavigate();
 
   useEffect(() => {
     const fetchChatsAndActiveUsers = async () => {
@@ -48,6 +50,8 @@ const Chats = () => {
             <li
               key={chat.id}
               className={`list-item ${activeUsers.includes(chat.id) ? 'active' : ''}`}
+              onClick={() => navigate(`/friends/${chat.id}`)}
+              style={{cursor:'pointer'}}
             >
               <span className="user-name">{chat.sender}</span>
               {activeUsers.includes(chat.id) && <span className="active-indicator">●</span>}

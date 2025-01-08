@@ -6,6 +6,8 @@ import GroupChatPage from './GroupChat';
 import NavAfterLogin from './NavAfterLogin';
 import { useAuth } from './contexts/AuthContext';
 import CommunityPage from './CommunitiesPage';
+import FriendRequestsPage from './NotificationsPage';
+import ViewFriends from './FriendsPage';
 
 const ChatsPage = () => {
   const [activeSection, setActiveSection] = useState('active');
@@ -38,8 +40,8 @@ const ChatsPage = () => {
       </nav>
 
       <div className="content">
-        {activeSection === 'active' && <Chats />}
-        {activeSection === 'requests' && <ChatRequests />}
+        {activeSection === 'active' && <ViewFriends />}
+        {activeSection === 'requests' && <FriendRequestsPage />}
         {activeSection === 'groups' && <CommunityPage />}
       </div>
     </div>

@@ -359,35 +359,63 @@ class CommunityComment(db.Model):
     author = db.relationship('User', backref='community_comments')
     post = db.relationship('CommunityPost', backref='comments')
 class Activity(db.Model):
+    """Model for predefined activities"""
     __tablename__ = 'activity'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50), nullable=False)  # meditation, breathing, journaling, etc.
-    duration = db.Column(db.Integer)  # duration in minutes
-    difficulty_level = db.Column(db.String(20))  # beginner, intermediate, advanced
-    instructions = db.Column(db.Text)
-    benefits = db.Column(db.Text)
+    category = db.Column(db.String(50), nullable=False)  # e.g., 'meditation', 'exercise', 'creative'
+    mood_tags = db.Column(db.String(200))  # Comma-separated tags matching smile reasons
+    duration_minutes = db.Column(db.Integer)
+    difficulty_level = db.Column(db.String(20))  # 'easy', 'medium', 'hard'
+    resources_needed = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class UserActivity(db.Model):
+    """Model for tracking user activity participation"""
     __tablename__ = 'user_activity'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     activity_id = db.Column(db.Integer, db.ForeignKey('activity.id'), nullable=False)
-    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+    mood_before = db.Column(db.Integer)  # Scale of 1-10
+    mood_after = db.Column(db.Integer)  # Scale of 1-10
     feedback = db.Column(db.Text)
-    rating = db.Column(db.Integer)  # 1-5 rating
-    mood_before = db.Column(db.Integer)  # 1-5 scale
-    mood_after = db.Column(db.Integer)  # 1-5 scale
+    effectiveness_rating = db.Column(db.Integer)  # Scale of 1-5
+
+class ActivityStreak(db.Model):
+    """Model for tracking user activity streaks"""
+    __tablename__ = 'activity_streak'
+    __table_args__ = {'extend_existing': True}
     
-    # Relationships
-    activity = db.relationship('Activity', backref='user_activities')
-    user = db.relationship('User', backref='activity_completions')
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    current_streak = db.Column(db.Integer, default=0)
+    longest_streak = db.Column(db.Integer, default=0)
+    last_activity_date = db.Column(db.DateTime)
+    total_activities_completed = db.Column(db.Integer, default=0)
+    
+    def update_streak(self, activity_date):
+        """Update streak based on new activity completion"""
+        if not self.last_activity_date:
+            self.current_streak = 1
+        else:
+            days_diff = (activity_date - self.last_activity_date).days
+            if days_diff <= 1:  # Maintain or increment streak
+                self.current_streak += 1
+            else:  # Reset streak
+                self.current_streak = 1
+                
+        if self.current_streak > self.longest_streak:
+            self.longest_streak = self.current_streak
+            
+        self.last_activity_date = activity_date
+        self.total_activities_completed += 1
 class MoodEntry(db.Model):
     __tablename__ = 'mood_entry'
     __table_args__ = {'extend_existing': True}

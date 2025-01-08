@@ -20,6 +20,7 @@ import UserProfileView from './AuthorProfilePage';
 import FriendRequestsPage from './NotificationsPage';
 import PostPage from './PostsPage';
 import MoodTrackerPage from './MoodDescription';
+import ChatPage from './FriendChatPage';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path='/notifications' element={<FriendRequestsPage />} />
         <Route path='/community/:postId' element={<PostPage />} />
         <Route path='/mood_entry' element={<MoodTrackerPage />} />
+        <Route path='/friends/:friendId' element={<ChatPage />} />
       </Routes>
     </>
   );

@@ -23,7 +23,6 @@ const ViewFriends = () => {
 
   return (
     <div className="view-friends-page">
-      <NavAfterLogin />
       <h2>Your Friends</h2>
       <div className="friend-list">
         {friends.length === 0 ? (
@@ -31,7 +30,7 @@ const ViewFriends = () => {
         ) : (
           friends.map((friend) => (
             <Link
-              to={`/messages/${friend.id}`} 
+              to={`/friends/${friend.id}`} 
               key={friend.id}
               className="friend-item"
             >
