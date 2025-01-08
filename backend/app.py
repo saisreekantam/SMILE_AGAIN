@@ -5,6 +5,7 @@ from typing import Optional
 from flask import Flask, request, jsonify, Blueprint, make_response, send_from_directory
 from flask_cors import CORS
 from flask_login import LoginManager
+from mood import create_mood_routes
 from models import init_auth,User
 from extensions import db, bcrypt, socketio, login_manager
 from datetime import timedelta
@@ -77,12 +78,14 @@ def create_app():
         from blogs.routes import blogs_bp
         from workshops.routes import workshops_bp
         from friends.routes import register_profile_routes
-        
+        from community import create_community_routes
         auth_bp = Blueprint('auth', __name__)
         users_bp = Blueprint('users', __name__)
         chats_bp = Blueprint('chats', __name__)
         bot_bp = Blueprint('bot', __name__)
         profile_bp=Blueprint('friends',__name__)
+        create_mood_routes(app, db)
+        create_community_routes(app, db)
         register_auth_routes(auth_bp, db, bcrypt, login_manager)
         register_user_routes(users_bp, db)
         register_chat_routes(chats_bp, db, socketio)

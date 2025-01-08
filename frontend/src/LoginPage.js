@@ -45,7 +45,7 @@ function LoginPage() {
         if (isLoggedIn) {
             console.log("Navigating to /problem_page...");
             console.log(isLoggedIn);
-            navigate("/problem_page");
+            navigate("/mood_entry");
         }
     }, [isLoggedIn, navigate]);
 

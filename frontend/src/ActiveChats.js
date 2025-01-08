@@ -15,7 +15,7 @@ const Chats = () => {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         });
-        setChats(chatsResponse.data);
+        setChats(chatsResponse.data || []);
 
         // Fetch active users
         const activeUsersResponse = await axios.get('http://localhost:8000/chats/active', {

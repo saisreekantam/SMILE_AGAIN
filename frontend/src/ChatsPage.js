@@ -5,6 +5,7 @@ import ChatRequests from './ChatRequests';
 import GroupChatPage from './GroupChat';
 import NavAfterLogin from './NavAfterLogin';
 import { useAuth } from './contexts/AuthContext';
+import CommunityPage from './CommunitiesPage';
 
 const ChatsPage = () => {
   const [activeSection, setActiveSection] = useState('active');
@@ -32,14 +33,14 @@ const ChatsPage = () => {
           className={`nav-button ${activeSection === 'groups' ? 'active' : ''}`}
           onClick={() => setActiveSection('groups')}
         >
-        Groups
+        Communities
         </button>
       </nav>
 
       <div className="content">
         {activeSection === 'active' && <Chats />}
         {activeSection === 'requests' && <ChatRequests />}
-        {activeSection === 'groups' && <GroupChatPage />}
+        {activeSection === 'groups' && <CommunityPage />}
       </div>
     </div>
   );

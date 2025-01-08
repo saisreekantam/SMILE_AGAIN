@@ -18,6 +18,8 @@ import AddWorkshop from './AddWorkShop';
 import FeedbacksPage from './WorkshopFeedbacks';
 import UserProfileView from './AuthorProfilePage';
 import FriendRequestsPage from './NotificationsPage';
+import PostPage from './PostsPage';
+import MoodTrackerPage from './MoodDescription';
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
         <Route path="/workshops/:workshopId/feedback" element={<FeedbacksPage />} />
         <Route path='/user/:userId' element={<UserProfileView />} />
         <Route path='/notifications' element={<FriendRequestsPage />} />
+        <Route path='/community/:postId' element={<PostPage />} />
+        <Route path='/mood_entry' element={<MoodTrackerPage />} />
       </Routes>
     </>
   );

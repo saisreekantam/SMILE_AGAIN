@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './FriendsPage.css';
+import NavAfterLogin from './NavAfterLogin';
 
 const ViewFriends = () => {
   const [friends, setFriends] = useState([]);
@@ -22,6 +23,7 @@ const ViewFriends = () => {
 
   return (
     <div className="view-friends-page">
+      <NavAfterLogin />
       <h2>Your Friends</h2>
       <div className="friend-list">
         {friends.length === 0 ? (

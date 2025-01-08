@@ -43,11 +43,27 @@ def register_routes(bp, db):
     @bp.route('/friends', methods=['GET'])
     @login_required
     def friends():
-        friends = Friendship.query.filter_by(user_id=current_user.id, status='accepted').all()
-        friend_list = [
-            {'id': friend.friend_id, 'name': User.query.get(friend.friend_id).name}
-            for friend in friends
-        ]
+    # Get friendships where user is either the requester or receiver
+        friends = Friendship.query.filter(
+        db.or_(
+            db.and_(Friendship.user_id == current_user.id, Friendship.status == 'accepted'),
+            db.and_(Friendship.friend_id == current_user.id, Friendship.status == 'accepted')
+        )
+    ).all()
+    
+        friend_list = []
+        for friendship in friends:
+        # If current user is the requester, add the friend
+            if friendship.user_id == current_user.id:
+                friend = User.query.get(friendship.friend_id)
+                if friend:
+                    friend_list.append({'id': friend.id, 'name': friend.name})
+        # If current user is the receiver, add the requester
+            else:
+                friend = User.query.get(friendship.user_id)
+                if friend:
+                    friend_list.append({'id': friend.id, 'name': friend.name})
+    
         return jsonify(friend_list)
 
     @bp.route('/friend/<int:friend_id>', methods=['POST'])

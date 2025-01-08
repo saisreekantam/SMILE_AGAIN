@@ -309,6 +309,107 @@ class Feedback(db.Model):
         db.UniqueConstraint('workshop_id', 'user_id', name='unique_workshop_feedback'),
         {'extend_existing': True}
     )
+from datetime import datetime
+from extensions import db
+
+class Community(db.Model):
+    __tablename__ = 'community'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    smile_reason = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    members = db.relationship('User', secondary='community_members', backref='communities')
+
+# Association table for community members
+community_members = db.Table('community_members',
+    db.Column('community_id', db.Integer, db.ForeignKey('community.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('joined_at', db.DateTime, default=datetime.utcnow),
+    extend_existing=True
+)
+
+class CommunityPost(db.Model):
+    __tablename__ = 'community_post'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    community_id = db.Column(db.Integer, db.ForeignKey('community.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    likes = db.Column(db.Integer, default=0)
+    
+    # Relationship to get user information
+    author = db.relationship('User', backref='community_posts')
+    
+class CommunityComment(db.Model):
+    __tablename__ = 'community_comment'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('community_post.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    author = db.relationship('User', backref='community_comments')
+    post = db.relationship('CommunityPost', backref='comments')
+class Activity(db.Model):
+    __tablename__ = 'activity'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # meditation, breathing, journaling, etc.
+    duration = db.Column(db.Integer)  # duration in minutes
+    difficulty_level = db.Column(db.String(20))  # beginner, intermediate, advanced
+    instructions = db.Column(db.Text)
+    benefits = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class UserActivity(db.Model):
+    __tablename__ = 'user_activity'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    activity_id = db.Column(db.Integer, db.ForeignKey('activity.id'), nullable=False)
+    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    feedback = db.Column(db.Text)
+    rating = db.Column(db.Integer)  # 1-5 rating
+    mood_before = db.Column(db.Integer)  # 1-5 scale
+    mood_after = db.Column(db.Integer)  # 1-5 scale
+    
+    # Relationships
+    activity = db.relationship('Activity', backref='user_activities')
+    user = db.relationship('User', backref='activity_completions')
+class MoodEntry(db.Model):
+    __tablename__ = 'mood_entry'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mood_level = db.Column(db.Integer, nullable=False)  # 1-5 scale
+    emotions = db.Column(db.JSON)  # Store selected emotion tags
+    notes = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Add relationship to User model
+    user = db.relationship('User', backref=db.backref('mood_entries', lazy=True))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'mood_level': self.mood_level,
+            'emotions': self.emotions,
+            'notes': self.notes,
+            'timestamp': self.timestamp.isoformat(),
+        }
 class ChatRequest(db.Model):
     __tablename__ = 'chat_request'
     __table_args__ = {'extend_existing': True}
