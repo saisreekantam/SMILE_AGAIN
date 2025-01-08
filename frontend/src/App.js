@@ -17,6 +17,7 @@ import WorkshopsList from './WorkshopsList';
 import AddWorkshop from './AddWorkShop';
 import FeedbacksPage from './WorkshopFeedbacks';
 import UserProfileView from './AuthorProfilePage';
+import FriendRequestsPage from './NotificationsPage';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path='/workshops/create' element={<AddWorkshop />} />
         <Route path="/workshops/:workshopId/feedback" element={<FeedbacksPage />} />
         <Route path='/user/:userId' element={<UserProfileView />} />
+        <Route path='/notifications' element={<FriendRequestsPage />} />
       </Routes>
     </>
   );

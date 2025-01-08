@@ -39,6 +39,14 @@ const ProfilePage = () => {
   return (
     <div className="profile-page">
       <NavAfterLogin />
+      <div className="profile-header">
+        <button
+          className="notifications-button"
+          onClick={() => navigate('/notifications')}
+        >
+          Notifications
+        </button>
+      </div>
       <div className="profile-container">
         <img
           src={profile.profilePic}

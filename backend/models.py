@@ -121,6 +121,70 @@ class Blog(db.Model):
             'created_by': self.user_id
         }
 
+# In backend_models.py or wherever your models are defined
+
+class Notification(db.Model):
+    """
+    Model for storing user notifications including friend requests.
+    Each notification represents an event that needs user attention.
+    """
+    __tablename__ = 'notification'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    type = db.Column(db.String(50), nullable=False)  # e.g., 'friend_request', 'message', etc.
+    content = db.Column(db.Text, nullable=True)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    related_id = db.Column(db.Integer, nullable=True)  # For storing related entity IDs (e.g., friendship_id)
+
+    # Relationships
+    recipient = db.relationship(
+        'User',
+        foreign_keys=[recipient_id],
+        backref=db.backref('received_notifications', lazy='dynamic')
+    )
+    
+    sender = db.relationship(
+        'User',
+        foreign_keys=[sender_id],
+        backref=db.backref('sent_notifications', lazy='dynamic')
+    )
+
+    def to_dict(self):
+        """Convert notification to dictionary format"""
+        return {
+            'id': self.id,
+            'type': self.type,
+            'content': self.content,
+            'is_read': self.is_read,
+            'created_at': self.created_at.isoformat(),
+            'sender': {
+                'id': self.sender_id,
+                'name': User.query.get(self.sender_id).name
+            } if self.sender_id else None,
+            'related_id': self.related_id
+        }
+
+    @staticmethod
+    def create_friend_request_notification(friendship):
+        """
+        Create a notification for a new friend request.
+        
+        Args:
+            friendship (Friendship): The friendship request instance
+        """
+        notification = Notification(
+            recipient_id=friendship.friend_id,
+            sender_id=friendship.user_id,
+            type='friend_request',
+            content=f"{User.query.get(friendship.user_id).name} sent you a friend request",
+            related_id=friendship.id
+        )
+        db.session.add(notification)
+        db.session.commit()
 class Comment(db.Model):
     """
     Comment model for storing blog comments.

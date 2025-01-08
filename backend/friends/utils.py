@@ -1,8 +1,8 @@
 from typing import List, Dict, Optional, Set, Tuple
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_, func
-from backend.models import User, Friendship, FriendRequest
-from backend.extensions import db
+from models import Message, User, Friendship, FriendRequest
+from extensions import db
 import logging
 
 # Configure logging

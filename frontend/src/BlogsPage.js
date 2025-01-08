@@ -14,7 +14,6 @@ const BlogsPage = () => {
                 const response = await axios.get("http://localhost:8000/blogs");
                 console.log('API Response:', response.data); // Debug the response
                 setBlogs(response.data || []); // Ensure blogs is always an array
-                // setBlogs(response.data.blogs_list);
             } catch (error) {
                 console.error('Error fetching blogs:', error);
             }
@@ -22,6 +21,14 @@ const BlogsPage = () => {
 
         fetchBlogs();
     }, []);
+
+    // Function to truncate content
+    const truncateContent = (content, length = 100) => {
+        if (content.length > length) {
+            return content.substring(0, length) + '...';
+        }
+        return content;
+    };
 
     return (
         <div className="Blogs-container">
@@ -35,24 +42,28 @@ const BlogsPage = () => {
                     <p className="no-blogs-message">No blogs available to display.</p>
                 ) : (
                     blogs.map(blog => (
-                        <div key={blog.blog_id} className="blog-card">
+                        <div 
+                            key={blog.blog_id} 
+                            className="blog-card" 
+                            onClick={() => navigate(`/blogs/${blog.blog_id}`)} // Navigate to blog details page
+                            style={{ cursor: "pointer" }}
+                        >
                             <h3 className="user-community">
-                                <a href={`/user/${blog.created_by}`} className="created-by-link">
+                                <a href={`/user/${blog.created_by}`} className="created-by-link" onClick={(e) => e.stopPropagation()}>
                                     {blog.author_name}
                                 </a>
-                                
-                                {/* <a href={`/community/${blog.community_name}`} className="community-name-link">
-                                    {blog.community_name}
-                                </a> */}
                             </h3>
                             <h2 className="blog-title">{blog.title}</h2>
-                            <p className="blog-content">{blog.content}</p>
+                            <p className="blog-content">{truncateContent(blog.content)}</p>
                             <div className="blog-meta">
                                 <span>Likes: {blog.likes}</span>
                                 <span>Dislikes: {blog.dislikes}</span>
                             </div>
                             <div className="comments-button">
-                                <button onClick={() => navigate(`/blogs/${blog.blog_id}/comments`)}>
+                                <button onClick={(e) => {
+                                    e.stopPropagation(); // Prevent triggering card click
+                                    navigate(`/blogs/${blog.blog_id}/comments`);
+                                }}>
                                     View Comments
                                 </button>
                             </div>

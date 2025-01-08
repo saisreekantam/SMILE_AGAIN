@@ -1,0 +1,98 @@
+body {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.blog-details-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    background-color: #111; /* Slightly lighter black for contrast */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Subtle white glow */
+}
+
+.blog-title {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #fff; /* White title */
+    border-bottom: 2px solid #555; /* Grey underline */
+    padding-bottom: 5px;
+}
+
+.blog-content {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #ddd; /* Light grey for content text */
+}
+
+.blog-actions {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.like-button, .dislike-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 2px solid #555; /* Grey border */
+    border-radius: 4px;
+    background-color: transparent; /* Transparent buttons */
+    color: #fff;
+    transition: all 0.3s ease-in-out;
+}
+
+.like-button:hover {
+    background-color: #0f0; /* Bright green hover */
+    color: #000; /* Black text on hover */
+}
+
+.dislike-button:hover {
+    background-color: #f00; /* Bright red hover */
+    color: #000; /* Black text on hover */
+}
+
+.comments-section {
+    margin-top: 30px;
+}
+
+.comments-section h2 {
+    border-bottom: 2px solid #555;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #fff;
+}
+
+.comment-card {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #222; /* Dark grey for comment cards */
+    border: 1px solid #444; /* Border for separation */
+    border-radius: 4px;
+    color: #ddd; /* Light grey for text */
+}
+
+.comment-card strong {
+    color: #fff; /* White for author names */
+}
+
+a {
+    color: #fff; /* White links */
+    text-decoration: none;
+    border-bottom: 1px solid #555; /* Subtle underline */
+    transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+    color: #0f0; /* Bright green on hover */
+}
+
+button {
+    outline: none;
+}

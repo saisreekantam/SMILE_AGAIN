@@ -1,0 +1,125 @@
+/* General Page Styles */
+.friend-requests-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Page Heading */
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 24px;
+    border-bottom: 2px solid #fff;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  
+  /* Friend Request Count */
+  .friend-requests-count {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+    background-color: #1a1a1a; /* Darker black for section */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Requests List Container */
+  .friend-requests-list {
+    border: 1px solid #fff;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #1a1a1a;
+  }
+  
+  /* Individual Request Item */
+  .friend-request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+  }
+  
+  .friend-request-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* User Name */
+  .friend-request-item p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* Request Actions Buttons */
+  .request-actions button {
+    margin-left: 10px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid #fff;
+    background: transparent;
+    color: #fff;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Accept Button */
+  .accept-button:hover {
+    background-color: #00ff00; /* Green hover */
+    color: #000;
+  }
+  
+  /* Reject Button */
+  .reject-button:hover {
+    background-color: #ff0000; /* Red hover */
+    color: #000;
+  }
+  
+  /* Loading Text */
+  .loading {
+    text-align: center;
+    font-size: 18px;
+    color: #fff;
+    animation: blink 1s linear infinite;
+  }
+  
+  /* Blink Animation for Loading */
+  @keyframes blink {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  /* No Requests Text */
+  .friend-requests-list p {
+    font-size: 16px;
+    color: #ccc;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  /* Button Hover Effects */
+  button {
+    outline: none;
+  }
+  
+  button:focus {
+    outline: 2px dashed #fff;
+  }
+  
