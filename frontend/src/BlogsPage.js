@@ -22,6 +22,40 @@ const BlogsPage = () => {
         fetchBlogs();
     }, []);
 
+    const handleLike = async (blogId) => {
+        try {
+            const response = await axios.post('/api/blog/like', { blogId });
+            if (response.status === 200) {
+                setBlogs(prevBlogs =>
+                    prevBlogs.map(blog =>
+                        blog.blog_id === blogId
+                            ? { ...blog, likes: blog.likes + 1 }
+                            : blog
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Error liking the blog:', error);
+        }
+    };
+
+    const handleDislike = async (blogId) => {
+        try {
+            const response = await axios.post('/api/blog/dislike', { blogId });
+            if (response.status === 200) {
+                setBlogs(prevBlogs =>
+                    prevBlogs.map(blog =>
+                        blog.blog_id === blogId
+                            ? { ...blog, dislikes: blog.dislikes + 1 }
+                            : blog
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Error disliking the blog:', error);
+        }
+    };
+
     // Function to truncate content
     const truncateContent = (content, length = 100) => {
         if (content.length > length) {
@@ -57,7 +91,9 @@ const BlogsPage = () => {
                             <p className="blog-content">{truncateContent(blog.content)}</p>
                             <div className="blog-meta">
                                 <span>Likes: {blog.likes}</span>
+                                <span onClick={() => handleLike(blog.blog_id)}>👍</span>
                                 <span>Dislikes: {blog.dislikes}</span>
+                                <span onClick={() => handleDislike(blog.blog_id)}>👎</span>
                             </div>
                             <div className="comments-button">
                                 <button onClick={(e) => {

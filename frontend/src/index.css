@@ -11,3 +11,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+#root {
+  padding: 0;  /* Remove padding */
+  margin: 0;   /* Ensure there's no margin either */
+}

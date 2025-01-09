@@ -1,218 +1,248 @@
-from flask import Blueprint, request, jsonify
+from typing import Dict, Any, Tuple, List, Optional
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+import logging
 from sqlalchemy import func
-from models import UserProblem
+from .utils import ActivityManager, ActivityRecommender
 from models import Activity, UserActivity, ActivityStreak
 
-activities_bp = Blueprint('activities', __name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def register_routes(bp, db):
+def register_routes(bp: Blueprint, db: SQLAlchemy) -> None:
+    """
+    Register all activity-related routes with the blueprint.
+    
+    Args:
+        bp: Flask blueprint instance
+        db: SQLAlchemy database instance
+    """
+    
+    # Initialize managers
+    activity_manager = ActivityManager(db.session)
+    activity_recommender = ActivityRecommender(db.session)
+
     @bp.route('/recommended', methods=['GET'])
     @login_required
-    def get_recommended_activities():
-        """Get personalized activity recommendations based on user's mood and history"""
+    def get_recommended_activities() -> Tuple[Dict[str, Any], int]:
+        """
+        Get personalized activity recommendations for the current user.
+        
+        Returns:
+            Tuple containing response data and status code
+        """
         try:
-            # Get user's smile reason
-            user_problem = UserProblem.query.filter_by(user_id=current_user.id).first()
-            if not user_problem or not user_problem.smile_reason:
-                return jsonify({'error': 'Please complete your mood profile first'}), 400
-
-            # Get user's activity history
-            completed_activities = UserActivity.query.filter_by(
+            limit = request.args.get('limit', default=5, type=int)
+            activities = activity_recommender.get_recommendations(
                 user_id=current_user.id,
-                completed_at__isnot=None
-            ).all()
-            
-            completed_ids = [ua.activity_id for ua in completed_activities]
-            
-            # Find matching activities
-            query = Activity.query.filter(
-                Activity.mood_tags.contains(user_problem.smile_reason)
+                limit=limit
             )
             
-            # Prioritize unfinished activities
-            if completed_ids:
-                query = query.filter(~Activity.id.in_(completed_ids))
+            logger.info(f"Retrieved {len(activities)} recommendations for user {current_user.id}")
+            return jsonify(activities), 200
             
-            activities = query.order_by(func.random()).limit(5).all()
-            
-            return jsonify([{
-                'id': activity.id,
-                'title': activity.title,
-                'description': activity.description,
-                'category': activity.category,
-                'duration_minutes': activity.duration_minutes,
-                'difficulty_level': activity.difficulty_level,
-                'resources_needed': activity.resources_needed
-            } for activity in activities])
-
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            logger.error(f"Error getting recommendations: {str(e)}")
+            return jsonify({
+                'error': 'Failed to get recommendations',
+                'message': str(e)
+            }), 500
+
+    @bp.route('/activities', methods=['GET'])
+    @login_required
+    def get_activities() -> Tuple[Dict[str, Any], int]:
+        """
+        Get list of all available activities, optionally filtered by category.
+        
+        Returns:
+            Tuple containing response data and status code
+        """
+        try:
+            category = request.args.get('category')
+            query = Activity.query
+
+            if category:
+                query = query.filter_by(category=category)
+
+            activities = query.all()
+            return jsonify([activity.to_dict() for activity in activities]), 200
+            
+        except Exception as e:
+            logger.error(f"Error getting activities: {str(e)}")
+            return jsonify({
+                'error': 'Failed to get activities',
+                'message': str(e)
+            }), 500
 
     @bp.route('/start/<int:activity_id>', methods=['POST'])
     @login_required
-    def start_activity(activity_id):
-        """Start an activity and record initial mood"""
+    def start_activity(activity_id: int) -> Tuple[Dict[str, Any], int]:
+        """
+        Start a new activity session.
+        
+        Args:
+            activity_id: ID of the activity to start
+            
+        Returns:
+            Tuple containing response data and status code
+        """
         try:
-            activity = Activity.query.get(activity_id)
-            if not activity:
-                return jsonify({'error': 'Activity not found'}), 404
+            data = request.get_json()
+            mood_before = data.get('mood_before', 5.0)
+            
+            # Validate mood rating
+            if not isinstance(mood_before, (int, float)) or not 1 <= mood_before <= 10:
+                return jsonify({
+                    'error': 'Invalid mood rating',
+                    'message': 'Mood must be between 1 and 10'
+                }), 400
 
-            mood_before = request.json.get('mood_before')
-            if not mood_before or not (1 <= mood_before <= 10):
-                return jsonify({'error': 'Valid mood_before (1-10) is required'}), 400
-
-            user_activity = UserActivity(
+            result = activity_manager.start_activity(
                 user_id=current_user.id,
                 activity_id=activity_id,
                 mood_before=mood_before
             )
             
-            db.session.add(user_activity)
-            db.session.commit()
-
-            return jsonify({
-                'message': 'Activity started successfully',
-                'user_activity_id': user_activity.id
-            })
-
+            if 'error' in result:
+                return jsonify(result), 400
+                
+            return jsonify(result), 200
+            
         except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 500
+            logger.error(f"Error starting activity: {str(e)}")
+            return jsonify({
+                'error': 'Failed to start activity',
+                'message': str(e)
+            }), 500
 
     @bp.route('/complete/<int:user_activity_id>', methods=['POST'])
     @login_required
-    def complete_activity(user_activity_id):
-        """Complete an activity and record final mood and feedback"""
+    def complete_activity(user_activity_id: int) -> Tuple[Dict[str, Any], int]:
+        """
+        Complete an activity session and record results.
+        
+        Args:
+            user_activity_id: ID of the activity session to complete
+            
+        Returns:
+            Tuple containing response data and status code
+        """
         try:
-            user_activity = UserActivity.query.get(user_activity_id)
-            if not user_activity or user_activity.user_id != current_user.id:
-                return jsonify({'error': 'Activity not found'}), 404
-
-            if user_activity.completed_at:
-                return jsonify({'error': 'Activity already completed'}), 400
-
-            data = request.json
-            mood_after = data.get('mood_after')
-            if not mood_after or not (1 <= mood_after <= 10):
-                return jsonify({'error': 'Valid mood_after (1-10) is required'}), 400
-
-            user_activity.completed_at = datetime.utcnow()
-            user_activity.mood_after = mood_after
-            user_activity.feedback = data.get('feedback')
-            user_activity.effectiveness_rating = data.get('effectiveness_rating')
-
-            # Update activity streak
-            streak = ActivityStreak.query.filter_by(user_id=current_user.id).first()
-            if not streak:
-                streak = ActivityStreak(user_id=current_user.id)
-                db.session.add(streak)
+            data = request.get_json()
+            mood_after = data.get('mood_after', 5.0)
+            effectiveness_rating = data.get('effectiveness_rating', 3)
             
-            streak.update_streak(datetime.utcnow())
+            # Validate ratings
+            if not isinstance(mood_after, (int, float)) or not 1 <= mood_after <= 10:
+                return jsonify({
+                    'error': 'Invalid mood rating',
+                    'message': 'Mood must be between 1 and 10'
+                }), 400
+                
+            if not isinstance(effectiveness_rating, int) or not 1 <= effectiveness_rating <= 5:
+                return jsonify({
+                    'error': 'Invalid effectiveness rating',
+                    'message': 'Rating must be between 1 and 5'
+                }), 400
+
+            result = activity_manager.complete_activity(
+                user_id=current_user.id,
+                user_activity_id=user_activity_id,
+                mood_after=mood_after,
+                effectiveness_rating=effectiveness_rating
+            )
             
-            db.session.commit()
-
-            return jsonify({
-                'message': 'Activity completed successfully',
-                'mood_improvement': mood_after - user_activity.mood_before,
-                'current_streak': streak.current_streak,
-                'total_completed': streak.total_activities_completed
-            })
-
+            if 'error' in result:
+                return jsonify(result), 400
+                
+            return jsonify(result), 200
+            
         except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 500
+            logger.error(f"Error completing activity: {str(e)}")
+            return jsonify({
+                'error': 'Failed to complete activity',
+                'message': str(e)
+            }), 500
 
     @bp.route('/stats', methods=['GET'])
     @login_required
-    def get_activity_stats():
-        """Get user's activity statistics and achievements"""
+    def get_activity_stats() -> Tuple[Dict[str, Any], int]:
+        """
+        Get user's activity statistics and achievements.
+        
+        Returns:
+            Tuple containing response data and status code
+        """
         try:
-            streak = ActivityStreak.query.filter_by(user_id=current_user.id).first()
+            stats = activity_manager.get_activity_stats(current_user.id)
+            return jsonify(stats), 200
             
-            completed_activities = UserActivity.query.filter_by(
-                user_id=current_user.id,
-                completed_at__isnot=None
-            ).all()
+        except Exception as e:
+            logger.error(f"Error getting activity stats: {str(e)}")
+            return jsonify({
+                'error': 'Failed to get activity statistics',
+                'message': str(e)
+            }), 500
+
+    @bp.route('/history', methods=['GET'])
+    @login_required
+    def get_activity_history() -> Tuple[Dict[str, Any], int]:
+        """
+        Get user's activity history with optional pagination.
+        
+        Returns:
+            Tuple containing response data and status code
+        """
+        try:
+            page = request.args.get('page', 1, type=int)
+            per_page = request.args.get('per_page', 10, type=int)
             
-            # Calculate average mood improvement
-            mood_improvements = [
-                (act.mood_after - act.mood_before) 
-                for act in completed_activities 
-                if act.mood_after and act.mood_before
-            ]
-            
-            avg_improvement = sum(mood_improvements) / len(mood_improvements) if mood_improvements else 0
-            
-            # Get most effective activities
-            most_effective = UserActivity.query.filter_by(
-                user_id=current_user.id,
-                completed_at__isnot=None
+            # Get paginated activity history
+            activities = UserActivity.query.filter_by(
+                user_id=current_user.id
             ).order_by(
-                UserActivity.effectiveness_rating.desc()
-            ).limit(3).all()
+                UserActivity.started_at.desc()
+            ).paginate(
+                page=page,
+                per_page=per_page,
+                error_out=False
+            )
+            
+            # Format activity data
+            activity_data = []
+            for ua in activities.items:
+                activity = Activity.query.get(ua.activity_id)
+                activity_data.append({
+                    'id': ua.id,
+                    'activity': activity.to_dict(),
+                    'started_at': ua.started_at.isoformat(),
+                    'completed_at': ua.completed_at.isoformat() if ua.completed_at else None,
+                    'mood_before': ua.mood_before,
+                    'mood_after': ua.mood_after,
+                    'effectiveness_rating': ua.effectiveness_rating,
+                    'mood_improvement': ua.mood_after - ua.mood_before if ua.mood_after else None
+                })
             
             return jsonify({
-                'streak_stats': {
-                    'current_streak': streak.current_streak if streak else 0,
-                    'longest_streak': streak.longest_streak if streak else 0,
-                    'total_completed': streak.total_activities_completed if streak else 0
-                },
-                'mood_stats': {
-                    'average_improvement': round(avg_improvement, 1),
-                    'activities_with_improvement': len([i for i in mood_improvements if i > 0])
-                },
-                'most_effective_activities': [{
-                    'activity_name': Activity.query.get(ua.activity_id).title,
-                    'effectiveness_rating': ua.effectiveness_rating,
-                    'mood_improvement': ua.mood_after - ua.mood_before
-                } for ua in most_effective]
-            })
-
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-
-    @bp.route('/suggestions', methods=['GET'])
-    @login_required
-    def get_activity_suggestions():
-        """Get personalized activity suggestions based on effectiveness"""
-        try:
-            # Get user's most effective activities
-            effective_activities = UserActivity.query.filter_by(
-                user_id=current_user.id,
-                completed_at__isnot=None
-            ).order_by(
-                UserActivity.effectiveness_rating.desc()
-            ).limit(5).all()
+                'activities': activity_data,
+                'pagination': {
+                    'total': activities.total,
+                    'pages': activities.pages,
+                    'current_page': activities.page,
+                    'per_page': activities.per_page,
+                    'has_next': activities.has_next,
+                    'has_prev': activities.has_prev
+                }
+            }), 200
             
-            # Get activities similar to effective ones
-            if effective_activities:
-                effective_categories = set(
-                    Activity.query.get(ua.activity_id).category 
-                    for ua in effective_activities
-                )
-                
-                suggested_activities = Activity.query.filter(
-                    Activity.category.in_(effective_categories)
-                ).order_by(func.random()).limit(3).all()
-                
-                return jsonify([{
-                    'id': activity.id,
-                    'title': activity.title,
-                    'description': activity.description,
-                    'category': activity.category,
-                    'why_suggested': f"Based on your enjoyment of {activity.category} activities"
-                } for activity in suggested_activities])
-            
-            # Default suggestions if no history
-            return jsonify([{
-                'id': activity.id,
-                'title': activity.title,
-                'description': activity.description,
-                'category': activity.category,
-                'why_suggested': "Recommended for new users"
-            } for activity in Activity.query.order_by(func.random()).limit(3).all()])
-
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            logger.error(f"Error getting activity history: {str(e)}")
+            return jsonify({
+                'error': 'Failed to get activity history',
+                'message': str(e)
+            }), 500
+
+    logger.info("Activity routes registered successfully")

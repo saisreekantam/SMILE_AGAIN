@@ -66,7 +66,7 @@ const FriendChatPage = () => {
           <div>Loading...</div>
         ) : (
           messages.map((msg, index) => (
-            <div key={index} className="message">
+            <div key={index} className={`message-pehla`}>
               <div className="sender">{msg.sender_name}</div>
               <div className="content">{msg.content}</div>
               <div className="timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</div>

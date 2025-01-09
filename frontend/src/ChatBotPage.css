@@ -54,6 +54,7 @@
   border-radius: 15px;
   position: relative;
   animation: messageAppear 0.3s ease-out;
+  background-color: white;
 }
 
 @keyframes messageAppear {

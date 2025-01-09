@@ -39,17 +39,23 @@ body {
     margin-bottom: 20px;
   }
   
-  .message {
+  .message-pehla {
     background-color: #333;
     padding: 10px;
     margin: 5px 0;
     border-radius: 5px;
+    color: white;
   }
   
   .sender {
     font-weight: bold;
   }
-  
+  .message-container .user {
+     background-color: red;
+  }
+  .message-container .friend {
+    background-color: green;
+  } 
   .content {
     margin: 5px 0;
   }

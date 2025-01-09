@@ -1,290 +1,271 @@
-from typing import List, Dict, Optional
-from datetime import datetime, timedelta
-from models import Activity, UserActivity, ActivityStreak
-from extensions import db
+from typing import List, Dict, Optional, Any, Tuple
+from datetime import datetime, timedelta, date
+from sqlalchemy import and_, or_, func, desc
+from sqlalchemy.orm.session import Session
+from models import Activity, UserActivity, ActivityStreak, User
+import logging
+from collections import defaultdict
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class ActivityRecommender:
+    """Handles personalized activity recommendations based on user history and preferences."""
+    
+    def __init__(self, db_session: Session):
+        self.db = db_session
+
+    def get_recommendations(self, user_id: int, limit: int = 5) -> List[Dict[str, Any]]:
+        """
+        Get personalized activity recommendations for a user.
+        
+        Args:
+            user_id: User's ID
+            limit: Maximum number of recommendations
+            
+        Returns:
+            List of recommended activities with metadata
+        """
+        try:
+            # Get user's completed activities
+            completed_activities = UserActivity.query.filter(
+                UserActivity.user_id == user_id,
+                UserActivity.completed_at.isnot(None)
+            ).all()
+
+            # Calculate category effectiveness
+            category_effectiveness = defaultdict(list)
+            for ua in completed_activities:
+                activity = Activity.query.get(ua.activity_id)
+                if ua.effectiveness_rating:
+                    category_effectiveness[activity.category].append(
+                        ua.effectiveness_rating
+                    )
+
+            # Get average effectiveness per category
+            category_scores = {
+                cat: sum(ratings)/len(ratings)
+                for cat, ratings in category_effectiveness.items()
+            }
+
+            recommended = []
+            if category_scores:
+                # Prioritize effective categories
+                best_categories = sorted(
+                    category_scores.items(),
+                    key=lambda x: x[1],
+                    reverse=True
+                )[:2]
+
+                for category, score in best_categories:
+                    activities = Activity.query.filter(
+                        Activity.category == category,
+                        ~Activity.id.in_([ua.activity_id for ua in completed_activities])
+                    ).limit(limit//2).all()
+
+                    recommended.extend([{
+                        **activity.to_dict(),
+                        'recommendation_reason': f'Based on your success with {category} activities'
+                    } for activity in activities])
+
+            # Fill remaining slots with new activities
+            remaining = limit - len(recommended)
+            if remaining > 0:
+                new_activities = Activity.query.filter(
+                    ~Activity.id.in_([r['id'] for r in recommended])
+                ).order_by(func.random()).limit(remaining).all()
+
+                recommended.extend([{
+                    **activity.to_dict(),
+                    'recommendation_reason': 'Try something new!'
+                } for activity in new_activities])
+
+            return recommended
+
+        except Exception as e:
+            logger.error(f"Error getting recommendations: {str(e)}")
+            return []
 
 class ActivityManager:
-    """
-    Comprehensive utility class for managing activities and recommendations
-    """
+    """Main interface for activity-related operations."""
+    
     DEFAULT_ACTIVITIES = {
         'anxiety': [
             {
-                'title': 'Mindful Breathing Exercise',
-                'description': 'A gentle breathing exercise: Breathe in for 4 counts, hold for 4, and exhale for 4. Repeat this 3 times. 🌬️',
+                'title': 'Mindful Breathing',
+                'description': 'Simple breathing exercise for anxiety relief',
                 'category': 'meditation',
-                'duration_minutes': 5,
-                'difficulty_level': 'easy',
-                'resources_needed': 'A quiet space'
-            },
-            {
-                'title': '5-4-3-2-1 Grounding Technique',
-                'description': 'Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste 🌟',
-                'category': 'mindfulness',
                 'duration_minutes': 10,
                 'difficulty_level': 'easy',
-                'resources_needed': 'None'
-            },
-            {
-                'title': 'Peaceful Place Visualization',
-                'description': 'Imagine your favorite peaceful place - maybe a beach or garden. Focus on the sights and sounds there 🏖️',
-                'category': 'visualization',
-                'duration_minutes': 15,
-                'difficulty_level': 'easy',
-                'resources_needed': 'A comfortable place to sit or lie down'
-            }
-        ],
-        'depression': [
-            {
-                'title': 'Tiny Joy Journal',
-                'description': 'Write down three tiny moments of joy from your day, no matter how small they seem 📝',
-                'category': 'reflection',
-                'duration_minutes': 10,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Journal and pen'
-            },
-            {
-                'title': 'Sunshine and Steps',
-                'description': 'Take a short walk outside, focusing on the warmth of the sun and the rhythm of your steps 🌞',
-                'category': 'physical',
-                'duration_minutes': 15,
-                'difficulty_level': 'medium',
-                'resources_needed': 'Comfortable walking shoes'
-            },
-            {
-                'title': 'Color Your Emotions',
-                'description': 'Express your feelings through colors and shapes - no artistic skill needed! Just let the colors flow 🎨',
-                'category': 'creative',
-                'duration_minutes': 20,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Paper and colored pencils/markers'
+                'mood_tags': ['anxiety', 'stress'],
+                'resources_needed': 'Quiet space'
             }
         ],
         'stress': [
             {
-                'title': 'Tea Mindfulness Ritual',
-                'description': 'Prepare and drink a cup of tea mindfully, focusing on each sensation and the calming process 🫖',
-                'category': 'mindfulness',
-                'duration_minutes': 15,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Tea and a quiet moment'
-            },
-            {
-                'title': 'Tension Release Progressive Relaxation',
-                'description': 'Systematically tense and relax each muscle group, releasing physical and mental tension 💆‍♀️',
+                'title': 'Progressive Relaxation',
+                'description': 'Systematic muscle relaxation technique',
                 'category': 'relaxation',
-                'duration_minutes': 20,
-                'difficulty_level': 'medium',
-                'resources_needed': 'Comfortable place to lie down'
-            },
-            {
-                'title': 'Nature's Symphony',
-                'description': 'Find a spot near nature and close your eyes. Focus on identifying different natural sounds 🌿',
-                'category': 'mindfulness',
-                'duration_minutes': 10,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Access to outdoors or nature sounds recording'
-            }
-        ],
-        'loneliness': [
-            {
-                'title': 'Self-Care Letter',
-                'description': 'Write a compassionate letter to yourself, acknowledging your feelings and offering kind words 💌',
-                'category': 'self-care',
                 'duration_minutes': 15,
                 'difficulty_level': 'medium',
-                'resources_needed': 'Paper and pen'
-            },
-            {
-                'title': 'Memory Album Creation',
-                'description': 'Create a digital or physical collection of happy memories with loved ones 📸',
-                'category': 'creative',
-                'duration_minutes': 30,
-                'difficulty_level': 'medium',
-                'resources_needed': 'Photos or memory items'
-            },
-            {
-                'title': 'Comfort Playlist',
-                'description': 'Create a playlist of songs that make you feel connected and understood 🎵',
-                'category': 'music',
-                'duration_minutes': 20,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Music player or streaming service'
+                'mood_tags': ['stress', 'anxiety'],
+                'resources_needed': 'Comfortable space'
             }
         ],
-        'overwhelmed': [
+        'mood': [
             {
-                'title': 'Task Declutter',
-                'description': 'Break down one overwhelming task into tiny, manageable steps ✍️',
-                'category': 'organization',
-                'duration_minutes': 15,
-                'difficulty_level': 'medium',
-                'resources_needed': 'Paper and pen'
-            },
-            {
-                'title': 'Five-Minute Reset',
-                'description': 'Set a timer for 5 minutes and do absolutely nothing. Just observe your thoughts without judgment ⏰',
-                'category': 'meditation',
-                'duration_minutes': 5,
-                'difficulty_level': 'easy',
-                'resources_needed': 'Timer'
-            },
-            {
-                'title': 'Worry Box',
-                'description': 'Write down your worries and physically put them in a box, symbolically setting them aside 📦',
-                'category': 'coping',
+                'title': 'Gratitude Journal',
+                'description': 'Write three things youre grateful for',
+                'category': 'reflection',
                 'duration_minutes': 10,
                 'difficulty_level': 'easy',
-                'resources_needed': 'Paper, pen, and a box or container'
+                'mood_tags': ['mood', 'depression'],
+                'resources_needed': 'Journal and pen'
             }
         ]
     }
 
+    def __init__(self, db_session: Session):
+        self.db = db_session
+        self.recommender = ActivityRecommender(db_session)
+
     @classmethod
-    def initialize_default_activities(cls) -> None:
-        """Initialize the database with default activities if empty"""
+    def initialize_default_activities(cls, db: Session) -> None:
+        """Initialize database with default activities if empty."""
         try:
             if Activity.query.first() is None:
-                for activity_data in cls.DEFAULT_ACTIVITIES:
-                    activity = Activity(**activity_data)
-                    db.session.add(activity)
+                for mood_category, activities in cls.DEFAULT_ACTIVITIES.items():
+                    for activity_data in activities:
+                        activity = Activity(**activity_data)
+                        db.session.add(activity)
                 db.session.commit()
+                logger.info("Default activities initialized successfully")
         except Exception as e:
+            logger.error(f"Error initializing default activities: {str(e)}")
             db.session.rollback()
-            raise Exception(f"Failed to initialize activities: {str(e)}")
 
-    @staticmethod
-    def get_personalized_activities(user_id: int, mood_tag: str, limit: int = 5) -> List[Dict]:
-        """Get personalized activity recommendations based on user history and mood"""
+    def start_activity(self, user_id: int, activity_id: int, mood_before: float) -> Dict[str, Any]:
+        """Start a new activity session."""
         try:
-            # Get user's completed activities and their effectiveness
-            completed_activities = UserActivity.query.filter_by(
+            activity = Activity.query.get(activity_id)
+            if not activity:
+                return {'error': 'Activity not found'}, 404
+
+            user_activity = UserActivity(
                 user_id=user_id,
-                completed_at__isnot=None
-            ).order_by(UserActivity.effectiveness_rating.desc()).all()
+                activity_id=activity_id,
+                mood_before=mood_before,
+                started_at=datetime.utcnow()
+            )
+            self.db.session.add(user_activity)
+            self.db.session.commit()
 
-            # Get effective categories for this user
-            effective_categories = set()
-            if completed_activities:
-                for ua in completed_activities:
-                    activity = Activity.query.get(ua.activity_id)
-                    if ua.effectiveness_rating and ua.effectiveness_rating >= 4:
-                        effective_categories.add(activity.category)
-
-            # Build query for recommendations
-            query = Activity.query.filter(Activity.mood_tags.contains(mood_tag))
-
-            # Prioritize activities from effective categories
-            if effective_categories:
-                query = query.order_by(
-                    Activity.category.in_(list(effective_categories)).desc(),
-                    Activity.created_at.desc()
-                )
-            else:
-                query = query.order_by(Activity.created_at.desc())
-
-            activities = query.limit(limit).all()
-
-            return [{
-                'id': activity.id,
-                'title': activity.title,
-                'description': activity.description,
-                'category': activity.category,
-                'duration_minutes': activity.duration_minutes,
-                'difficulty_level': activity.difficulty_level,
-                'resources_needed': activity.resources_needed,
-                'recommended_reason': 'Based on your previous positive experiences' 
-                    if activity.category in effective_categories else 'Matched to your current mood'
-            } for activity in activities]
+            return {
+                'success': True,
+                'user_activity_id': user_activity.id,
+                'message': 'Activity started successfully'
+            }
 
         except Exception as e:
-            raise Exception(f"Error getting personalized activities: {str(e)}")
+            logger.error(f"Error starting activity: {str(e)}")
+            self.db.session.rollback()
+            return {'error': str(e)}
 
-    @staticmethod
-    def track_activity_completion(
-        user_id: int,
-        activity_id: int,
-        mood_improvement: int,
+    def complete_activity(
+        self, 
+        user_id: int, 
+        user_activity_id: int, 
+        mood_after: float,
         effectiveness_rating: int
-    ) -> Dict:
-        """Track activity completion and update user's streak"""
+    ) -> Dict[str, Any]:
+        """Complete an activity session and update streak."""
         try:
-            # Update or create streak
+            user_activity = UserActivity.query.get(user_activity_id)
+            if not user_activity or user_activity.user_id != user_id:
+                return {'error': 'Activity session not found'}, 404
+
+            if user_activity.completed_at:
+                return {'error': 'Activity already completed'}, 400
+
+            # Update activity completion
+            user_activity.completed_at = datetime.utcnow()
+            user_activity.mood_after = mood_after
+            user_activity.effectiveness_rating = effectiveness_rating
+
+            # Update streak
             streak = ActivityStreak.query.filter_by(user_id=user_id).first()
             if not streak:
                 streak = ActivityStreak(user_id=user_id)
-                db.session.add(streak)
+                self.db.session.add(streak)
 
-            completion_time = datetime.utcnow()
-            streak.update_streak(completion_time)
-
-            # Calculate achievements
-            achievements = []
-            if streak.current_streak == 7:
-                achievements.append("7-Day Streak Achievement Unlocked!")
-            if streak.total_activities_completed == 10:
-                achievements.append("Activity Master Achievement Unlocked!")
-            if mood_improvement >= 3:
-                achievements.append("Mood Booster Achievement Unlocked!")
-
-            db.session.commit()
+            streak.update_streak(user_activity.completed_at)
+            
+            self.db.session.commit()
 
             return {
+                'success': True,
+                'message': 'Activity completed successfully',
                 'streak': streak.current_streak,
-                'total_completed': streak.total_activities_completed,
-                'achievements': achievements
+                'mood_improvement': mood_after - user_activity.mood_before
             }
 
         except Exception as e:
-            db.session.rollback()
-            raise Exception(f"Error tracking activity completion: {str(e)}")
+            logger.error(f"Error completing activity: {str(e)}")
+            self.db.session.rollback()
+            return {'error': str(e)}
 
-    @staticmethod
-    def get_activity_insights(user_id: int) -> Dict:
-        """Get insights about user's activity patterns and effectiveness"""
+    def get_activity_stats(self, user_id: int) -> Dict[str, Any]:
+        """Get comprehensive activity statistics for a user."""
         try:
-            completed_activities = UserActivity.query.filter_by(
-                user_id=user_id,
-                completed_at__isnot=None
+            # Get user's streak info
+            streak = ActivityStreak.query.filter_by(user_id=user_id).first()
+            
+            # Get completed activities
+            completed_activities = UserActivity.query.filter(
+                UserActivity.user_id == user_id,
+                UserActivity.completed_at.isnot(None)
             ).all()
 
-            if not completed_activities:
-                return {
-                    'total_activities': 0,
-                    'average_mood_improvement': 0,
-                    'most_effective_category': None,
-                    'recommendation': "Try your first activity to start tracking your progress!"
-                }
-
-            # Calculate insights
+            # Calculate mood improvements
             mood_improvements = []
-            category_effectiveness = {}
+            for activity in completed_activities:
+                if activity.mood_before and activity.mood_after:
+                    mood_improvements.append(activity.mood_after - activity.mood_before)
 
-            for ua in completed_activities:
-                activity = Activity.query.get(ua.activity_id)
-                if ua.mood_before and ua.mood_after:
-                    improvement = ua.mood_after - ua.mood_before
-                    mood_improvements.append(improvement)
+            # Get recent activity trend
+            recent_activities = UserActivity.query.filter(
+                UserActivity.user_id == user_id,
+                UserActivity.completed_at.isnot(None)
+            ).order_by(
+                UserActivity.completed_at.desc()
+            ).limit(7).all()
 
-                    if activity.category not in category_effectiveness:
-                        category_effectiveness[activity.category] = []
-                    category_effectiveness[activity.category].append(improvement)
-
-            # Calculate averages per category
-            category_averages = {
-                category: sum(improvements) / len(improvements)
-                for category, improvements in category_effectiveness.items()
-            }
-
-            most_effective_category = max(category_averages.items(), key=lambda x: x[1])[0]
+            activity_trend = [{
+                'date': ua.completed_at.strftime('%Y-%m-%d'),
+                'mood_improvement': ua.mood_after - ua.mood_before 
+                    if ua.mood_after and ua.mood_before else 0,
+                'effectiveness': ua.effectiveness_rating or 0
+            } for ua in recent_activities]
 
             return {
-                'total_activities': len(completed_activities),
-                'average_mood_improvement': sum(mood_improvements) / len(mood_improvements),
-                'most_effective_category': most_effective_category,
-                'recommendation': f"Activities in the {most_effective_category} category seem to work best for you!"
+                'streak_stats': {
+                    'current_streak': streak.current_streak if streak else 0,
+                    'longest_streak': streak.longest_streak if streak else 0,
+                    'total_completed': len(completed_activities)
+                },
+                'mood_stats': {
+                    'average_improvement': sum(mood_improvements) / len(mood_improvements) 
+                        if mood_improvements else 0,
+                    'activities_with_improvement': len([i for i in mood_improvements if i > 0])
+                },
+                'recent_trend': activity_trend
             }
 
         except Exception as e:
-            raise Exception(f"Error getting activity insights: {str(e)}")
-    
+            logger.error(f"Error getting activity stats: {str(e)}")
+            return {
+                'streak_stats': {'current_streak': 0, 'longest_streak': 0, 'total_completed': 0},
+                'mood_stats': {'average_improvement': 0, 'activities_with_improvement': 0},
+                'recent_trend': []
+            }

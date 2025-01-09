@@ -79,13 +79,14 @@ def create_app():
         from workshops.routes import workshops_bp
         from friends.routes import register_profile_routes
         from community import create_community_routes
-        from activity.routes import register_routes as register_activity_routes
-        from activity import create_activity_routes
+        from activity.routes import register_routes
+        activities_bp = Blueprint('activities', __name__, url_prefix='/activities')
         auth_bp = Blueprint('auth', __name__)
         users_bp = Blueprint('users', __name__)
         chats_bp = Blueprint('chats', __name__)
         bot_bp = Blueprint('bot', __name__)
         profile_bp=Blueprint('friends',__name__)
+        register_routes(activities_bp, db)
         create_mood_routes(app, db)
         create_community_routes(app, db)
         register_auth_routes(auth_bp, db, bcrypt, login_manager)
@@ -98,6 +99,7 @@ def create_app():
         app.register_blueprint(chats_bp, url_prefix='/chats')
         app.register_blueprint(bot_bp, url_prefix='/bot')
         app.register_blueprint(blogs_bp)
+        app.register_blueprint(activities_bp)
         app.register_blueprint(workshops_bp, url_prefix='/workshops')
         app.register_blueprint(profile_bp, url_prefix='/profile')
     @app.errorhandler(404)

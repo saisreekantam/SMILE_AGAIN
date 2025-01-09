@@ -359,63 +359,105 @@ class CommunityComment(db.Model):
     author = db.relationship('User', backref='community_comments')
     post = db.relationship('CommunityPost', backref='comments')
 class Activity(db.Model):
-    """Model for predefined activities"""
+    """Activity model representing wellness activities users can perform."""
     __tablename__ = 'activity'
     __table_args__ = {'extend_existing': True}
-    
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50), nullable=False)  # e.g., 'meditation', 'exercise', 'creative'
-    mood_tags = db.Column(db.String(200))  # Comma-separated tags matching smile reasons
-    duration_minutes = db.Column(db.Integer)
-    difficulty_level = db.Column(db.String(20))  # 'easy', 'medium', 'hard'
-    resources_needed = db.Column(db.String(500))
+    category = db.Column(db.String(50), nullable=False)
+    duration_minutes = db.Column(db.Integer, nullable=False)
+    difficulty_level = db.Column(db.String(20), nullable=False)
+    mood_tags = db.Column(db.JSON)  # Store as JSON array of mood tags
+    resources_needed = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_dict(self):
+        """Convert activity to dictionary representation."""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'category': self.category,
+            'duration_minutes': self.duration_minutes,
+            'difficulty_level': self.difficulty_level,
+            'mood_tags': self.mood_tags,
+            'resources_needed': self.resources_needed
+        }
+
 class UserActivity(db.Model):
-    """Model for tracking user activity participation"""
+    """Model tracking user's activity sessions and progress."""
     __tablename__ = 'user_activity'
     __table_args__ = {'extend_existing': True}
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     activity_id = db.Column(db.Integer, db.ForeignKey('activity.id'), nullable=False)
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
     completed_at = db.Column(db.DateTime)
-    mood_before = db.Column(db.Integer)  # Scale of 1-10
-    mood_after = db.Column(db.Integer)  # Scale of 1-10
-    feedback = db.Column(db.Text)
+    mood_before = db.Column(db.Float)  # Scale of 1-10
+    mood_after = db.Column(db.Float)   # Scale of 1-10
     effectiveness_rating = db.Column(db.Integer)  # Scale of 1-5
+    notes = db.Column(db.Text)
+
+    # Reference the Activity model
+    activity = db.relationship('Activity', backref=db.backref('user_activities', lazy=True))
+
+    def to_dict(self):
+        """Convert user activity to dictionary representation."""
+        return {
+            'id': self.id,
+            'activity_id': self.activity_id,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'mood_before': self.mood_before,
+            'mood_after': self.mood_after,
+            'effectiveness_rating': self.effectiveness_rating,
+            'notes': self.notes
+        }
 
 class ActivityStreak(db.Model):
-    """Model for tracking user activity streaks"""
+    """Model tracking user's activity completion streaks."""
     __tablename__ = 'activity_streak'
     __table_args__ = {'extend_existing': True}
-    
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True)
     current_streak = db.Column(db.Integer, default=0)
     longest_streak = db.Column(db.Integer, default=0)
-    last_activity_date = db.Column(db.DateTime)
+    last_activity_date = db.Column(db.Date)
     total_activities_completed = db.Column(db.Integer, default=0)
-    
-    def update_streak(self, activity_date):
-        """Update streak based on new activity completion"""
+
+    def update_streak(self, completion_time: datetime):
+        """
+        Update streak based on activity completion.
+        
+        Args:
+            completion_time: Datetime when activity was completed
+        """
+        today = completion_time.date()
+        
         if not self.last_activity_date:
             self.current_streak = 1
-        else:
-            days_diff = (activity_date - self.last_activity_date).days
-            if days_diff <= 1:  # Maintain or increment streak
-                self.current_streak += 1
-            else:  # Reset streak
-                self.current_streak = 1
-                
-        if self.current_streak > self.longest_streak:
-            self.longest_streak = self.current_streak
-            
-        self.last_activity_date = activity_date
+        elif (today - self.last_activity_date).days == 1:
+            self.current_streak += 1
+        elif (today - self.last_activity_date).days > 1:
+            self.current_streak = 1
+        # If completed on same day, streak stays the same
+        
+        self.longest_streak = max(self.longest_streak, self.current_streak)
+        self.last_activity_date = today
         self.total_activities_completed += 1
+
+    def to_dict(self):
+        """Convert streak info to dictionary representation."""
+        return {
+            'current_streak': self.current_streak,
+            'longest_streak': self.longest_streak,
+            'total_activities_completed': self.total_activities_completed,
+            'last_activity_date': self.last_activity_date.isoformat() if self.last_activity_date else None
+        }
 class MoodEntry(db.Model):
     __tablename__ = 'mood_entry'
     __table_args__ = {'extend_existing': True}
