@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./LoginPage.css";
 import { useAuth } from "./contexts/AuthContext";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { login, isLoggedIn } = useAuth();
+    const { login, isLoggedIn,username } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -25,9 +25,10 @@ function LoginPage() {
             );
 
             if (response.data.success) {
-                const username=response.data.username;
-                login({ username }); // Update the context state
+                const Username=response.data.username;
+                login(Username); 
                 console.log("Login successful:", response.data);
+                console.log("Username from authContext ",username);
             } else {
                 alert("Login failed");
             }
@@ -45,7 +46,7 @@ function LoginPage() {
         if (isLoggedIn) {
             console.log("Navigating to /problem_page...");
             console.log(isLoggedIn);
-            navigate("/mood_entry");
+            navigate("/mood_entry");   
         }
     }, [isLoggedIn, navigate]);
 
