@@ -1,84 +1,113 @@
-.add-workshop-container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border: 1px solid #000000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    color: #000000;
-    font-family: Arial, sans-serif;
+
+
+.create-workshop-container {
+  background-color: #1c1c1c;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  width: 900px;
+  background: linear-gradient(135deg, #1a1a1a, #333333);
+  font-family: 'Arial', sans-serif;
+  color: #f1f1f1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* max-width: 600px; */
+}
+
+.create-workshop-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #f1f1f1;
+  font-size: 1.8rem;
+}
+
+.error-message {
+  background-color: #662424;
+  color: #ffb3b3;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #cccccc;
+}
+
+.form-group input,
+.form-group textarea {
+  background-color: #2a2a2a;
+  color: #f1f1f1;
+  padding: 0.8rem;
+  border: 1px solid #444444;
+  border-radius: 5px;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #6666ff;
+}
+
+textarea {
+  resize: none;
+  height: 100px;
+}
+
+button {
+  background-color: #4444cc;
+  color: #f1f1f1;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #3333aa;
+}
+
+button.loading {
+  background-color: #555555;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .create-workshop-container {
+      padding: 1.5rem;
   }
-  
-  .header {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #000000;
+
+  .create-workshop-container h2 {
+      font-size: 1.5rem;
   }
-  
-  .add-workshop-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+
+  form {
+      gap: 1rem;
   }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
+
+  .form-group input,
+  .form-group textarea {
+      font-size: 0.9rem;
   }
-  
-  label {
-    font-weight: bold;
-    margin-bottom: 5px;
+
+  button {
+      font-size: 0.9rem;
   }
-  
-  input,
-  textarea {
-    padding: 10px;
-    border: 1px solid #000000;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    color: #000000;
-  }
-  
-  textarea {
-    resize: none;
-    height: 80px;
-  }
-  
-  input[type="checkbox"] {
-    width: auto;
-  }
-  
-  .submit-btn {
-    padding: 10px 20px;
-    background-color: #000000;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .submit-btn:hover {
-    background-color: #444444;
-  }
-  
-  .error-message,
-  .success-message {
-    text-align: center;
-    padding: 10px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  
-  .error-message {
-    background-color: #ffcccc;
-    color: #cc0000;
-  }
-  
-  .success-message {
-    background-color: #ccffcc;
-    color: #006600;
-  }
-  
+}

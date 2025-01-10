@@ -4,12 +4,14 @@ import logging
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 import webbrowser
+
+from dotenv import load_dotenv
 from models import Message
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
-
+from groclake.modellake import ModelLake
 logger = logging.getLogger(__name__)
 
 class WorkshopRedirectManager:
@@ -254,52 +256,39 @@ class WebEmpatheticChatbot:
 
         Now respond as Joy:"""
         # Initialize Llama with updated prompt template
+        load_dotenv()
         try:
-            self.llm = Ollama(model="llama3")
-            self.memory = ConversationBufferMemory(
-                input_key="user_input",
-                memory_key="chat_history"
-            )
-            self.prompt = PromptTemplate(
-                input_variables=["emotion", "confidence", "chat_history", "user_input", "coping_exercises"],
-                template=self.prompt_template
-            )
-            self.conversation = LLMChain(
-                llm=self.llm,
-                prompt=self.prompt,
-                memory=self.memory,
-                verbose=True
-            )
+           self.model_lake=ModelLake()
+           self.memory=[]
         except Exception as e:
             logger.error(f"Error initializing Llama: {str(e)}")
             raise
 
     def generate_response(self, user_message: str, user_id: int) -> Dict:
-        """Generate response with crisis detection and workshop redirection."""
         try:
-            # Detect emotion and crisis
+        # Detect emotion and crisis
             emotion, confidence = self.emotion_detector.detect_emotion(user_message)
             is_crisis, crisis_type, crisis_confidence = self.crisis_detector.detect_crisis(user_message)
-            
-            # Get workshop URL
+        
+        # Get workshop URL
             workshop_url = self.redirect_manager.get_workshops_url()
-            
-            # Attempt redirection for crisis situations
+        
+        # Handle crisis redirection
             should_redirect = is_crisis and crisis_confidence > 0.7
             if should_redirect:
                 redirect_success = self.redirect_manager.redirect_to_workshops()
             else:
                 redirect_success = False
-            
-            # Get chat history
+        
+        # Get chat history and relevant coping exercises
             chat_history = self._get_chat_history(user_id)
-            
-            # Get relevant coping exercises
             exercises = self.coping_exercises.get(emotion, self.coping_exercises['neutral'])
             exercises_text = "\n".join(exercises)
-            
-            # Generate response using Llama
-            response = self.conversation.predict(
+        
+        # Prepare system context for ModelLake
+            system_context = {
+            "role": "system",
+            "content": self.prompt_template.format(
                 emotion=emotion,
                 confidence=confidence,
                 is_crisis=is_crisis,
@@ -309,47 +298,77 @@ class WebEmpatheticChatbot:
                 chat_history=chat_history,
                 user_input=user_message,
                 coping_exercises=exercises_text
-            )
-            
-            # Clean up response
-            response = response.strip()
-            
-            # Save interaction
-            self._save_interaction(
-                user_id, 
-                user_message, 
-                response, 
-                is_crisis,
-                redirect_attempted=should_redirect,
-                redirect_success=redirect_success
-            )
-            
-            return {
-                'message': {
-                    'content': response,
-                    'type': 'bot'
-                },
-                'metadata': {
-                    'emotion': emotion,
-                    'confidence': confidence,
-                    'is_crisis': is_crisis,
-                    'crisis_type': crisis_type if is_crisis else None,
-                    'timestamp': datetime.now().isoformat(),
-                    'workshop_url': workshop_url if should_redirect else None,
-                    'redirect_attempted': should_redirect,
-                    'redirect_success': redirect_success,
-                    'requires_immediate_help': is_crisis and crisis_confidence > 0.7,
-                    'counselor_referral': self._should_refer_to_counselor(emotion, confidence),
-                    'suggested_exercises': exercises[:2]
+                )
+            }
+        
+        # Prepare messages for ModelLake
+            messages = [system_context] + self.memory + [{"role": "user", "content": user_message}]
+        
+        # Generate response using ModelLake
+            try:
+                payload = {
+                "messages": messages,
+                "token_size": 300
                 }
+                response = self.model_lake.chat_complete(payload=payload)
+                bot_reply = response.get('answer', '')
+            
+            # Update conversation memory
+                self.memory.append({"role": "user", "content": user_message})
+                self.memory.append({"role": "assistant", "content": bot_reply})
+            
+            # Keep memory size manageable
+                if len(self.memory) > 10:  # Keep last 5 exchanges
+                    self.memory = self.memory[-10:]
+                
+            except Exception as e:
+                logger.error(f"Error in ModelLake response generation: {str(e)}")
+                return self._get_crisis_fallback_response(
+                emotion,
+                is_crisis,
+                workshop_url if should_redirect else None
+                )
+        
+        # Clean up response
+            bot_reply = bot_reply.strip()
+        
+        # Save interaction to database
+            self._save_interaction(
+            user_id, 
+            user_message, 
+            bot_reply, 
+            is_crisis,
+            redirect_attempted=should_redirect,
+            redirect_success=redirect_success
+            )
+        
+        # Return complete response with metadata
+            return {
+            'message': {
+                'content': bot_reply,
+                'type': 'bot'
+                },
+            'metadata': {
+                'emotion': emotion,
+                'confidence': confidence,
+                'is_crisis': is_crisis,
+                'crisis_type': crisis_type if is_crisis else None,
+                'timestamp': datetime.now().isoformat(),
+                'workshop_url': workshop_url if should_redirect else None,
+                'redirect_attempted': should_redirect,
+                'redirect_success': redirect_success,
+                'requires_immediate_help': is_crisis and crisis_confidence > 0.7,
+                'counselor_referral': self._should_refer_to_counselor(emotion, confidence),
+                'suggested_exercises': exercises[:2]
+            }
             }
             
         except Exception as e:
-            logger.error(f"Error generating response: {str(e)}")
-            return self._get_crisis_fallback_response(
-                emotion if 'emotion' in locals() else 'neutral',
-                'crisis' in locals() and is_crisis,
-                self.redirect_manager.get_workshops_url() if hasattr(self, 'redirect_manager') else None
+                logger.error(f"Error in response generation: {str(e)}")
+                return self._get_crisis_fallback_response(
+        emotion if 'emotion' in locals() else 'neutral',
+            'crisis' in locals() and is_crisis,
+            self.redirect_manager.get_workshops_url() if hasattr(self, 'redirect_manager') else None
             )
 
     def _get_chat_history(self, user_id):

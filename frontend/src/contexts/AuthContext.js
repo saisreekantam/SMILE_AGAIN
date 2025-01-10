@@ -20,13 +20,13 @@ export const AuthProvider = ({ children }) => {
     const login = (userDetails) => {
         setIsLoggedIn(true);
         setuserName(userDetails || "User");
-        
+        localStorage.setItem("user",userDetails);
     };
 
     const logout = () => {
         setUser(null);
         setIsLoggedIn(false);
-        
+        localStorage.removeItem("user");
     };
 
   

@@ -8,6 +8,7 @@ const WorkshopsList = () => {
   const [workshops, setWorkshops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showOptions, setShowOptions] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const WorkshopsList = () => {
   }
 
   return (
-    <div className="Container">
+    <div className="Containerr">
       <NavAfterLogin />
       <div className="container">
         <h1 className="header">Workshops</h1>
@@ -88,9 +89,21 @@ const WorkshopsList = () => {
             ))
           )}
         </div>
-        <button onClick={() => navigate("/workshops/create")} className="create-workshop-btn">
-          Create Workshop
-        </button>
+
+        {/* Floating Action Button */}
+        <div
+          className="fab-container"
+          onMouseEnter={() => setShowOptions(true)}
+          onMouseLeave={() => setShowOptions(false)}
+        >
+          <button className="fab-button">+</button>
+          {showOptions && (
+            <div className="fab-options">
+              <button onClick={() => navigate("/workshops/create")}>Add Workshop</button>
+              <button onClick={() => console.log("Delete Workshop clicked")}>Delete Workshop</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

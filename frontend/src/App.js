@@ -21,6 +21,8 @@ import FriendRequestsPage from './NotificationsPage';
 import PostPage from './PostsPage';
 import MoodTrackerPage from './MoodDescription';
 import ChatPage from './FriendChatPage';
+import EnhancedActivityDashboard from './ActivitiesPage';
+import BlogDetailsPage from './BlogDetailsPage';
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
         <Route path='/home' element={<ChatBotPage />} />
         <Route path='/myProfile' element={<ProfilePage />} />
         <Route path='/blogs' element={<BlogsPage />} />
+        <Route path='/blogs/:blogId' element={<BlogDetailsPage />} />
         <Route path='/blogs/:blogId/comments' element={<CommentsPage />} />
         <Route path='/groups' element={<GroupChatPage />} />
         <Route path='/groups/:groupId' element={<GroupPage />} />
@@ -47,6 +50,7 @@ function App() {
         <Route path='/community/:postId' element={<PostPage />} />
         <Route path='/mood_entry' element={<MoodTrackerPage />} />
         <Route path='/friends/:friendId' element={<ChatPage />} />
+        <Route path='/activities' element={<EnhancedActivityDashboard />} />
       </Routes>
     </>
   );

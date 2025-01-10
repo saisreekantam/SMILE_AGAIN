@@ -1,54 +1,91 @@
-/* Overall page styling */
+/* General Styles */
+
 .chats-page {
-    font-family: 'Arial', sans-serif;
-    color: #fff;
-    background-color: #000;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  color: #e0e0e0;
+  background: linear-gradient(to bottom, #1d005e, #29008a); /* Purple-blue gradient */
+  background:  url('./assets/ChatsBg.jpg');
   
-  /* Navigation styling */
-  .navigation {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-    background-color: #111;
-    border-bottom: 2px solid #333;
-  }
-  
-  .nav-button {
-    background: #222;
-    color: #fff;
-    border: 1px solid #333;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    margin: 0 0.5rem;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-  }
-  
-  .nav-button:hover {
-    background: #444;
-    transform: scale(1.05);
-  }
-  
-  .nav-button.active {
-    background: #555;
-    border-color: #777;
-    font-weight: bold;
-  }
-  
-  /* Content area styling */
-  .content {
-    flex-grow: 1;
-    padding: 2rem;
-    background-color: #111;
-    overflow-y: auto;
-  }
-  
-  .content > * {
-    margin: auto;
-    max-width: 800px;
-  }
-  
+}
+.chats-page .navContainer{
+  width: 90%;
+}
+
+.navigation {
+  display: flex;
+  justify-content: center;
+  background-color: rgba(33, 0, 77, 0.9); /* Dark purple with slight transparency */
+  padding: 10px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid #3e00b7;
+  width: 90%;
+}
+
+.nav-button {
+  background: none;
+  border: 2px solid transparent;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  margin: 0 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(62, 0, 183, 0.8); /* Hover effect */
+  border-color: #7a00ff;
+  color: #ffffff;
+}
+
+.nav-button.active {
+  background-color: #3e00b7; /* Highlighted button */
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: rgba(45, 0, 105, 0.9); /* Slightly darker tone */
+  border-radius: 12px;
+  margin: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+  width: 90%;
+}
+
+/* Styling for Individual Components */
+.content > div {
+  background-color: #24005e; /* Component background */
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Scrollbar Customization */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(33, 0, 77, 0.5);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #3e00b7;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #7a00ff;
+}

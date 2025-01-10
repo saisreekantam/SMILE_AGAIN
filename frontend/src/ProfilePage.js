@@ -3,9 +3,12 @@ import './ProfilePage.css';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NavAfterLogin from './NavAfterLogin';
+import { useAuth } from './contexts/AuthContext';
+import Userimg from '../src/assets/UserPhoto.jpg'
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
+  const { logout } = useAuth();
   const navigate=useNavigate();
 
   useEffect(() => {
@@ -37,33 +40,36 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="profile-page">
+    <div className="profile-page-container">
       <NavAfterLogin />
-      <div className="profile-header">
-        <button
-          className="notifications-button"
-          onClick={() => navigate('/notifications')}
-        >
-          Notifications
-        </button>
-      </div>
-      <div className="profile-container">
-        <img
-          src={profile.profilePic}
-          alt={`${profile.name}'s profile`}
-          className="profile-pic"
-        />
-        <div className="profile-details">
-          <h1 className="profile-name">{profile.name}</h1>
-          <p className="profile-email">Email: {profile.email}</p>
-          <p className="profile-gender">Gender: {profile.gender}</p>
-          <p className="profile-description">About: {profile.description}</p>
+      <div className='profile-page'>
+        <div className="profile-header-pehla">
+          <button
+            className="notifications-button"
+            onClick={() => navigate('/notifications')}
+          >
+            Notifications
+          </button>
         </div>
+        <div className="profile-container">
+          {console.log(profile.profile_pic)}
+          <img
+            src={profile.profile_pic==="/static/default.jpg" ? Userimg : profile.profile_pic}
+            alt={`${profile.name}'s profile`}
+            className="profile-pic"
+          />
+          <div className="profile-details">
+            <h1 className="profile-name">{profile.name}</h1>
+            <p className="profile-email">Email: {profile.email}</p>
+            <p className="profile-gender">Gender: {profile.gender}</p>
+            <p className="profile-description">About: {profile.description}</p>
+          </div>
+        </div>
+        <div className="friends-link">
+          <Link to="/friends">View Friends</Link>
+        </div>
+        <button onClick={handleLogout}>Logout</button>
       </div>
-      <div className="friends-link">
-        <Link to="/friends">View Friends</Link>
-      </div>
-      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };

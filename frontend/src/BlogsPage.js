@@ -79,7 +79,10 @@ const BlogsPage = () => {
                         <div 
                             key={blog.blog_id} 
                             className="blog-card" 
-                            onClick={() => navigate(`/blogs/${blog.blog_id}`)} // Navigate to blog details page
+                            onClick={() =>{
+                                console.log("Navigating with blog:",blog); 
+                                navigate(`/blogs/${blog.blog_id}`,{state: { blog }})} // Navigate to blog details page
+                            }
                             style={{ cursor: "pointer" }}
                         >
                             <h3 className="user-community">

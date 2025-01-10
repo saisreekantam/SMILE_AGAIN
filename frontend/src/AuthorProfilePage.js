@@ -63,7 +63,7 @@ const UserProfileView = () => {
   }
 
   return (
-    <div className="container">
+    <div className="container-author">
       <div className="profile-card">
         <div className="profile-header">
           <h2 className="profile-title">{profile.name}'s Profile</h2>

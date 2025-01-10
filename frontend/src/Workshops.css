@@ -1,143 +1,232 @@
-/* Container */
+/* General Page Styles */
+
+.Containerr{
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: linear-gradient(to bottom, #2a005e, #3e006e); /* Blueish purple gradient */
+  color: #e0e0e0;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  flex-direction: column;
+}
+.Containerr .navContainer{
+  width: 90%;
+}
+
+
+
 .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #ffffff;
-    color: #000000;
-    font-family: Arial, sans-serif;
-  }
-  
-  /* Header */
-  .header {
-    text-align: center;
-    font-size: 32px;
-    margin-bottom: 20px;
-    color: #000000;
-  }
-  
-  /* Workshops List */
-  .workshops-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  /* Workshop Card */
-  .workshop-card {
-    flex: 1 1 calc(45% - 20px);
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    color: #000000;
-    position: relative;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .workshop-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Sponsored Tag */
-  .sponsored-tag {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #4caf50; /* Green */
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-  
-  /* Workshop Title */
-  .workshop-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #000000;
-  }
-  
-  /* Workshop Description */
-  .workshop-description {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #333333;
-  }
-  
-  /* Workshop Details */
-  .workshop-details {
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-  
-  /* Workshop Banner */
-  .workshop-banner {
-    width: 100%;
-    border-radius: 8px;
-    margin: 10px 0;
-  }
-  
-  /* Buttons */
-  .workshop-buttons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .view-feedback-btn {
-    background-color: #000000;
-    color: #ffffff;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .view-feedback-btn:hover {
-    background-color: #333333;
-  }
-  
-  .meet-link {
-    background-color: #000000;
-    color: #ffffff;
-    text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .meet-link:hover {
-    background-color: #333333;
-  }
-  
-  /* Create Workshop Button */
-  .create-workshop-btn {
-    display: block;
-    margin: 20px auto;
-    padding: 12px 20px;
-    font-size: 16px;
-    background-color: #000000;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .create-workshop-btn:hover {
-    background-color: #333333;
-  }
-  
-  /* Loading and Error Messages */
-  .loading,
-  .error {
-    text-align: center;
-    font-size: 18px;
-    margin-top: 20px;
-    color: #000000;
-  }
-  
+  width: 87%;
+  height: 100%;
+  margin: 0 20px;
+  padding: 20px;
+  background-color: rgba(30, 30, 30, 0.95);
+  /* border-radius: 12px; */
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.7);
+}
+
+.header {
+  font-size: 2.5rem;
+  color: #9fa8da;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.loading,
+.error {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 50px;
+  color: #c5cae9;
+}
+
+.no-workshops-message {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #c5cae9;
+  margin: 20px 0;
+}
+
+/* Workshop Card Styles */
+.workshops-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.workshop-card {
+  background-color: #202020;
+  color: #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  width: calc(33% - 20px);
+  min-width: 300px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.workshop-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.9);
+}
+
+.sponsored {
+  border: 2px solid #ffeb3b;
+}
+
+.sponsored-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ffeb3b;
+  color: #202020;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.workshop-title {
+  font-size: 1.5rem;
+  color: #9fa8da;
+  margin-bottom: 10px;
+}
+
+.workshop-description {
+  font-size: 1.1rem;
+  color: #c5cae9;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.workshop-details {
+  font-size: 1rem;
+  color: #c5cae9;
+  margin-bottom: 10px;
+}
+
+.workshop-banner {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  max-height: 200px;
+  object-fit: cover;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Buttons */
+.workshop-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.view-feedback-btn {
+  background-color: #5c6bc0;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-feedback-btn:hover {
+  background-color: #3f51b5;
+}
+
+.meet-link {
+  background-color: #5c6bc0;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.meet-link:hover {
+  background-color: #3f51b5;
+}
+
+.create-workshop-btn {
+  background-color: #5c6bc0;
+  color: #ffffff;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
+  transition: background-color 0.3s ease;
+}
+
+.create-workshop-btn:hover {
+  background-color: #3f51b5;
+}
+
+.fab-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 150px;
+  width: 100px;
+}
+
+.fab-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+
+}
+
+.fab-button:hover {
+  background-color: #0056b3;
+}
+
+.fab-options {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fab-options button {
+  background-color: white;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.fab-options button:hover {
+  background-color: #007bff;
+  color: white;
+}
+

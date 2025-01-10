@@ -65,7 +65,7 @@ const MoodTrackerPage = () => {
         }
       );
       console.log(response.data.message);
-      if (response.data.message=="Mood entry created successfully") {
+      if (response.data.message==="Mood entry created successfully") {
         navigate('/home'); // Redirect to chatbot after submission
       }
     } catch (err) {
@@ -83,7 +83,7 @@ const MoodTrackerPage = () => {
       <div className="mood-journal-container">
         <div className="mood-header">
           <h1>Mood Journal</h1>
-          <p>How are you feeling today?</p>
+          <p style={{color:'black'}}>How are you feeling today?</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mood-form">
@@ -95,9 +95,10 @@ const MoodTrackerPage = () => {
                 type="button"
                 className={`mood-button ${moodData.mood_level === parseInt(level) ? 'selected' : ''}`}
                 onClick={() => handleMoodChange(parseInt(level))}
+                style={{color:'black'}}
               >
-                <span className="mood-number">{level}</span>
-                <span className="mood-label">{label}</span>
+                <span className="mood-number" style={{color:'black'}}>{level}</span>
+                <span className="mood-label" style={{color:'black'}}>{label}</span>
               </button>
             ))}
           </div>
@@ -112,6 +113,7 @@ const MoodTrackerPage = () => {
                   type="button"
                   className={`emotion-tag ${moodData.emotions.includes(value) ? 'selected' : ''}`}
                   onClick={() => handleEmotionToggle(value)}
+                  style={{color:'black'}}
                 >
                   {label}
                 </button>

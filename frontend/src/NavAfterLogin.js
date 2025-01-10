@@ -3,10 +3,10 @@ import "./NavAfterLogin.css"
 import { useAuth } from "./contexts/AuthContext";
 
 const NavAfterLogin=React.memo(() => {
-    const { username } = useAuth();
-    console.log("username in navafterlogin ",username);
-    const userName=username || "User";
-    console.log(userName);
+    // let username=localStorage.getItem("user");
+    // const data = JSON.parse(username);
+    // username=data.username || "User";
+    // console.log(username);
     return(
         <div className="navContainer">
             <nav className="TopNavBar">

@@ -1,18 +1,17 @@
-body {
+.blog-details-container {
+    padding: 20px;
+    max-width: 100vw;
+    margin: auto;
+    background-color: #111; /* Slightly lighter black for contrast */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Subtle white glow */
     background-color: #000; /* Black background */
     color: #fff; /* White text */
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-}
-
-.blog-details-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-    background-color: #111; /* Slightly lighter black for contrast */
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Subtle white glow */
+    align-self: center;
+    left: 50%;
 }
 
 .blog-title {

@@ -1,0 +1,73 @@
+/* ActivitiesPage.css */
+.centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    padding: 1.5rem;
+  }
+  
+  .centered-content {
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  .card {
+    border: 2px solid #333;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background-color: #242424;
+    text-align: center;
+  }
+  
+  .card-title {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .card-description {
+    color: #9ca3af;
+    margin-bottom: 1rem;
+  }
+  
+  .card-button {
+    background-color: #2563eb;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
+  
+  .card-button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .border-container {
+    border: 2px dashed #555;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .chart-container {
+    height: 300px;
+    margin: 2rem 0;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  

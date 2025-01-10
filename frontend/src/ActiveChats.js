@@ -40,7 +40,7 @@ const Chats = () => {
   }
 
   return (
-    <div className="container">
+    <div className="container-chats">
       <h2 className="header">Chats</h2>
       {Chats.length === 0 ? (
         <div className="no-chats">No chats available.</div>
