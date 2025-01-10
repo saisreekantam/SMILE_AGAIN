@@ -1,44 +1,59 @@
+/* Container for the navigation bar */
+.navContainer {
+  background: linear-gradient(135deg, #6a11cb, #2575fc); /* Bluish-purple gradient */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  left: 300px;
+}
+
+/* Top navigation bar styling */
 .TopNavBar {
-    display: flex;
-    justify-content: space-between; /* Space out Logo and Links */
-    align-items: center; /* Vertically center the elements */
-    height: 80px;
-    width: 100%; /* Ensure it takes full width of the parent */
-    padding: 0 20px; /* Optional: padding to add some space on the sides */
-    color: black;
-    box-sizing: border-box; /* Ensures padding doesn't affect width */
-    background-color: black;
-  }
-  .Smile{
-    color: gray;
-  }
-  .Again{
-    color: white;
-  }
-  
-  .Logo {
-    font-size: 24px;
-    font-weight: bold;
-    white-space: nowrap; /* Prevent logo text from wrapping */
-  }
-  
-  
-  .Links {
-    display: flex; /* Align links horizontally */
-    gap: 15px; /* Space between the links */
-    margin-left: auto; /* Push Links div to the right */
-    flex-wrap: nowrap; /* Ensure no wrapping of links */
-    color: white;
-  }
-  
-  .Links a {
-    text-decoration: none;
-    color: white;
-    font-size: 16px;
-    font-weight: 500;
-    white-space: nowrap; /* Prevent links from wrapping */
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  font-family: "Arial", sans-serif;
+  left: 300px;
+}
+
+/* Logo styling */
+.Logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.Smile {
+  color: #ffe53b; /* Yellowish accent */
+}
+
+.Again {
+  color: white;
+}
+
+/* Links styling */
+.Links a {
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+  margin: 0 15px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.Links a:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Subtle hover effect */
+  color: #ffe53b; /* Accent color on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .TopNavBar {
-    overflow: hidden; /* Prevent horizontal scroll */
+    flex-direction: column;
+    text-align: center;
   }
+
+  .Links a {
+    margin: 10px 0;
+  }
+}
