@@ -61,7 +61,7 @@ const ProblemDescriptionForm=() => {
 
                 ))}
                 {currentStep === formFields.length-1 && (
-                    <button type="submit">Submit</button>
+                    <button type="submit" className="Problem-Button">Submit</button>
                 )}
             </form>
         </div>

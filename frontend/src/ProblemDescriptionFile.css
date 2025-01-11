@@ -41,7 +41,7 @@
   }
   
   /* Submit Button */
-  button[type="submit"] {
+  .Problem-Button {
     width: 100%;
     padding: 10px;
     border: none;

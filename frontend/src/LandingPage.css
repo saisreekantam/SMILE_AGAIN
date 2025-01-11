@@ -70,6 +70,8 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    opacity: 0;
+    animation: slideUp 1s ease-in-out forwards; /* Slide-up effect for the text */
   }
   .center h2{
     z-index: 2;
@@ -78,6 +80,7 @@
     width: 200px;
     top: 100px;
   }
+
   .LeftImages,.RightImages{
     flex-grow: 1;
     background-color: black;
@@ -87,7 +90,33 @@
     width: fit-content;
     height: 100%;
     position: relative;
+    opacity: 0;
+    animation: fadeIn 1s ease-in-out forwards; /* Fade-in effect for images */
   }
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+
+  
+
+  
   .ImageContainer{
     position: relative;
     display: inline-block;

@@ -13,7 +13,7 @@ const CommunityPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [id,setId]  = useState(1);
+  const [community_id,setId]  = useState(1);
   const navigate=useNavigate();
 
   useEffect(() => {
@@ -111,7 +111,7 @@ const CommunityPage = () => {
   return (
     <div className="community-page">
       <button onClick={() => {
-        navigate(`/your_smile_journey/${id}`)
+        navigate(`/your_smile_journey/${community_id}`)
       }}>View Your Journey</button>
       {community && (
         <div className="community-header">

@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import NavAfterLogin from './NavAfterLogin';
 import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
 import './ChatBotPage.css';
+import BotSpeech from './Bot_Speech';
+import SpeechInput from './Speech_Input';
 
 // Configure axios defaults for all requests
 axios.defaults.withCredentials = true;
@@ -188,6 +190,9 @@ const ChatBotPage = () => {
             >
               <div className="message-content">
                 {message.text}
+                {message.sender==='bot' && (
+                  <BotSpeech message={message.text}/>
+                )}
               </div>
               <div className="message-timestamp">
                 {formatTimestamp(message.timestamp)}
@@ -226,6 +231,11 @@ const ChatBotPage = () => {
             rows="1"
             className="chat-input"
           />
+          <div className='input-buttons'>
+            <SpeechInput onSpeechInput={(text) => setInput(text)}
+            isDisabled={isLoading}
+          />
+          </div>
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !input.trim()}

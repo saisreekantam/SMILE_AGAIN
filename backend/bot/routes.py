@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def register_routes(bp, db):
     # Initialize chatbot instance
-    chatbot = WebEmpatheticChatbot(db)
+    chatbot = WebEmpatheticChatbot()
 
     @bp.route('/chat', methods=['POST', 'OPTIONS'])
     @login_required

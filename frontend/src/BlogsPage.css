@@ -1,8 +1,8 @@
 
 .Blogs-container {
-  padding: 20px;
+  /* padding: 20px; */
   text-align: center;
-  width: 100%;
+  width: 100vw;
   font-family: 'Arial', sans-serif;
   background: linear-gradient(to bottom, rgba(42, 47, 100, 0.95), rgba(29, 27, 59, 0.95));
   color: #ffffff;
@@ -11,9 +11,12 @@
   align-items: center;
   flex-direction: column;
 }
+.Blogs-container .navContainer{
+  width: 100vw;
+}
 
 .blogs-container {
-  width: 1050px;
+  width: 100%;
   padding: 20px;
   background-color: rgba(50, 55, 120, 0.9); /* Semi-transparent background for blogs section */
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
@@ -25,6 +28,7 @@ h2 {
   color: #b6b8ff;
   font-weight: bold;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  text-decoration: none;
 }
 
 .add-blog-button {

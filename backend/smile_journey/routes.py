@@ -1,213 +1,219 @@
-from typing import Dict, List, Optional, Tuple
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from datetime import datetime
-import logging
-from sqlalchemy.exc import SQLAlchemyError
-from http import HTTPStatus
+from datetime import datetime, timedelta
+from sqlalchemy import func
+from typing import Dict, List, Optional
 
 from models import (
     JourneyPath, JourneyMilestone, UserJourneyProgress,
-    MilestoneProgress, UserCoins, CoinTransaction, User, Group
+    User, Group, UserProblem, db
 )
-from extensions import db
 
-# Configure logging
-logger = logging.getLogger(__name__)
+journey_bp = Blueprint('journey', __name__)
 
-class ActivityValidator:
-    """Validator for journey activities"""
-    
-    @staticmethod
-    def validate_activity(activity_type: str, data: Dict) -> Tuple[bool, str]:
-        """
-        Validate activity data based on type.
-        
-        Args:
-            activity_type: Type of activity to validate
-            data: Activity data to validate
-            
-        Returns:
-            Tuple[bool, str]: (is_valid, message)
-        """
-        if activity_type == 'study_session':
-            return ActivityValidator._validate_study_session(data)
-        elif activity_type == 'reflection':
-            return ActivityValidator._validate_reflection(data)
-        elif activity_type == 'connection':
-            return ActivityValidator._validate_connection(data)
-        return False, 'Invalid activity type'
+def register_journey_routes(app, db):
+    """Register all journey-related routes"""
 
-    @staticmethod
-    def _validate_study_session(data: Dict) -> Tuple[bool, str]:
-        required_fields = ['duration_minutes', 'subject', 'technique_used']
-        if not all(field in data for field in required_fields):
-            return False, "Missing required fields"
-        if not isinstance(data['duration_minutes'], int) or data['duration_minutes'] < 15:
-            return False, "Study session must be at least 15 minutes"
-        return True, "Valid study session"
-
-    @staticmethod
-    def _validate_reflection(data: Dict) -> Tuple[bool, str]:
-        if 'content' not in data or len(data['content'].strip()) < 100:
-            return False, "Reflection must be at least 100 characters"
-        return True, "Valid reflection"
-
-    @staticmethod
-    def _validate_connection(data: Dict) -> Tuple[bool, str]:
-        required_fields = ['connection_type', 'peer_id', 'activity_description']
-        if not all(field in data for field in required_fields):
-            return False, "Missing required fields"
-        if data['connection_type'] not in ['study_partner', 'study_group']:
-            return False, "Invalid connection type"
-        return True, "Valid connection"
-
-class JourneyManager:
-    """Manager class for journey-related operations"""
-    
-    @staticmethod
-    def initialize_default_paths():
-        """Initialize default journey paths if they don't exist"""
+    @journey_bp.route('/paths/<int:community_id>', methods=['GET'])
+    @login_required
+    def get_community_paths(community_id: int):
+        """Get available journey paths for a community"""
         try:
-            grade_stress_group = Group.query.filter_by(name="Grade Stress").first()
-            if grade_stress_group:
-                existing_path = JourneyPath.query.filter_by(community_id=grade_stress_group.id).first()
-                if not existing_path:
-                    JourneyManager._create_grade_stress_path(grade_stress_group.id)
+            # Verify the community exists
+            community = Group.query.get(community_id)
+            if not community:
+                return jsonify({'error': 'Community not found'}), 404
+
+            # Get paths for the community
+            paths = JourneyPath.query.filter_by(community_id=community_id).all()
+            paths_data = []
+
+            for path in paths:
+                # Get user's progress for this path
+                progress = UserJourneyProgress.query.filter_by(
+                    user_id=current_user.id,
+                    path_id=path.id
+                ).first()
+
+                # Get milestones for this path
+                milestones = JourneyMilestone.query.filter_by(
+                    path_id=path.id
+                ).order_by(JourneyMilestone.order_number).all()
+
+                # Build response data
+                paths_data.append({
+                    'id': path.id,
+                    'name': path.name,
+                    'description': path.description,
+                    'total_milestones': path.total_milestones,
+                    'coins_per_milestone': path.coins_per_milestone,
+                    'user_progress': {
+                        'started': bool(progress),
+                        'completed_milestones': progress.completed_milestones if progress else 0,
+                        'total_coins_earned': progress.total_coins_earned if progress else 0,
+                        'current_milestone': progress.current_milestone if progress else None,
+                        'current_streak': progress.current_streak if progress else 0
+                    },
+                    'milestones': [{
+                        'id': m.id,
+                        'title': m.title,
+                        'description': m.description,
+                        'type': m.milestone_type,
+                        'order_number': m.order_number,
+                        'coins_reward': m.coins_reward
+                    } for m in milestones]
+                })
+
+            return jsonify(paths_data)
+
         except Exception as e:
-            logger.error(f"Failed to initialize paths: {str(e)}")
-            raise
+            return jsonify({'error': str(e)}), 500
 
-    @staticmethod
-    def _create_grade_stress_path(group_id: int) -> JourneyPath:
-        """Create the grade stress journey path"""
-        path = JourneyPath(
-            community_id=group_id,
-            name="Grade Stress Relief Journey",
-            description="A step-by-step journey to manage academic stress",
-            total_milestones=7,
-            coins_per_milestone=50
-        )
-        db.session.add(path)
-        db.session.flush()
-
-        milestones = [
-            {
-                "title": "Start Your Journey",
-                "description": "Complete the initial stress assessment",
-                "order_number": 1,
-                "milestone_type": "reflection",
-                "coins_reward": 50,
-                "required_days": 1,
-                "required_activities": 1
-            },
-            # Add more milestones here...
-        ]
-
-        for milestone_data in milestones:
-            milestone = JourneyMilestone(path_id=path.id, **milestone_data)
-            db.session.add(milestone)
-
-        db.session.commit()
-        return path
-
-    @staticmethod
-    def get_journey_stats(user_id: int, path_id: int) -> Dict:
-        """Get comprehensive journey statistics"""
-        progress = UserJourneyProgress.query.filter_by(
-            user_id=user_id,
-            path_id=path_id
-        ).first()
-
-        if not progress:
-            return {'started': False, 'message': 'Journey not started'}
-
-        return {
-            'started': True,
-            'completed_milestones': progress.completed_milestones,
-            'total_coins_earned': progress.total_coins_earned,
-            'current_streak': progress.current_streak
-        }
-
-    @staticmethod
-    def get_leaderboard(path_id: int) -> List[Dict]:
-        """Get leaderboard entries for a path"""
-        entries = db.session.query(
-            UserJourneyProgress, User
-        ).join(
-            User, User.id == UserJourneyProgress.user_id
-        ).filter(
-            UserJourneyProgress.path_id == path_id
-        ).order_by(
-            UserJourneyProgress.completed_milestones.desc(),
-            UserJourneyProgress.total_coins_earned.desc()
-        ).limit(10).all()
-
-        return [{
-            'user_id': entry.User.id,
-            'name': entry.User.name,
-            'completed_milestones': entry.UserJourneyProgress.completed_milestones,
-            'total_coins': entry.UserJourneyProgress.total_coins_earned,
-            'current_streak': entry.UserJourneyProgress.current_streak
-        } for entry in entries]
-
-class JourneyRoutes:
-    """Journey routes handler"""
-    
-    def __init__(self, blueprint: Blueprint):
-        """Initialize journey routes handler"""
-        self.blueprint = blueprint
-        self.validator = ActivityValidator()
-        self.register_routes()
-
-    def register_routes(self):
-        """Register all journey-related routes"""
-        
-        @self.blueprint.route('/paths/<int:community_id>', methods=['GET'])
-        @login_required
-        def get_community_paths(community_id: int) -> Tuple[Dict, int]:
-            try:
-                paths = JourneyPath.query.filter_by(community_id=community_id).all()
-                paths_data = []
-                
-                for path in paths:
-                    user_progress = UserJourneyProgress.query.filter_by(
-                        user_id=current_user.id,
-                        path_id=path.id
-                    ).first()
-                    
-                    paths_data.append({
-                        'id': path.id,
-                        'name': path.name,
-                        'description': path.description,
-                        'total_milestones': path.total_milestones,
-                        'coins_per_milestone': path.coins_per_milestone,
-                        'user_progress': {
-                            'started': bool(user_progress),
-                            'completed_milestones': user_progress.completed_milestones if user_progress else 0,
-                            'total_coins_earned': user_progress.total_coins_earned if user_progress else 0
-                        }
-                    })
-                    
-                return jsonify(paths_data), HTTPStatus.OK
-                
-            except Exception as e:
-                logger.error(f"Error in get_community_paths: {str(e)}")
-                return jsonify({'error': 'Failed to retrieve paths'}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-        # Add other route handlers here...
-
-def register_journey_routes(app):
-    """Register journey routes with the application"""
-    journey_bp = Blueprint('journey', __name__)
-    routes_handler = JourneyRoutes(journey_bp)
-    
-    # Initialize journey paths
-    with app.app_context():
+    @journey_bp.route('/start/<int:path_id>', methods=['POST'])
+    @login_required
+    def start_journey(path_id: int):
+        """Start a new journey path"""
         try:
-            JourneyManager.initialize_default_paths()
+            # Check if path exists
+            path = JourneyPath.query.get(path_id)
+            if not path:
+                return jsonify({'error': 'Journey path not found'}), 404
+
+            # Check if user already started this path
+            existing_progress = UserJourneyProgress.query.filter_by(
+                user_id=current_user.id,
+                path_id=path_id
+            ).first()
+
+            if existing_progress:
+                return jsonify({'message': 'Journey already started',
+                              'progress_id': existing_progress.id}), 200
+
+            # Create new progress entry
+            new_progress = UserJourneyProgress(
+                user_id=current_user.id,
+                path_id=path_id,
+                started_at=datetime.utcnow()
+            )
+            db.session.add(new_progress)
+            db.session.commit()
+
+            return jsonify({
+                'message': 'Journey started successfully',
+                'progress_id': new_progress.id
+            })
+
         except Exception as e:
-            logger.error(f"Failed to initialize journey paths: {str(e)}")
-    
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @journey_bp.route('/milestone/<int:milestone_id>/complete', methods=['POST'])
+    @login_required
+    def complete_milestone(milestone_id: int):
+        """Mark a milestone as completed"""
+        try:
+            milestone = JourneyMilestone.query.get(milestone_id)
+            if not milestone:
+                return jsonify({'error': 'Milestone not found'}), 404
+
+            # Get user's progress for this path
+            progress = UserJourneyProgress.query.filter_by(
+                user_id=current_user.id,
+                path_id=milestone.path_id
+            ).first()
+
+            if not progress:
+                return jsonify({'error': 'Journey not started'}), 400
+
+            if milestone.order_number != progress.current_milestone:
+                return jsonify({'error': 'Cannot skip milestones'}), 400
+
+            # Update progress
+            progress.completed_milestones += 1
+            progress.current_milestone += 1
+            progress.total_coins_earned += milestone.coins_reward
+            progress.last_activity_date = datetime.utcnow()
+
+            # Update streak
+            if progress.last_activity_date:
+                days_diff = (datetime.utcnow() - progress.last_activity_date).days
+                if days_diff <= 1:
+                    progress.current_streak += 1
+                else:
+                    progress.current_streak = 1
+            else:
+                progress.current_streak = 1
+
+            db.session.commit()
+
+            return jsonify({
+                'message': 'Milestone completed',
+                'coins_earned': milestone.coins_reward,
+                'current_streak': progress.current_streak
+            })
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @journey_bp.route('/progress', methods=['GET'])
+    @login_required
+    def get_progress():
+        """Get user's progress across all journeys"""
+        try:
+            progress_entries = UserJourneyProgress.query.filter_by(
+                user_id=current_user.id
+            ).all()
+
+            progress_data = []
+            for entry in progress_entries:
+                path = JourneyPath.query.get(entry.path_id)
+                current_milestone = JourneyMilestone.query.filter_by(
+                    path_id=path.id,
+                    order_number=entry.current_milestone
+                ).first()
+
+                progress_data.append({
+                    'path_name': path.name,
+                    'completed_milestones': entry.completed_milestones,
+                    'total_milestones': path.total_milestones,
+                    'current_milestone': {
+                        'title': current_milestone.title if current_milestone else None,
+                        'description': current_milestone.description if current_milestone else None
+                    },
+                    'coins_earned': entry.total_coins_earned,
+                    'current_streak': entry.current_streak
+                })
+
+            return jsonify(progress_data)
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @journey_bp.route('/stats', methods=['GET'])
+    @login_required
+    def get_journey_stats():
+        """Get user's journey statistics"""
+        try:
+            # Get all user progress entries
+            progress_entries = UserJourneyProgress.query.filter_by(
+                user_id=current_user.id
+            ).all()
+
+            total_coins = sum(p.total_coins_earned for p in progress_entries)
+            total_milestones = sum(p.completed_milestones for p in progress_entries)
+            current_streaks = [p.current_streak for p in progress_entries]
+            max_streak = max(current_streaks) if current_streaks else 0
+
+            return jsonify({
+                'total_coins_earned': total_coins,
+                'total_milestones_completed': total_milestones,
+                'highest_streak': max_streak,
+                'active_journeys': len(progress_entries)
+            })
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    # Register the blueprint with the app
     app.register_blueprint(journey_bp, url_prefix='/journey')
-    return journey_bp

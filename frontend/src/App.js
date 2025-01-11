@@ -54,7 +54,7 @@ function App() {
         <Route path='/friends/:friendId' element={<ChatPage />} />
         <Route path='/activities' element={<EnhancedActivityDashboard />} />
         <Route path='/meditation_timer' element={<MeditationTimer />} />
-        <Route path='/your_smile_journey/:id' element={<JourneyDashboard />} />
+        <Route path='/your_smile_journey/:community_id' element={<JourneyDashboard />} />
       </Routes>
     </>
   );

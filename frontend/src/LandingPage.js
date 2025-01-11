@@ -1,5 +1,5 @@
 import './LandingPage.css'
-import React,{ useEffect } from 'react'
+import React,{ useEffect,useState } from 'react'
 import image1 from './assets/Image1.jpg'
 import image2 from './assets/Image2.jpg'
 import image3 from './assets/Image3.jpg'
@@ -10,6 +10,22 @@ import { useAuth } from './contexts/AuthContext'
 
 function LandingPage() {
   const { isLoggedIn } = useAuth();
+  const [showText, setShowText] = useState(false);
+  const [showImages, setShowImages] = useState(false);
+
+  useEffect(() => {
+    // Show the text first
+    setShowText(true);
+
+    // Delay for showing images
+    const imageDelay = setTimeout(() => {
+      setShowImages(true);
+    }, 1000); // 1-second delay
+
+    return () => {
+      clearTimeout(imageDelay); // Cleanup timeout
+    };
+  }, []);
   useEffect(() => {
     const scrollContainer = document.querySelector('.ImagesContainer');
   

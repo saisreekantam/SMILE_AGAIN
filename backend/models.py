@@ -373,90 +373,52 @@ def add_to_user_model():
     # Add this property to User model
     User.meditation_metrics = meditation_metrics
 class JourneyPath(db.Model):
-    """Model for different journey paths available in communities"""
+    """Journey path model"""
     __tablename__ = 'journey_path'
-    
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer, primary_key=True)
     community_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
-    total_milestones = db.Column(db.Integer, default=0)
+    total_milestones = db.Column(db.Integer, default=7)
     coins_per_milestone = db.Column(db.Integer, default=50)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Relationships
+    milestones = db.relationship('JourneyMilestone', backref='path', lazy=True)
+    user_progress = db.relationship('UserJourneyProgress', backref='path', lazy=True)
+
 class JourneyMilestone(db.Model):
-    """Model for individual milestones in a journey path"""
+    """Journey milestone model"""
     __tablename__ = 'journey_milestone'
-    
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer, primary_key=True)
     path_id = db.Column(db.Integer, db.ForeignKey('journey_path.id'))
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     order_number = db.Column(db.Integer, nullable=False)
+    milestone_type = db.Column(db.String(50))  # reflection, activity, connection
     coins_reward = db.Column(db.Integer, default=50)
-    required_days = db.Column(db.Integer, default=1)
-    required_activities = db.Column(db.Integer, default=1)
-    
-    # Define what type of milestone this is
-    milestone_type = db.Column(db.String(50), default='activity')  # activity, reflection, connection
-    
-    # Additional requirements based on type
-    activity_type = db.Column(db.String(50))  # meditation, exercise, etc.
-    reflection_prompt = db.Column(db.Text)
-    connection_requirement = db.Column(db.String(100))
+    required_days = db.Column(db.Integer)
+    required_activities = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class UserJourneyProgress(db.Model):
-    """Model to track user progress in journey paths"""
+    """User journey progress model"""
     __tablename__ = 'user_journey_progress'
-    
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     path_id = db.Column(db.Integer, db.ForeignKey('journey_path.id'))
-    current_milestone = db.Column(db.Integer, db.ForeignKey('journey_milestone.id'))
+    current_milestone = db.Column(db.Integer, default=1)
     completed_milestones = db.Column(db.Integer, default=0)
     total_coins_earned = db.Column(db.Integer, default=0)
-    started_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_activity_date = db.Column(db.DateTime)
     current_streak = db.Column(db.Integer, default=0)
-    
-    # Relationship
-    progress_details = db.relationship('MilestoneProgress', backref='user_progress', lazy=True)
-
-class MilestoneProgress(db.Model):
-    """Model to track detailed progress for each milestone"""
-    __tablename__ = 'milestone_progress'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_progress_id = db.Column(db.Integer, db.ForeignKey('user_journey_progress.id'))
-    milestone_id = db.Column(db.Integer, db.ForeignKey('journey_milestone.id'))
-    activities_completed = db.Column(db.Integer, default=0)
-    days_active = db.Column(db.Integer, default=0)
-    reflection_submitted = db.Column(db.Boolean, default=False)
-    connections_made = db.Column(db.Integer, default=0)
-    completed = db.Column(db.Boolean, default=False)
-    completed_at = db.Column(db.DateTime)
-    coins_earned = db.Column(db.Integer, default=0)
-
-class UserCoins(db.Model):
-    """Model to track user's coin balance and transactions"""
-    __tablename__ = 'user_coins'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    balance = db.Column(db.Integer, default=0)
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
-
-class CoinTransaction(db.Model):
-    """Model to track coin transactions"""
-    __tablename__ = 'coin_transaction'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    amount = db.Column(db.Integer, nullable=False)
-    transaction_type = db.Column(db.String(50))  # earned, spent
-    source = db.Column(db.String(100))  # milestone, activity, bonus
-    description = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    last_activity_date = db.Column(db.DateTime)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
 class Notification(db.Model):
     """
     Model for storing user notifications including friend requests.
