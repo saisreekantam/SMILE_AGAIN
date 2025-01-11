@@ -3,7 +3,7 @@
     background-color: black;
     position: relative;
   }
-  
+   
   .TopNavBar {
     display: flex;
     justify-content: space-between; /* Space out Logo and Links */
