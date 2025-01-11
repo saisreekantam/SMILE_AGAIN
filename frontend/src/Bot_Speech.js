@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Globe } from 'lucide-react';
 
-const BotSpeech = ({ message }) => {
+const VOICE_PREFERENCES = {
+  en: {
+    preferred: ['Microsoft Zira', 'Microsoft Ravi', 'hi-IN', 'en-IN','te-IN'],
+    fallback: 'en-US'
+  },
+  hi: { preferred: ['hi-IN'], fallback: 'hi' },
+  te: { preferred: ['te-IN'], fallback: 'te' },
+  ta: { preferred: ['ta-IN'], fallback: 'ta' },
+  ml: { preferred: ['ml-IN'], fallback: 'ml' },
+  kn: { preferred: ['kn-IN'], fallback: 'kn' },
+  bn: { preferred: ['bn-IN'], fallback: 'bn' },
+  gu: { preferred: ['gu-IN'], fallback: 'gu' },
+  mr: { preferred: ['mr-IN'], fallback: 'mr' }
+};
+
+const BotSpeech = ({ message, language = 'en' }) => {
   const [speaking, setSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [voices, setVoices] = useState([]);
-
-  const emojiVoiceMapping = {
-    happy: ["😊", "😁", "😃", "😄"],
-    sad: ["😢", "😞", "😔"],
-    angry: ["😡", "😠"],
-    surprised: ["😲", "😮", "😯"],
-  };
+  const [selectedVoice, setSelectedVoice] = useState(null);
 
   const removeEmojis = (text) => {
     return text
@@ -23,26 +32,26 @@ const BotSpeech = ({ message }) => {
       .trim();
   };
 
-  const getVoiceByEmoji = (text) => {
-    for (const [emotion, emojis] of Object.entries(emojiVoiceMapping)) {
-      for (const emoji of emojis) {
-        if (text.includes(emoji)) {
-          switch (emotion) {
-            case 'happy':
-              return voices.find((voice) => voice.name.toLowerCase().includes('female'));
-            case 'sad':
-              return voices.find((voice) => voice.name.toLowerCase().includes('male'));
-            case 'angry':
-              return voices.find((voice) => voice.name.toLowerCase().includes('robot'));
-            case 'surprised':
-              return voices.find((voice) => voice.name.toLowerCase().includes('child'));
-            default:
-              return voices[0]; // Default voice
-          }
-        }
-      }
+  const findPreferredVoice = (availableVoices, languageCode) => {
+    const prefs = VOICE_PREFERENCES[languageCode];
+    if (!prefs) return null;
+
+    // Try to find a voice matching preferred options
+    for (const pref of prefs.preferred) {
+      // First, try to find an exact match for Indian English or Indian accent
+      const exactMatch = availableVoices.find(voice => 
+        voice.lang.toLowerCase().includes(pref.toLowerCase()) ||
+        voice.name.toLowerCase().includes(pref.toLowerCase())
+      );
+      if (exactMatch) return exactMatch;
     }
-    return voices[0]; // Default voice if no emoji is matched
+
+    // If no preferred voice found, try fallback
+    const fallbackVoice = availableVoices.find(voice => 
+      voice.lang.toLowerCase().startsWith(prefs.fallback.toLowerCase())
+    );
+
+    return fallbackVoice || availableVoices[0];
   };
 
   useEffect(() => {
@@ -52,37 +61,37 @@ const BotSpeech = ({ message }) => {
       const loadVoices = () => {
         const availableVoices = window.speechSynthesis.getVoices();
         setVoices(availableVoices);
+        
+        // Set preferred voice based on language
+        const voice = findPreferredVoice(availableVoices, language);
+        setSelectedVoice(voice);
       };
 
       window.speechSynthesis.onvoiceschanged = loadVoices;
       loadVoices();
     }
-  }, []);
-
-  useEffect(() => {
-    if (message && speechSupported) {
-      speak(message);
-    }
-  }, [message]);
+  }, [language]);
 
   const speak = (text) => {
     try {
       if (!speechSupported) return;
 
       window.speechSynthesis.cancel();
-
-      // Remove emojis from text before speaking
       const cleanedText = removeEmojis(text);
       const utterance = new SpeechSynthesisUtterance(cleanedText);
 
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-
-      const selectedVoice = getVoiceByEmoji(text);
-      if (selectedVoice) {
+      // Adjust voice properties for Indian accent when speaking English
+      if (language === 'en' && selectedVoice) {
         utterance.voice = selectedVoice;
+        utterance.rate = 0.9; // Slightly slower for clearer pronunciation
+        utterance.pitch = 1.1; // Slightly higher pitch for Indian accent
+      } else if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
       }
+
+      utterance.volume = 1.0;
 
       utterance.onstart = () => setSpeaking(true);
       utterance.onend = () => setSpeaking(false);

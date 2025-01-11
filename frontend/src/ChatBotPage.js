@@ -1,65 +1,62 @@
-// ChatBotPage.js
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NavAfterLogin from './NavAfterLogin';
 import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
+import { Globe } from 'lucide-react';
 import './ChatBotPage.css';
-import { Mic } from 'lucide-react';
 import BotSpeech from './Bot_Speech';
 import SpeechInput from './Speech_Input';
 
-// Configure axios defaults for all requests
+// Supported languages configuration
+const SUPPORTED_LANGUAGES = {
+  en: { name: 'English', code: 'en-US' },
+  hi: { name: 'हिंदी', code: 'hi-IN' },
+  te: { name: 'తెలుగు', code: 'te-IN' },
+  ta: { name: 'தமிழ்', code: 'ta-IN' },
+  ml: { name: 'മലയാളം', code: 'ml-IN' },
+  kn: { name: 'ಕನ್ನಡ', code: 'kn-IN' },
+  bn: { name: 'বাংলা', code: 'bn-IN' },
+  gu: { name: 'ગુજરાતી', code: 'gu-IN' },
+  mr: { name: 'मराठी', code: 'mr-IN' }
+};
+
+// Configure axios defaults
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'http://localhost:8000';
 
-/**
- * ChatBotPage Component
- * Provides an interface for users to interact with the AI chatbot
- * Features include real-time chat, message history, and stress detection
- */
 const ChatBotPage = () => {
   // State management
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Refs for DOM manipulation
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+
+  // Refs
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
-  
-  // Navigation and authentication
+
+  // Auth and navigation
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  // Effect to redirect if not logged in
-  // useEffect(() => {
-  //   if (!isLoggedIn) {
-  //     navigate('/login');
-  //   }
-  // }, [isLoggedIn, navigate]);
-
-  // Effect to scroll to bottom when messages update
+  // Scroll to bottom when messages update
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Effect to focus input on mount
+  // Focus input on mount
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
-  /**
-   * Formats timestamp for message display
-   * @param {Date} timestamp - Message timestamp
-   * @returns {string} Formatted time string
-   */
   const formatTimestamp = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString([], {
       hour: '2-digit',
@@ -67,29 +64,31 @@ const ChatBotPage = () => {
     });
   };
 
-  /**
-   * Handles sending messages to the chatbot
-   * Includes error handling and loading states
-   */
+  const handleLanguageChange = (langCode) => {
+    setSelectedLanguage(langCode);
+    setShowLanguageMenu(false);
+  };
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     setIsLoading(true);
     setError(null);
 
-    // Add user message immediately for better UX
-    const userMessage = { 
-      sender: 'user', 
-      text: input.trim(), 
-      timestamp: new Date() 
+    // Add user message immediately
+    const userMessage = {
+      sender: 'user',
+      text: input.trim(),
+      timestamp: new Date(),
+      language: selectedLanguage
     };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
 
     try {
-      // Send message to backend
       const response = await axios.post('/bot/chat', {
-        message: userMessage.text
+        message: input,
+        language: selectedLanguage
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -100,24 +99,19 @@ const ChatBotPage = () => {
         throw new Error(response.data.error);
       }
 
-      // Add bot response to chat
+      // Add bot response
       const botMessage = {
         sender: 'bot',
         text: response.data.message.content,
         timestamp: new Date(),
-        metadata: response.data.metadata // Include any additional metadata
+        metadata: response.data.metadata,
+        language: selectedLanguage
       };
       setMessages(prev => [...prev, botMessage]);
-
-      // Handle counselor referral if needed
-      if (botMessage.metadata?.counselor_referral) {
-        handleCounselorReferral();
-      }
 
     } catch (err) {
       console.error('Error sending message:', err);
       
-      // Handle different types of errors
       if (err.response?.status === 401) {
         navigate('/login');
         return;
@@ -128,17 +122,14 @@ const ChatBotPage = () => {
         sender: 'bot',
         text: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
-        isError: true
+        isError: true,
+        language: selectedLanguage
       }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Handles keypress events for message input
-   * @param {KeyboardEvent} e - Keyboard event
-   */
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -146,116 +137,140 @@ const ChatBotPage = () => {
     }
   };
 
-  /**
-   * Handles counselor referral process
-   * Triggered when stress levels are high
-   */
-  const handleCounselorReferral = () => {
-    // Implementation for counselor referral
-    setMessages(prev => [...prev, {
-      sender: 'bot',
-      text: 'I notice you might be feeling overwhelmed. Would you like to connect with a professional counselor?',
-      timestamp: new Date(),
-      isReferral: true
-    }]);
-  };
-
   return (
-    <div className="chatbot-page">
-      <NavAfterLogin />
-      {/* <div className="quote-container">
-        <h1>Find Your Smile Again</h1>
-        <p className="quote">
-          "A smile doesn't always mean you're happy. Sometimes it just means you're strong."
-        </p>
-      </div> */}
+    <div>
+      <div className="chatbot-page">
+        <NavAfterLogin />
+        <div className="quote-container">
+          <h1>Find Your Smile Again</h1>
+          <p className="quote">
+            "A smile doesn't always mean you're happy. Sometimes it just means you're strong."
+          </p>
+        </div>
 
-      <div className="chat-section">
-        <div className="chat-container" ref={chatContainerRef}>
-          {/* Welcome message */}
-          <div className="message bot-message">
-            <div className="message-content">
-              Hi! I'm here to listen and help. How are you feeling today?
-            </div>
-            <div className="message-timestamp">
-              {formatTimestamp(new Date())}
+        <div className="chat-section">
+          {/* Language Selector */}
+          <div className="language-selector flex justify-end p-4">
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                title="Select language"
+              >
+                <Globe className="w-6 h-6" />
+              </button>
+              
+              {showLanguageMenu && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1" role="menu">
+                    {Object.entries(SUPPORTED_LANGUAGES).map(([code, { name }]) => (
+                      <button
+                        key={code}
+                        onClick={() => handleLanguageChange(code)}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          selectedLanguage === code
+                            ? 'bg-purple-100 text-purple-900'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                        role="menuitem"
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Chat messages */}
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`message ${message.sender}-message ${message.isError ? 'error-message' : ''} ${message.isReferral ? 'referral-message' : ''}`}
-            >
+          {/* Chat Container */}
+          <div className="chat-container" ref={chatContainerRef}>
+            {/* Welcome message */}
+            <div className="message bot-message">
               <div className="message-content">
-                {message.text}
-                {message.sender==='bot' && (
-                  <BotSpeech message={message.text}/>
-                )}
+                Hi! I'm here to listen and help. How are you feeling today?
+                <BotSpeech message="Hi! I'm here to listen and help. How are you feeling today?" language={selectedLanguage} />
               </div>
               <div className="message-timestamp">
-                {formatTimestamp(message.timestamp)}
+                {formatTimestamp(new Date())}
               </div>
             </div>
-          ))}
 
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="message bot-message loading">
-              <div className="message-content">
-                <FaSpinner className="spinner" />
-                <span>Joy is typing...</span>
+            {/* Chat messages */}
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`message ${message.sender}-message ${message.isError ? 'error-message' : ''}`}
+              >
+                <div className="message-content">
+                  {message.text}
+                  {message.sender === 'bot' && (
+                    <BotSpeech message={message.text} language={message.language} />
+                  )}
+                </div>
+                <div className="message-timestamp">
+                  {formatTimestamp(message.timestamp)}
+                </div>
               </div>
+            ))}
+
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="message bot-message loading">
+                <div className="message-content">
+                  <FaSpinner className="spinner" />
+                  <span>Joy is typing...</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Error display */}
+          {error && (
+            <div className="error-banner">
+              {error}
+              <button onClick={() => setError(null)} className="error-close">✕</button>
             </div>
           )}
+
+          {/* Input area */}
+          <div className="chat-input-container">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message here..."
+              disabled={isLoading}
+              rows="1"
+              className="chat-input"
+            />
+            <div className="input-buttons">
+              <SpeechInput 
+                onSpeechInput={(text) => setInput(text)}
+                isDisabled={isLoading}
+                language={selectedLanguage}
+              />
+            </div>
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !input.trim()}
+              className="send-button"
+              aria-label="Send message"
+            >
+              {isLoading ? <FaSpinner className="spinner" /> : <FaPaperPlane />}
+            </button>
+          </div>
         </div>
 
-        {/* Error display */}
-        {error && (
-          <div className="error-banner">
-            {error}
-            <button onClick={() => setError(null)} className="error-close">✕</button>
-          </div>
-        )}
-
-        {/* Input area */}
-        <div className="chat-input-container">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message here..."
-            disabled={isLoading}
-            rows="1"
-            className="chat-input"
-          />
-          <div className='input-buttons'>
-            <SpeechInput onSpeechInput={(text) => setInput(text)}
-            isDisabled={isLoading}
-          />
-          </div>
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
-            className="send-button"
-            aria-label="Send message"
-          >
-            {isLoading ? <FaSpinner className="spinner" /> : <FaPaperPlane />}
-            Send
-          </button>
+        <div className="support-message">
+          <h3>Need More Support?</h3>
+          <p>
+            If you're feeling overwhelmed, our professional counselors are here to help.
+            Click here to connect with a mental health professional.
+          </p>
         </div>
       </div>
-
-      {/* <div className="support-message">
-        <h3>Need More Support?</h3>
-        <p>
-          If you're feeling overwhelmed, our professional counselors are here to help.
-          Click here to connect with a mental health professional.
-        </p>
-      </div>
-    </div> */}
     </div>
   );
 };
