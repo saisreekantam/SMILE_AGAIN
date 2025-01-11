@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import NavAfterLogin from './NavAfterLogin';
+import crying_gif from './assets/crying.gif'
 import './MoodTrackerPage.css';
 
 const MoodTrackerPage = () => {
