@@ -1,10 +1,10 @@
 /* Overall background */
-body {
+/* body {
     margin: 0;
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #4c4cd9, #6a11cb);
     color: white;
-  }
+  } */
   
   /* Container styling */
   .min-h-screen {
@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
     padding: 20px;
     flex-direction: column;
-    width: 1090px;
+    width: 100vw;
   }
   
   .w-full {

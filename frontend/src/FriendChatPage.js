@@ -3,8 +3,7 @@ import axios from "axios";
 import './FriendChatPage.css'
 import { useParams } from "react-router-dom";
 
-const FriendChatPage = () => {
-  const { friendId } = useParams();
+const FriendChatPage = ({ friend }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [unreadCounts, setUnreadCounts] = useState([]);
@@ -14,7 +13,7 @@ const FriendChatPage = () => {
     // Fetch chat history when component mounts
     const fetchChatHistory = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/chats/friends/chat/${friendId}`);
+        const response = await axios.get(`http://localhost:8000/chats/friends/chat/${friend.id}`);
         setMessages(response.data || []);
       } catch (error) {
         console.error("Error fetching chat history", error);
@@ -39,12 +38,12 @@ const FriendChatPage = () => {
     // Poll for unread message counts every 10 seconds
     const intervalId = setInterval(fetchUnreadCounts, 10000);
     return () => clearInterval(intervalId);
-  }, [friendId]);
+  }, [friend.id]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
     try {
-      await axios.post(`http://localhost:8000/chats/friends/send/${friendId}`, { message: newMessage });
+      await axios.post(`http://localhost:8000/chats/friends/send/${friend.id}`, { message: newMessage });
       setMessages([...messages, { content: newMessage, sender_name: "You", timestamp: new Date() }]);
       setNewMessage("");
     } catch (error) {
@@ -55,9 +54,9 @@ const FriendChatPage = () => {
   return (
     <div className="chat-page">
       <div className="chat-header">
-        <h2>Chat with {friendId}</h2>
+        <h2>Chat with {friend.id}</h2>
         <span className="unread-count">
-          {unreadCounts.find(count => count.friend_id === friendId)?.unread_count || 0} Unread Messages
+          {unreadCounts.find(count => count.friend_id === friend.id)?.unread_count || 0} Unread Messages
         </span>
       </div>
 

@@ -1,0 +1,58 @@
+/* GroupGames.css */
+@keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(147, 51, 234, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(147, 51, 234, 0);
+    }
+  }
+  
+  .active-question {
+    animation: pulse 2s infinite;
+  }
+  
+  .chat-message-container {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E0 #EDF2F7;
+  }
+  
+  .chat-message-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .chat-message-container::-webkit-scrollbar-track {
+    background: #EDF2F7;
+    border-radius: 4px;
+  }
+  
+  .chat-message-container::-webkit-scrollbar-thumb {
+    background-color: #CBD5E0;
+    border-radius: 4px;
+    border: 2px solid #EDF2F7;
+  }
+  
+  .game-transition-enter {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  .game-transition-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  .game-transition-exit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .game-transition-exit-active {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 300ms, transform 300ms;
+  }

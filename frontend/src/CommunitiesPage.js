@@ -111,8 +111,8 @@ const CommunityPage = () => {
   return (
     <div className="community-page">
       <button onClick={() => {
-        navigate(`/your_smile_journey/${community_id}`)
-      }}>View Your Journey</button>
+        navigate("/my_journey")
+      }}>Activities</button>
       {community && (
         <div className="community-header">
           <h1>{community.name}</h1>

@@ -16,7 +16,7 @@ const NavAfterLogin=React.memo(() => {
                 </div>
                 <div className="Links">
                     <a href="/home">Home</a>
-                    <a href="/activities">Activities</a>
+                    <a href="/activities">Smile Path</a>
                     <a href="/blogs">Blogs</a>
                     <a href="/workshops">Workshops</a>
                     <a href="/chats">Chats</a>

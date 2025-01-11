@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import NavAfterLogin from './NavAfterLogin';
 import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
 import './ChatBotPage.css';
+import { Mic } from 'lucide-react';
 import BotSpeech from './Bot_Speech';
 import SpeechInput from './Speech_Input';
 
@@ -162,13 +163,12 @@ const ChatBotPage = () => {
   return (
     <div className="chatbot-page">
       <NavAfterLogin />
-      
-      <div className="quote-container">
+      {/* <div className="quote-container">
         <h1>Find Your Smile Again</h1>
         <p className="quote">
           "A smile doesn't always mean you're happy. Sometimes it just means you're strong."
         </p>
-      </div>
+      </div> */}
 
       <div className="chat-section">
         <div className="chat-container" ref={chatContainerRef}>
@@ -243,17 +243,19 @@ const ChatBotPage = () => {
             aria-label="Send message"
           >
             {isLoading ? <FaSpinner className="spinner" /> : <FaPaperPlane />}
+            Send
           </button>
         </div>
       </div>
 
-      <div className="support-message">
+      {/* <div className="support-message">
         <h3>Need More Support?</h3>
         <p>
           If you're feeling overwhelmed, our professional counselors are here to help.
           Click here to connect with a mental health professional.
         </p>
       </div>
+    </div> */}
     </div>
   );
 };

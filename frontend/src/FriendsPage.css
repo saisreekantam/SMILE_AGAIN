@@ -1,47 +1,39 @@
-/* General page styles */
-.view-friends-page {
-  background-color: #000; /* Black background */
-  color: #fff; /* White text */
-  font-family: 'Arial', sans-serif;
-  padding: 20px;
-  text-align: center;
-}
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.friend-list {
+/* Main container for friends and chat */
+.friends-chat-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: center;
+  height: calc(100vh - 60px); /* Full height minus navigation bar */
+  width: 100%;
+}
+
+/* Friends list styles */
+.friend-list {
+  flex: 1; /* 1/4th width */
+  background-color: #f8f9fa; /* Light gray background */
+  padding: 1rem;
+  border-right: 1px solid #ddd; /* Separate with a border */
+  overflow-y: auto; /* Scrollable list */
 }
 
 .friend-item {
-  background-color: #111; /* Slightly lighter black for contrast */
-  color: #fff;
-  text-decoration: none;
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 15px;
-  transition: transform 0.3s, background-color 0.3s;
-  width: 200px;
-  text-align: center;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 5px;
 }
 
-.friend-item:hover {
-  background-color: #222;
-  transform: scale(1.05);
+.friend-item:hover,
+.friend-item.active {
+  background-color: #007bff; /* Highlight color */
+  color: white;
 }
 
-.friend-item h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-p {
-  font-size: 1rem;
-  color: #ccc; /* Slightly gray for placeholder text */
+/* Chat section styles */
+.chat-section {
+  flex: 3; /* 3/4th width */
+  padding: 1rem;
+  background-color: #fff; /* White background for chat */
+  overflow-y: auto; /* Scrollable chat section */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }

@@ -7,6 +7,8 @@ import NavAfterLogin from './NavAfterLogin';
 const BlogsPage = () => {
     const [blogs, setBlogs] = useState([]);
     const navigate = useNavigate();
+    const [likes,setLikes] = useState(2);
+    const [dislikes,setDislikes] = useState(0);
 
     useEffect(() => {
         const fetchBlogs = async () => {
@@ -34,6 +36,7 @@ const BlogsPage = () => {
                     )
                 );
             }
+            setLikes(likes+1);
         } catch (error) {
             console.error('Error liking the blog:', error);
         }
@@ -51,6 +54,7 @@ const BlogsPage = () => {
                     )
                 );
             }
+            setDislikes(dislikes+1);
         } catch (error) {
             console.error('Error disliking the blog:', error);
         }
@@ -70,7 +74,7 @@ const BlogsPage = () => {
             <div className='blogs-container'>
                 <h2>Blogs</h2>
                 <button className="add-blog-button" onClick={() => navigate('/add-blog')}>
-                    Add Blog
+                    +
                 </button>
                 {blogs.length === 0 ? (
                     <p className="no-blogs-message">No blogs available to display.</p>
@@ -100,14 +104,6 @@ const BlogsPage = () => {
                                     Dislikes: <span onClick={() => handleDislike(blog.blog_id)}>👎</span>
                                 </span>
                            </div>
-                            <div className="comments-button">
-                                <button onClick={(e) => {
-                                    e.stopPropagation(); // Prevent triggering card click
-                                    navigate(`/blogs/${blog.blog_id}/comments`);
-                                }}>
-                                    View Comments
-                                </button>
-                            </div>
                         </div>
                     ))
                 )}

@@ -12,6 +12,7 @@
     padding: 0;
     align-self: center;
     left: 50%;
+    overflow-x: hidden;
 }
 
 .blog-title {
@@ -58,6 +59,7 @@
 
 .comments-section {
     margin-top: 30px;
+    background-color: #000;
 }
 
 .comments-section h2 {
@@ -113,7 +115,7 @@ button {
 }
 
 .post-comment-button {
-    align-self: flex-end;
+    align-self: center;
     background-color: #6c63ff;
     color: #fff;
     border: none;

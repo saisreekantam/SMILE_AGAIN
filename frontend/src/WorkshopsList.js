@@ -18,6 +18,7 @@ const WorkshopsList = () => {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         });
+        console.log(response.data);
         setWorkshops(response.data);
       } catch (err) {
         setError("Failed to load workshops. Please try again later.");

@@ -69,7 +69,7 @@ def create_workshop():
         banner_url=banner_url,
         meet_link=meet_link,
         price=price,
-        is_paid=(price > 0),
+        is_paid=(int(price) >= 0),
         sponsored=sponsored,
         tag=tag,
         created_by=current_user.id

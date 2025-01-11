@@ -32,7 +32,7 @@
   }
   
   .mood-button {
-    flex: 1;
+    /* flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,18 +41,75 @@
     border-radius: 10px;
     background: rgb(186, 11, 186);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease; */
+    
   }
+
+/* CSS */
+.mood-button{
+  align-items: center;
+  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+  border: 0;
+  border-radius: 8px;
+  /* box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px; */
+  box-sizing: border-box;
+  color: #FFFFFF;
+  display: flex;
+  font-family: Phantomsans, sans-serif;
+  flex-direction: column;
+  height: 80px;
+  align-items: center;
+  font-size: 20px;
+  justify-content: center;
+  line-height: 1em;
+  max-width: 100%;
+  min-width: 140px;
+  padding: 3px;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  cursor: pointer;
+  color: white;
+}
+
+.mood-button:active,
+.mood-button:hover {
+  outline: 0;
+}
+
+.mood-button span {
+  /* background-color: rgb(5, 6, 45); */
+  padding: 0;
+  border-radius: 6px;
+  width: 100%;
+  height: 25px;
+  transition: 300ms;
+  color: white;
+}
+
+.mood-button:hover span {
+  background: none;
+}
+
+@media (min-width: 768px) {
+  .mood-button {
+    font-size: 24px;
+    min-width: 196px;
+  }
+}
+
   
-  .mood-button:hover {
+  /* .mood-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
+  } */
   
-  .mood-button.selected {
+  /* .mood-button.selected {
     border-color: #4CAF50;
     background-color: #E8F5E9;
-  }
+  } */
   
   .mood-number {
     font-size: 24px;
@@ -63,6 +120,7 @@
   .mood-label {
     font-size: 14px;
     color: #666;
+    padding: 0px;
   }
   
   .emotions-section {
@@ -85,9 +143,10 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 20px;
-    background: white;
+    background: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
     cursor: pointer;
     transition: all 0.2s ease;
+    color: white;
   }
   
   .emotion-tag:hover {

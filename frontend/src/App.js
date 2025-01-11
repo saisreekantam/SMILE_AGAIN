@@ -25,6 +25,8 @@ import EnhancedActivityDashboard from './ActivitiesPage';
 import BlogDetailsPage from './BlogDetailsPage';
 import MeditationTimer from './MeditationTimer';
 import JourneyDashboard from './SmileJourneyPage';
+import GroupGamesPage from './GroupGames';
+import CommunityActivities from './CommunitiesAI';
 
 function App() {
   return (
@@ -54,7 +56,9 @@ function App() {
         <Route path='/friends/:friendId' element={<ChatPage />} />
         <Route path='/activities' element={<EnhancedActivityDashboard />} />
         <Route path='/meditation_timer' element={<MeditationTimer />} />
-        <Route path='/your_smile_journey/:community_id' element={<JourneyDashboard />} />
+        {/* <Route path='/your_smile_journey/:community_id' element={<JourneyDashboard />} />
+        <Route path='/group_games/:groupId' element={<GroupGamesPage />} /> */}
+        <Route path='/my_journey' element={<CommunityActivities />} />
       </Routes>
     </>
   );

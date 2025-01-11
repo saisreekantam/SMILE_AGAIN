@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'; // For type-checking props
 import axios from 'axios';
 import './BlogDetailsPage.css';
 import { useLocation } from 'react-router-dom';
+import NavAfterLogin from './NavAfterLogin';
 
 const BlogDetailsPage = () => {
     const location=useLocation();
@@ -25,6 +26,7 @@ const BlogDetailsPage = () => {
         } catch (error) {
             console.error('Error liking blog:', error);
         }
+        setLikeCount(prev => prev + 1);
     };
 
     // Handle dislike button click
@@ -35,6 +37,7 @@ const BlogDetailsPage = () => {
         } catch (error) {
             console.error('Error disliking blog:', error);
         }
+        setDislikeCount(prev => prev + 1);
     };
     const fetchComments = async () => {
         try {
@@ -64,6 +67,7 @@ const BlogDetailsPage = () => {
 
     return (
         <div className="blog-details-container">
+            <NavAfterLogin />
             <h1 className="blog-title">{blog.title}</h1>
             <p className="blog-content">{blog.content}</p>
             <div className="blog-actions">

@@ -83,6 +83,8 @@ def create_app():
         from meditation.routes import register_meditation_routes
         from models import MeditationSession, MeditationPreset, MeditationStreak
         from smile_journey.routes import register_journey_routes
+        from games.routes import register_routes
+        register_routes(app, db)
         register_journey_routes(app, db)
         meditation_bp = Blueprint('meditation', __name__)
         register_meditation_routes(meditation_bp, db)

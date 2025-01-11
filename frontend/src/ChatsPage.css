@@ -10,8 +10,8 @@
   font-family: 'Arial', sans-serif;
   margin: 0;
   color: #e0e0e0;
-  background: linear-gradient(to bottom, #1d005e, #29008a); /* Purple-blue gradient */
-  background:  url('./assets/ChatsBg.jpg');
+  /* background:  url('./assets/ChatsBg.jpg'); */
+  background-color: black;
   
 }
 .chats-page .navContainer{

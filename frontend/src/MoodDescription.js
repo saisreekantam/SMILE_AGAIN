@@ -83,8 +83,8 @@ const MoodTrackerPage = () => {
       
       <div className="mood-journal-container">
         <div className="mood-header">
-          <h1>Mood Journal</h1>
-          <p style={{color:'black'}}>How are you feeling today?</p>
+          <h1 style={{color:'white'}}>Mood Journal</h1>
+          <p style={{color:'white'}}>How are you feeling today?</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mood-form">
@@ -98,15 +98,15 @@ const MoodTrackerPage = () => {
                 onClick={() => handleMoodChange(parseInt(level))}
                 style={{color:'black'}}
               >
-                <span className="mood-number" style={{color:'black'}}>{level}</span>
-                <span className="mood-label" style={{color:'black'}}>{label}</span>
+                <span className="mood-number" style={{color:'white'}}>{level}</span>
+                <span className="mood-label" style={{color:'white'}}>{label}</span>
               </button>
             ))}
           </div>
 
           {/* Emotions Selection */}
           <div className="emotions-section">
-            <h3>Select emotions you're experiencing:</h3>
+            <h3 style={{color:'white'}}>Select emotions you're experiencing:</h3>
             <div className="emotions-grid">
               {emotionOptions.map(({ label, value }) => (
                 <button
@@ -114,7 +114,7 @@ const MoodTrackerPage = () => {
                   type="button"
                   className={`emotion-tag ${moodData.emotions.includes(value) ? 'selected' : ''}`}
                   onClick={() => handleEmotionToggle(value)}
-                  style={{color:'black'}}
+                  style={{color:'white'}}
                 >
                   {label}
                 </button>
@@ -124,7 +124,7 @@ const MoodTrackerPage = () => {
 
           {/* Notes Section */}
           <div className="notes-section">
-            <h3>Add notes about your day:</h3>
+            <h3 style={{color:'white'}}>Add notes about your day:</h3>
             <textarea
               value={moodData.notes}
               onChange={(e) => setMoodData(prev => ({ ...prev, notes: e.target.value }))}

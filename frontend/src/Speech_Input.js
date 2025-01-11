@@ -92,7 +92,7 @@ const SpeechInput = ({ onSpeechInput, isDisabled = false }) => {
             ? 'bg-red-100 text-red-600 hover:bg-red-200'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
-        title={isListening ? 'Stop listening' : 'Start voice input'}
+        // title={isListening ? 'Stop listening' : 'Start voice input'}
       >
         {isListening ? (
           <>
@@ -103,7 +103,7 @@ const SpeechInput = ({ onSpeechInput, isDisabled = false }) => {
           <>
             {error ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             <span className="sr-only">
-              {error ? 'Speech recognition error' : 'Start voice input'}
+              {/* {error ? 'Speech recognition error' : 'Start voice input'} */}
             </span>
           </>
         )}

@@ -419,6 +419,83 @@ class UserJourneyProgress(db.Model):
     current_streak = db.Column(db.Integer, default=0)
     last_activity_date = db.Column(db.DateTime)
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
+class Game(db.Model):
+    """Model for educational group games"""
+    __tablename__ = 'game'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # e.g., 'math', 'science', 'language'
+    difficulty = db.Column(db.String(20))  # 'easy', 'medium', 'hard'
+    min_players = db.Column(db.Integer, default=2)
+    max_players = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    is_active = db.Column(db.Boolean, default=True)
+
+class GameSession(db.Model):
+    """Model for active game sessions"""
+    __tablename__ = 'game_session'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    host_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    status = db.Column(db.String(20), default='waiting')  # waiting, in_progress, completed
+    current_round = db.Column(db.Integer, default=1)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ended_at = db.Column(db.DateTime)
+    max_rounds = db.Column(db.Integer)
+    session_code = db.Column(db.String(6), unique=True)  # For joining games
+    current_question = db.Column(db.Integer)  # Reference to current question
+
+class GameParticipant(db.Model):
+    """Model for users participating in a game session"""
+    __tablename__ = 'game_participant'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('game_session.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    score = db.Column(db.Integer, default=0)
+    is_host = db.Column(db.Boolean, default=False)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_action = db.Column(db.DateTime)
+    status = db.Column(db.String(20), default='active')  # active, disconnected, finished
+
+class GameQuestion(db.Model):
+    """Model for game questions"""
+    __tablename__ = 'game_question'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    question_text = db.Column(db.Text, nullable=False)
+    question_type = db.Column(db.String(20))  # multiple_choice, numerical, text
+    correct_answer = db.Column(db.Text)
+    points = db.Column(db.Integer, default=10)
+    difficulty = db.Column(db.String(20))
+    time_limit = db.Column(db.Integer)  # Time limit in seconds
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class GameAnswer(db.Model):
+    """Model for participant answers in games"""
+    __tablename__ = 'game_answer'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('game_session.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('game_question.id'))
+    participant_id = db.Column(db.Integer, db.ForeignKey('game_participant.id'))
+    answer_text = db.Column(db.Text)
+    is_correct = db.Column(db.Boolean)
+    points_earned = db.Column(db.Integer)
+    answer_time = db.Column(db.Float)  # Time taken to answer in seconds
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
 class Notification(db.Model):
     """
     Model for storing user notifications including friend requests.
