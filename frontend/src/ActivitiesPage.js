@@ -2,8 +2,12 @@ import React from "react";
 import { Calendar, Activity, Heart, ArrowUp, Clock, Target } from "lucide-react";
 import { AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, ResponsiveContainer } from "recharts";
 import "./ActivitiesPage.css";
+import MeditationTimer from "./MeditationTimer";
+import { useNavigate } from "react-router-dom";
+import NavAfterLogin from "./NavAfterLogin";
 
 const EnhancedActivityDashboard = () => {
+  const navigate=useNavigate();
   const mockActivities = [
     {
       id: 1,
@@ -32,17 +36,18 @@ const EnhancedActivityDashboard = () => {
   ];
 
   const mockMoodData = [
-    { name: "Mon", mood: 6 },
-    { name: "Tue", mood: 7 },
-    { name: "Wed", mood: 6.5 },
-    { name: "Thu", mood: 8 },
-    { name: "Fri", mood: 7.5 },
-    { name: "Sat", mood: 8.5 },
+    // { name: "Mon", mood: 6 },
+    // { name: "Tue", mood: 7 },
+    // { name: "Wed", mood: 6.5 },
+    // { name: "Thu", mood: 8 },
+    // { name: "Fri", mood: 7.5 },
+    // { name: "Sat", mood: 8.5 },
     { name: "Sun", mood: 9 },
   ];
 
   return (
     <div className="centered-container">
+      <NavAfterLogin />
       <div className="centered-content">
         {/* Header */}
         <div className="text-center border-container">
@@ -57,13 +62,13 @@ const EnhancedActivityDashboard = () => {
           <div className="card">
             <Calendar className="w-6 h-6 text-white mb-3" />
             <h3 className="card-title">Current Streak</h3>
-            <p className="text-3xl font-bold text-green-500">7 days</p>
+            <p className="text-3xl font-bold text-green-500">1 day</p>
           </div>
 
           <div className="card">
             <Activity className="w-6 h-6 text-white mb-3" />
             <h3 className="card-title">Total Activities</h3>
-            <p className="text-3xl font-bold text-green-500">28</p>
+            <p className="text-3xl font-bold text-green-500">2</p>
           </div>
 
           <div className="card">
@@ -76,7 +81,7 @@ const EnhancedActivityDashboard = () => {
         {/* Mood Progress Chart */}
         <div className="border-container chart-container">
           <h3 className="text-xl font-bold mb-4 text-white">Mood Progress</h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="95%">
             <AreaChart data={mockMoodData}>
               <defs>
                 <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
@@ -101,7 +106,7 @@ const EnhancedActivityDashboard = () => {
               <div key={activity.id} className="card">
                 <h3 className="card-title">{activity.title}</h3>
                 <p className="card-description">{activity.description}</p>
-                <button className="card-button">Start</button>
+                <button className="card-button" onClick={() => navigate('/meditation_timer')}>Start</button>
               </div>
             ))}
           </div>

@@ -13,6 +13,7 @@ const CommunityPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [id,setId]  = useState(1);
   const navigate=useNavigate();
 
   useEffect(() => {
@@ -33,6 +34,8 @@ const CommunityPage = () => {
       });
     //   console.log(response.data);
       setCommunity(response.data);
+      setId(response.data.id);
+      console.log("Community :",response.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load community');
     } finally {
@@ -107,7 +110,9 @@ const CommunityPage = () => {
 
   return (
     <div className="community-page">
-      
+      <button onClick={() => {
+        navigate(`/your_smile_journey/${id}`)
+      }}>View Your Journey</button>
       {community && (
         <div className="community-header">
           <h1>{community.name}</h1>

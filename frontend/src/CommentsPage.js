@@ -44,7 +44,7 @@ const CommentsPage = () => {
             },{headers:{"Content-Type" : "application/json"},withCredentials:true});
 
             // Update the comments list with the new comment
-            setComments(prevComments => [...prevComments, response.data.comment]);
+            setComments(prevComments => [...prevComments, response.data.content]);
             setNewComment('');
             setImageURL('');
         } catch (error) {
@@ -82,11 +82,11 @@ const CommentsPage = () => {
             ) : (
                 comments.map(comment => (
                     <div key={comment.comment_id} className="comment-card">
-                        <p className="comment-content">{comment.content}</p>
+                        <p className="comment-content" style={{color:'white'}}>{comment.content}</p>
                         {comment.image_url && (
                             <img src={comment.image_url} alt="Comment visual" className="comment-image" />
                         )}
-                        <p className="comment-author">- {comment.created_by}</p>
+                        <a className="comment-author" style={{color:'white'}} href='/home' onClick={(e)=> e.stopPropagation}>- {comment.author_name}</a>
                     </div>
                 ))
             )}

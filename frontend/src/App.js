@@ -23,6 +23,8 @@ import MoodTrackerPage from './MoodDescription';
 import ChatPage from './FriendChatPage';
 import EnhancedActivityDashboard from './ActivitiesPage';
 import BlogDetailsPage from './BlogDetailsPage';
+import MeditationTimer from './MeditationTimer';
+import JourneyDashboard from './SmileJourneyPage';
 
 function App() {
   return (
@@ -51,6 +53,8 @@ function App() {
         <Route path='/mood_entry' element={<MoodTrackerPage />} />
         <Route path='/friends/:friendId' element={<ChatPage />} />
         <Route path='/activities' element={<EnhancedActivityDashboard />} />
+        <Route path='/meditation_timer' element={<MeditationTimer />} />
+        <Route path='/your_smile_journey/:id' element={<JourneyDashboard />} />
       </Routes>
     </>
   );

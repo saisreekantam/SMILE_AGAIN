@@ -10,6 +10,7 @@ const BlogDetailsPage = () => {
     const [comments, setComments] = useState([]);
     const [likeCount, setLikeCount] = useState(0);
     const [dislikeCount, setDislikeCount] = useState(0);
+    const [newComment, setNewComment] = useState('');
     console.log(blog);
 
     useEffect(() => {
@@ -44,6 +45,19 @@ const BlogDetailsPage = () => {
         }
     };
 
+    const handleCommentSubmit = async () => {
+        if (newComment.trim() === '') return; // Avoid empty comments
+        try {
+            const response = await axios.post(`http://localhost:8000/blogs/${blog.blog_id}/comments`, {
+                content: newComment,
+            });
+            setComments((prevComments) => [...prevComments, response.data]); // Add new comment to the list
+            setNewComment(''); // Clear the input field
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        }
+    };
+
     if (!blog) {
         return <p>Loading blog details...</p>;
     }
@@ -68,11 +82,22 @@ const BlogDetailsPage = () => {
                     comments.map((comment) => (
                         <div key={comment.comment_id} className="comment-card">
                             <p>
-                                <strong>{comment.author_name}:</strong> {comment.content}
+                                <strong style={{color:'white'}}>{comment.author_name}:</strong> {comment.content}
                             </p>
                         </div>
                     ))
                 )}
+            </div>
+            <div className="add-comment-section">
+                    <textarea
+                        className="comment-input"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Write your comment here..."
+                    />
+                    <button className="post-comment-button" onClick={handleCommentSubmit}>
+                        Post Comment
+                    </button>
             </div>
         </div>
     );

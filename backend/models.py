@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 from flask import Flask, jsonify
 from flask_login import LoginManager, UserMixin
+from sqlalchemy import func
 from extensions import db
 
 class User(UserMixin, db.Model):
@@ -122,7 +123,340 @@ class Blog(db.Model):
         }
 
 # In backend_models.py or wherever your models are defined
+class MeditationMetrics:
+    """Data class for meditation statistics"""
+    total_minutes: int
+    session_count: int
+    average_duration: float
+    completion_rate: float
+    current_streak: int
+    longest_streak: int
 
+class MeditationSession(db.Model):
+    """Model for storing meditation session data with comprehensive tracking"""
+    __tablename__ = 'meditation_session'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    duration = db.Column(db.Integer, nullable=False)  # Planned duration in minutes
+    actual_duration = db.Column(db.Integer)  # Actual duration in minutes
+    ambient_sound = db.Column(db.String(50))
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+    completion_status = db.Column(db.String(20), default='started')  
+    mood_before = db.Column(db.Integer)  # Scale 1-10
+    mood_after = db.Column(db.Integer)   # Scale 1-10
+    notes = db.Column(db.Text)
+    interruption_count = db.Column(db.Integer, default=0)
+    focus_rating = db.Column(db.Integer)  # Scale 1-5
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('meditation_sessions', lazy=True))
+    preset = db.relationship('MeditationPreset', backref='sessions', lazy=True)
+    preset_id = db.Column(db.Integer, db.ForeignKey('meditation_preset.id'))
+
+    @property
+    def duration_minutes(self) -> int:
+        """Get session duration in minutes"""
+        if self.completed_at and self.started_at:
+            return int((self.completed_at - self.started_at).total_seconds() / 60)
+        return 0
+
+    @property
+    def is_completed(self) -> bool:
+        """Check if session was completed"""
+        return self.completion_status == 'completed'
+
+    @property
+    def mood_improvement(self) -> Optional[int]:
+        """Calculate mood improvement if both ratings exist"""
+        if self.mood_before is not None and self.mood_after is not None:
+            return self.mood_after - self.mood_before
+        return None
+
+    def complete_session(self, actual_duration: int, mood_after: int, 
+                        focus_rating: int, notes: Optional[str] = None) -> None:
+        """Mark session as complete with final metrics"""
+        self.completed_at = datetime.utcnow()
+        self.actual_duration = actual_duration
+        self.mood_after = mood_after
+        self.focus_rating = focus_rating
+        self.notes = notes
+        self.completion_status = 'completed'
+
+    def to_dict(self) -> Dict:
+        """Convert session to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'duration': self.duration,
+            'actual_duration': self.actual_duration,
+            'ambient_sound': self.ambient_sound,
+            'started_at': self.started_at.isoformat(),
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'status': self.completion_status,
+            'mood_improvement': self.mood_improvement,
+            'focus_rating': self.focus_rating,
+            'notes': self.notes
+        }
+
+class MeditationPreset(db.Model):
+    """Model for storing user's meditation presets with enhanced customization"""
+    __tablename__ = 'meditation_preset'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    ambient_sound = db.Column(db.String(50))
+    background_theme = db.Column(db.String(50), default='nature')
+    is_favorite = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_used_at = db.Column(db.DateTime)
+    use_count = db.Column(db.Integer, default=0)
+    description = db.Column(db.Text)
+    is_guided = db.Column(db.Boolean, default=False)
+    guide_voice = db.Column(db.String(50))
+    interval_bells = db.Column(db.Boolean, default=False)
+    bell_interval = db.Column(db.Integer)  # Interval in minutes
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('meditation_presets', lazy=True))
+
+    def increment_usage(self) -> None:
+        """Update preset usage statistics"""
+        self.use_count += 1
+        self.last_used_at = datetime.utcnow()
+
+    def to_dict(self) -> Dict:
+        """Convert preset to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'duration': self.duration,
+            'ambient_sound': self.ambient_sound,
+            'background_theme': self.background_theme,
+            'is_favorite': self.is_favorite,
+            'is_guided': self.is_guided,
+            'guide_voice': self.guide_voice,
+            'interval_bells': self.interval_bells,
+            'bell_interval': self.bell_interval,
+            'use_count': self.use_count,
+            'last_used': self.last_used_at.isoformat() if self.last_used_at else None
+        }
+
+class MeditationStreak(db.Model):
+    """Model for tracking meditation streaks with detailed statistics"""
+    __tablename__ = 'meditation_streak'
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    current_streak = db.Column(db.Integer, default=0)
+    longest_streak = db.Column(db.Integer, default=0)
+    last_meditation_date = db.Column(db.Date)
+    total_sessions = db.Column(db.Integer, default=0)
+    total_minutes = db.Column(db.Integer, default=0)
+    streak_start_date = db.Column(db.Date)
+    weekly_goal = db.Column(db.Integer, default=7)  # Sessions per week goal
+    monthly_minutes_goal = db.Column(db.Integer, default=500)  # Minutes per month
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('meditation_streak', uselist=False))
+
+    def update_streak(self, meditation_date: datetime) -> None:
+        """Update streak information based on new meditation session"""
+        today = meditation_date.date()
+        
+        if not self.last_meditation_date:
+            self.current_streak = 1
+            self.streak_start_date = today
+        else:
+            days_difference = (today - self.last_meditation_date).days
+            
+            if days_difference <= 1:  # Consecutive day
+                self.current_streak += 1
+            else:  # Streak broken
+                self.current_streak = 1
+                self.streak_start_date = today
+        
+        self.last_meditation_date = today
+        self.longest_streak = max(self.current_streak, self.longest_streak)
+        self.total_sessions += 1
+
+    def add_session_minutes(self, minutes: int) -> None:
+        """Add completed session minutes to total"""
+        self.total_minutes += minutes
+
+    def get_weekly_progress(self) -> Dict:
+        """Calculate progress towards weekly goals"""
+        today = datetime.utcnow().date()
+        week_start = today - timedelta(days=today.weekday())
+        
+        weekly_sessions = MeditationSession.query.filter(
+            MeditationSession.user_id == self.user_id,
+            func.date(MeditationSession.completed_at) >= week_start,
+            MeditationSession.completion_status == 'completed'
+        ).count()
+
+        return {
+            'sessions_completed': weekly_sessions,
+            'sessions_goal': self.weekly_goal,
+            'progress_percentage': (weekly_sessions / self.weekly_goal) * 100
+        }
+
+    def get_monthly_progress(self) -> Dict:
+        """Calculate progress towards monthly goals"""
+        today = datetime.utcnow().date()
+        month_start = today.replace(day=1)
+        
+        monthly_minutes = db.session.query(
+            func.sum(MeditationSession.actual_duration)
+        ).filter(
+            MeditationSession.user_id == self.user_id,
+            func.date(MeditationSession.completed_at) >= month_start,
+            MeditationSession.completion_status == 'completed'
+        ).scalar() or 0
+
+        return {
+            'minutes_completed': monthly_minutes,
+            'minutes_goal': self.monthly_minutes_goal,
+            'progress_percentage': (monthly_minutes / self.monthly_minutes_goal) * 100
+        }
+
+    def to_dict(self) -> Dict:
+        """Convert streak data to dictionary for API responses"""
+        return {
+            'current_streak': self.current_streak,
+            'longest_streak': self.longest_streak,
+            'total_sessions': self.total_sessions,
+            'total_minutes': self.total_minutes,
+            'streak_start': self.streak_start_date.isoformat() if self.streak_start_date else None,
+            'last_meditation': self.last_meditation_date.isoformat() if self.last_meditation_date else None,
+            'weekly_progress': self.get_weekly_progress(),
+            'monthly_progress': self.get_monthly_progress()
+        }
+
+# Add to User model (assuming it exists)
+def add_to_user_model():
+    """Add meditation-related properties to User model"""
+    
+    @property
+    def meditation_metrics(self) -> MeditationMetrics:
+        """Calculate comprehensive meditation metrics for user"""
+        completed_sessions = MeditationSession.query.filter_by(
+            user_id=self.id,
+            completion_status='completed'
+        ).all()
+        
+        total_minutes = sum(session.actual_duration for session in completed_sessions)
+        session_count = len(completed_sessions)
+        average_duration = total_minutes / session_count if session_count > 0 else 0
+        
+        all_sessions = MeditationSession.query.filter_by(user_id=self.id).count()
+        completion_rate = (session_count / all_sessions * 100) if all_sessions > 0 else 0
+        
+        streak = self.meditation_streak
+        current_streak = streak.current_streak if streak else 0
+        longest_streak = streak.longest_streak if streak else 0
+        
+        return MeditationMetrics(
+            total_minutes=total_minutes,
+            session_count=session_count,
+            average_duration=average_duration,
+            completion_rate=completion_rate,
+            current_streak=current_streak,
+            longest_streak=longest_streak
+        )
+    
+    # Add this property to User model
+    User.meditation_metrics = meditation_metrics
+class JourneyPath(db.Model):
+    """Model for different journey paths available in communities"""
+    __tablename__ = 'journey_path'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    community_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    total_milestones = db.Column(db.Integer, default=0)
+    coins_per_milestone = db.Column(db.Integer, default=50)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class JourneyMilestone(db.Model):
+    """Model for individual milestones in a journey path"""
+    __tablename__ = 'journey_milestone'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    path_id = db.Column(db.Integer, db.ForeignKey('journey_path.id'))
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    order_number = db.Column(db.Integer, nullable=False)
+    coins_reward = db.Column(db.Integer, default=50)
+    required_days = db.Column(db.Integer, default=1)
+    required_activities = db.Column(db.Integer, default=1)
+    
+    # Define what type of milestone this is
+    milestone_type = db.Column(db.String(50), default='activity')  # activity, reflection, connection
+    
+    # Additional requirements based on type
+    activity_type = db.Column(db.String(50))  # meditation, exercise, etc.
+    reflection_prompt = db.Column(db.Text)
+    connection_requirement = db.Column(db.String(100))
+
+class UserJourneyProgress(db.Model):
+    """Model to track user progress in journey paths"""
+    __tablename__ = 'user_journey_progress'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    path_id = db.Column(db.Integer, db.ForeignKey('journey_path.id'))
+    current_milestone = db.Column(db.Integer, db.ForeignKey('journey_milestone.id'))
+    completed_milestones = db.Column(db.Integer, default=0)
+    total_coins_earned = db.Column(db.Integer, default=0)
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_activity_date = db.Column(db.DateTime)
+    current_streak = db.Column(db.Integer, default=0)
+    
+    # Relationship
+    progress_details = db.relationship('MilestoneProgress', backref='user_progress', lazy=True)
+
+class MilestoneProgress(db.Model):
+    """Model to track detailed progress for each milestone"""
+    __tablename__ = 'milestone_progress'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_progress_id = db.Column(db.Integer, db.ForeignKey('user_journey_progress.id'))
+    milestone_id = db.Column(db.Integer, db.ForeignKey('journey_milestone.id'))
+    activities_completed = db.Column(db.Integer, default=0)
+    days_active = db.Column(db.Integer, default=0)
+    reflection_submitted = db.Column(db.Boolean, default=False)
+    connections_made = db.Column(db.Integer, default=0)
+    completed = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime)
+    coins_earned = db.Column(db.Integer, default=0)
+
+class UserCoins(db.Model):
+    """Model to track user's coin balance and transactions"""
+    __tablename__ = 'user_coins'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    balance = db.Column(db.Integer, default=0)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+
+class CoinTransaction(db.Model):
+    """Model to track coin transactions"""
+    __tablename__ = 'coin_transaction'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    amount = db.Column(db.Integer, nullable=False)
+    transaction_type = db.Column(db.String(50))  # earned, spent
+    source = db.Column(db.String(100))  # milestone, activity, bonus
+    description = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 class Notification(db.Model):
     """
     Model for storing user notifications including friend requests.

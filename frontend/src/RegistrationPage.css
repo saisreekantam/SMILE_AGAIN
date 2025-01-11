@@ -20,6 +20,9 @@
     margin-bottom: 20px;
     color: white;
 }
+.registration-container form{
+    width: 800px;
+}
 
 .registration-container input[type="text"],
 .registration-container input[type="email"],

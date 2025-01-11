@@ -5,8 +5,8 @@
   }
   
   .mood-journal-container {
-    max-width: 800px;
-    margin: 40px auto;
+    max-width: 90vw;
+    margin: 40px 20px;
     padding: 30px;
     background: white;
     border-radius: 15px;

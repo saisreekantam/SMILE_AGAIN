@@ -1,0 +1,97 @@
+/* Overall background */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #4c4cd9, #6a11cb);
+    color: white;
+  }
+  
+  /* Container styling */
+  .min-h-screen {
+    background: linear-gradient(to bottom, #4c4cd9, #6a11cb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    flex-direction: column;
+    width: 1090px;
+  }
+  
+  .w-full {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 1090px;
+    height: 1000px;
+  }
+  
+  /* Timer Card */
+  .bg-indigo-900\/30 {
+    background: rgba(75, 0, 130, 0.2);
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+  
+  /* Preset Buttons */
+  button {
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Active preset button */
+  .bg-indigo-600 {
+    background: #5a67d8;
+  }
+  
+  .bg-indigo-600:hover {
+    background: #4c51bf;
+  }
+  
+  /* Timer Text */
+  .font-mono {
+    color: #ffffff;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Control Buttons */
+  button.rounded-full {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  button.rounded-full:hover {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Completion Message */
+  .bg-indigo-800\/40 {
+    background: rgba(75, 0, 130, 0.2);
+    /* visibility: hidden; */
+    border: none;
+    box-shadow: none;
+    height: 30px;
+    
+  }
+  
+  /* Progress Bar */
+  .bg-indigo-500 {
+    background: #667eea;
+  }
+  
+  /* Breathing Guide */
+  .text-indigo-200 {
+    color: rgba(224, 231, 255, 0.8);
+  }
+  
+  .text-indigo-200:hover {
+    color: #fff;
+  }
+  

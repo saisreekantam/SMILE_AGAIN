@@ -24,7 +24,7 @@ const BlogsPage = () => {
 
     const handleLike = async (blogId) => {
         try {
-            const response = await axios.post('/api/blog/like', { blogId });
+            const response = await axios.post(`http://localhost:8000/blogs/${blogId}/like`, { blogId });
             if (response.status === 200) {
                 setBlogs(prevBlogs =>
                     prevBlogs.map(blog =>
@@ -41,7 +41,7 @@ const BlogsPage = () => {
 
     const handleDislike = async (blogId) => {
         try {
-            const response = await axios.post('/api/blog/dislike', { blogId });
+            const response = await axios.post(`http://localhost:8000/blogs/${blogId}/dislike`, { blogId });
             if (response.status === 200) {
                 setBlogs(prevBlogs =>
                     prevBlogs.map(blog =>
@@ -93,11 +93,13 @@ const BlogsPage = () => {
                             <h2 className="blog-title">{blog.title}</h2>
                             <p className="blog-content">{truncateContent(blog.content)}</p>
                             <div className="blog-meta">
-                                <span>Likes: {blog.likes}</span>
-                                <span onClick={() => handleLike(blog.blog_id)}>👍</span>
-                                <span>Dislikes: {blog.dislikes}</span>
-                                <span onClick={() => handleDislike(blog.blog_id)}>👎</span>
-                            </div>
+                                <span className="meta-item">
+                                    Likes: <span onClick={(e) => { handleLike(blog.blog_id); e.stopPropagation(); }}>👍</span>
+                                </span>
+                                <span className="meta-item">
+                                    Dislikes: <span onClick={() => handleDislike(blog.blog_id)}>👎</span>
+                                </span>
+                           </div>
                             <div className="comments-button">
                                 <button onClick={(e) => {
                                     e.stopPropagation(); // Prevent triggering card click

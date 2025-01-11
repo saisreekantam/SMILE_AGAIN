@@ -80,6 +80,13 @@ def create_app():
         from friends.routes import register_profile_routes
         from community import create_community_routes
         from activity.routes import register_routes
+        from meditation.routes import register_meditation_routes
+        from models import MeditationSession, MeditationPreset, MeditationStreak
+        from smile_journey.routes import register_journey_routes
+        register_journey_routes(app)
+        meditation_bp = Blueprint('meditation', __name__)
+        register_meditation_routes(meditation_bp, db)
+        app.register_blueprint(meditation_bp, url_prefix='/meditation')
         activities_bp = Blueprint('activities', __name__, url_prefix='/activities')
         auth_bp = Blueprint('auth', __name__)
         users_bp = Blueprint('users', __name__)

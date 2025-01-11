@@ -1,0 +1,123 @@
+/* General Styling for Dark Theme */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #1a1a2e; /* Deep dark blue */
+    color: #eaeaea; /* Light text color for contrast */
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1, h2, h3 {
+    color: #c9a7eb; /* Soft lavender color for headings */
+  }
+  
+  a {
+    color: #8ab6f5; /* Bluish link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  a:hover {
+    color: #b88cf0; /* Purple highlight for hover */
+  }
+  
+  /* Container */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  /* Card Styles */
+  .card {
+    background-color: #222437; /* Dark bluish-purple background */
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #2a2d4d; /* Subtle border for definition */
+  }
+  
+  .card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #9d84e4; /* Soft lavender for card titles */
+  }
+  
+  .card p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #b2b8d6; /* Light text for descriptions */
+  }
+  
+  /* Button Styles */
+  button {
+    background-color: #3d4c7c; /* Deep blue for buttons */
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: #5a6bbf; /* Lighter blue on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+  }
+  
+  button:active {
+    background-color: #4e5da3; /* Slightly darker on click */
+    transform: scale(1); /* Reset zoom effect */
+  }
+  
+  /* Input Fields */
+  input, textarea, select {
+    background-color: #2e3358; /* Dark input field background */
+    color: #eaeaea; /* Light text */
+    border: 1px solid #3d4379; /* Subtle border */
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    border-color: #5a6bbf; /* Highlighted border */
+    outline: none;
+  }
+  
+  /* Header Section */
+  .header {
+    background-color: #2a2d4d; /* Slightly lighter for header */
+    padding: 1rem;
+    border-bottom: 1px solid #3d4379;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #c9a7eb;
+  }
+  
+  /* Footer */
+  .footer {
+    background-color: #1f2235; /* Dark footer background */
+    color: #8f94b8;
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #3d4379;
+  }
+  
+  .footer a {
+    color: #8ab6f5;
+  }
+  
+  .footer a:hover {
+    color: #b88cf0;
+  }
+  
