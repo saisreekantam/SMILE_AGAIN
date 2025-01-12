@@ -15,7 +15,7 @@
   
 }
 .chats-page .navContainer{
-  width: 90%;
+  width: 100%;
 }
 
 .navigation {
@@ -25,7 +25,7 @@
   padding: 10px 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   border-bottom: 1px solid #3e00b7;
-  width: 90%;
+  width: 100%;
 }
 
 .nav-button {
@@ -55,19 +55,16 @@
 
 .content {
   flex: 1;
-  padding: 20px;
-  background-color: rgba(45, 0, 105, 0.9); /* Slightly darker tone */
-  border-radius: 12px;
-  margin: 20px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  /* background-color: rgba(45, 0, 105, 0.9); Slightly darker tone */
+  /* border-radius: 12px; */
+  /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); */
   overflow-y: auto;
-  width: 90%;
+  width: 100%;
 }
 
 /* Styling for Individual Components */
 .content > div {
   background-color: #24005e; /* Component background */
-  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }

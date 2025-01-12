@@ -13,8 +13,7 @@ const CommunityPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [community_id,setId]  = useState(1);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCommunity();
@@ -32,10 +31,7 @@ const CommunityPage = () => {
       const response = await axios.get('http://localhost:8000/community/communities', {
         withCredentials: true
       });
-    //   console.log(response.data);
       setCommunity(response.data);
-      setId(response.data.id);
-      console.log("Community :",response.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load community');
     } finally {
@@ -45,14 +41,13 @@ const CommunityPage = () => {
 
   const fetchPosts = async (page) => {
     if (!community) return;
-    
+
     try {
       setLoading(true);
       const response = await axios.get(
         `http://localhost:8000/community/communities/${community.id}/posts?page=${page}`,
         { withCredentials: true }
       );
-      console.log(response.data);
       setPosts(response.data.posts);
       setTotalPages(response.data.total_pages);
     } catch (err) {
@@ -74,7 +69,7 @@ const CommunityPage = () => {
         { withCredentials: true }
       );
       setNewPost('');
-      fetchPosts(1); // Refresh posts after submission
+      fetchPosts(1);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create post');
     } finally {
@@ -89,9 +84,8 @@ const CommunityPage = () => {
         {},
         { withCredentials: true }
       );
-      // Update the post's like count in the local state
-      setPosts(posts.map(post => 
-        post.id === postId 
+      setPosts(posts.map(post =>
+        post.id === postId
           ? { ...post, likes: post.likes + 1 }
           : post
       ));
@@ -110,78 +104,68 @@ const CommunityPage = () => {
 
   return (
     <div className="community-page">
-      <button onClick={() => {
-        navigate("/my_journey")
-      }}>Activities</button>
-      {community && (
-        <div className="community-header">
-          <h1>{community.name}</h1>
-          <p className="community-description">{community.description}</p>
-          <div className="community-stats">
-            <span><FaUser /> {community.member_count} members</span>
-          </div>
-        </div>
-      )}
-
-      <div className="create-post">
-        <form onSubmit={handlePostSubmit}>
-          <textarea
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder="Share something with your community..."
-            disabled={loading}
-          />
-          <button type="submit" disabled={loading || !newPost.trim()}>
-            {loading ? 'Posting...' : 'Post'}
-          </button>
-        </form>
+      <div className="community-sidebar">
+        {community && (
+          <div className="community-details">
+            <h1>{community.name}</h1>
+            <p>{community.description}</p>
+            <div className="community-stats">
+              <span><FaUser /> {community.member_count} members</span>
+            </div>
+          <button className='activities-button' onClick={() => navigate('/my_journey')}>Activities</button>
+          </div>          
+        )}
       </div>
 
-      <div className="posts-container">
-        {posts.map(post => (
-          <div key={post.id} className="post-card" onClick={() => navigate(`/community/${post.id}`)}>
-            <div className="post-header">
-              <span className="post-author">{post.author}</span>
-              <span className="post-date">
-                {new Date(post.created_at).toLocaleDateString()}
-              </span>
-            </div>
-            <div className="post-content" style={{color:'black'}}>{post.content}</div>
-            <div className="post-actions">
-              <button 
-                className="like-button" 
-                onClick={() => handleLike(post.id)}
-              >
-                <FaHeart /> {post.likes}
-              </button>
-              <button 
-                className="comment-button"
-                onClick={() => window.location.href = `/post/${post.id}`}
-              >
-                <FaComment /> {post.comment_count}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => setCurrentPage(p => p - 1)}
-            disabled={currentPage === 1 || loading}
-          >
-            Previous
-          </button>
-          <span>{currentPage} of {totalPages}</span>
-          <button 
-            onClick={() => setCurrentPage(p => p + 1)}
-            disabled={currentPage === totalPages || loading}
-          >
-            Next
-          </button>
+      <div className="community-main">
+        <div className="create-post">
+          <form onSubmit={handlePostSubmit} className='community-post-submit'>
+            <textarea
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              placeholder="Share something with your community..."
+              disabled={loading}
+            />
+            <button type="submit" disabled={loading || !newPost.trim()}>
+              {loading ? 'Posting...' : 'Post'}
+            </button>
+          </form>
         </div>
-      )}
+
+        <div className="posts-container">
+          {posts.map(post => (
+            <div key={post.id} className="post-card">
+              <div className="post-header">
+                <span className="post-author">{post.author}</span>
+                <span className="post-date">
+                  {new Date(post.created_at).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="post-content">{post.content}</div>
+              <div className="post-actions">
+                <button className="like-button" onClick={() => handleLike(post.id)} style={{color:'black'}}>
+                  <FaHeart color='black'/> {post.likes}
+                </button>
+                <button className="comment-button">
+                  <FaComment /> {post.comment_count}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1 || loading}>
+              Previous
+            </button>
+            <span>{currentPage} of {totalPages}</span>
+            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages || loading}>
+              Next
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

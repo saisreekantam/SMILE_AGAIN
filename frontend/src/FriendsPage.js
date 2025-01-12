@@ -50,11 +50,11 @@ const ViewFriends = () => {
         </div>
 
         {/* Chat Component */}
-        <div className="chat-section">
+        <div className="chat-section-friend">
           {selectedFriend ? (
             <FriendChatPage friend={selectedFriend} />
           ) : (
-            <p>Select a friend to start chatting</p>
+            <p style={{textAlign:'center',verticalAlign:'center',top:'50%',position:'relative',fontSize:'20px'}}>Select a friend to start chatting</p>
           )}
         </div>
       </div>

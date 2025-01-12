@@ -8,16 +8,21 @@
   
   /* Container styling */
   .min-h-screen {
-    background: linear-gradient(to bottom, #4c4cd9, #6a11cb);
+    background: black;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
     flex-direction: column;
     width: 100vw;
   }
-  
+  .min-h-screen h1{
+    align-self: flex-start;
+  }
+  .min-h-screen .navContainer{
+    width: 100%;
+    height: 100%;
+  }
   .w-full {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     width: 1090px;
@@ -31,6 +36,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    width: 100%;
   }
   
   /* Preset Buttons */

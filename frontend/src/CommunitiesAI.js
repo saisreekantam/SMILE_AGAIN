@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Users, Timer, Activity, Send, History, Award } from 'lucide-react';
 import axios from 'axios';
 import './CommunitiesAI.css'
+import { useNavigate } from 'react-router-dom';
 
 const CommunityActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -10,7 +11,7 @@ const CommunityActivities = () => {
   const [activityHistory, setActivityHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const chatContainerRef = useRef(null);
-  
+  const navigate=useNavigate();
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -80,7 +81,7 @@ const CommunityActivities = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 p-4 md:p-8">
+    <div className="min-h-screen-activities bg-gradient-to-br from-purple-600 to-blue-500 p-4 md:p-8">
       {/* Header */}
       <div className="max-w-4xl mx-auto bg-white rounded-t-xl shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
@@ -88,13 +89,6 @@ const CommunityActivities = () => {
             <Sparkles className="text-yellow-500 w-8 h-8" />
             <h1 className="text-2xl font-bold text-gray-800">Community Activities</h1>
           </div>
-          <button
-            onClick={fetchActivityHistory}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
-          >
-            <History className="w-5 h-5" />
-            <span>Activity History</span>
-          </button>
         </div>
 
         {/* Activity Feed */}
@@ -119,27 +113,27 @@ const CommunityActivities = () => {
                 <div className="space-y-4">
                   <p className="text-gray-800 mb-4">{activity.content}</p>
                   {activity.activities.map((act, idx) => (
-                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" style={{display:'flex',flexDirection:'column',border:'2px solid grey'}}>
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-lg text-purple-600">{act.title}</h3>
                         <button
-                          onClick={() => participateInActivity(act.id)}
+                          onClick={() => navigate('/meditation_timer')}
                           className="px-4 py-1 bg-green-500 text-white rounded-full text-sm hover:bg-green-600 transition-colors"
                         >
                           Join Activity
                         </button>
                       </div>
                       <p className="text-gray-600 mb-3">{act.description}</p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
+                      <div className="flex items-center space-x-4 text-sm text-gray-500" style={{display:'flex',flexDirection:'column',alignSelf:'flex-start'}}>
+                        <div className="flex items-center" style={{display:'flex',alignItems:'center'}}>
                           <Timer className="w-4 h-4 mr-1" />
                           {act.duration}
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center" style={{display:'flex',alignItems:'center'}}>
                           <Users className="w-4 h-4 mr-1" />
                           {act.participants}
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center" style={{display:'flex',alignItems:'center'}}>
                           <Activity className="w-4 h-4 mr-1" />
                           Energy: {act.energy_level}
                         </div>

@@ -558,6 +558,34 @@ class Notification(db.Model):
         )
         db.session.add(notification)
         db.session.commit()
+class ReminderLog(db.Model):
+    __tablename__ = 'reminder_log'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    email_sent = db.Column(db.Boolean, default=False)
+    error_message = db.Column(db.Text)
+
+    def __repr__(self):
+        return f'<ReminderLog {self.id} for user {self.user_id}>'
+class StressAssessment(db.Model):
+    __tablename__ = 'stress_assessment'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    assessment_date = db.Column(db.DateTime, default=datetime.utcnow)
+    stress_score = db.Column(db.Float, nullable=False)
+    sleep_quality = db.Column(db.Integer)  # 1-5 scale
+    anxiety_level = db.Column(db.Integer)  # 1-5 scale
+    social_support = db.Column(db.Integer)  # 1-5 scale
+    work_stress = db.Column(db.Integer)  # 1-5 scale
+    physical_activity = db.Column(db.Integer)  # 1-5 scale
+    mood_rating = db.Column(db.Integer)  # 1-5 scale
+    recommendations = db.Column(db.Text)
+    email_sent = db.Column(db.Boolean, default=False)
 class Comment(db.Model):
     """
     Comment model for storing blog comments.

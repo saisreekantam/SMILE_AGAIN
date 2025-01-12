@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Moon, Sun, Volume2, Volume1, VolumeX, Play, Pause, RefreshCw } from 'lucide-react';
 import './MeditationTimer.css'
 import NavAfterLogin from './NavAfterLogin';
+import { useParams } from 'react-router-dom';
 
 const MeditationTimer = () => {
   const [duration, setDuration] = useState(300); // 5 minutes in seconds
@@ -12,10 +13,15 @@ const MeditationTimer = () => {
   const [showCompleted, setShowCompleted] = useState(false);
 
   const presets = [
+    { id: '1min', label: '1 min', seconds: 60 },
+    { id: '2min', label: '2 min', seconds: 120 },
     { id: '5min', label: '5 min', seconds: 300 },
     { id: '10min', label: '10 min', seconds: 600 },
     { id: '15min', label: '15 min', seconds: 900 },
     { id: '20min', label: '20 min', seconds: 1200 },
+    { id: '30min', label: '30min' , seconds: 1800},
+    { id: '45min', label: '45min' , seconds: 2700},
+    { id: '1hr', label: '1hr' , seconds: 3600},
   ];
 
   const formatTime = (seconds) => {
@@ -69,12 +75,12 @@ const MeditationTimer = () => {
         <NavAfterLogin />
       <div className="w-full max-w-md bg-indigo-900/30 backdrop-blur-lg rounded-3xl p-8 shadow-xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold mb-2">Meditation Timer</h1>
+          <h1 className="text-3xl font-semibold mb-2">Timer</h1>
           <p className="text-indigo-200">Find your inner peace</p>
         </div>
 
         {/* Preset Buttons */}
-        <div className="grid grid-cols-4 gap-2 mb-8" style={{marginTop:'20px'}}>
+        <div className="grid grid-cols-4 gap-2 mb-8" style={{marginTop:'20px',display:'flex',justifyContent:'space-evenly'}}>
           {presets.map((preset) => (
             <button
               key={preset.id}
@@ -93,16 +99,17 @@ const MeditationTimer = () => {
 
         {/* Timer Display */}
         <div className="text-center mb-8">
-          <div className="text-6xl font-bold mb-4 font-mono">
+          <div className="text-6xl font-bold mb-4 font-mono" style={{textAlign:'center',fontSize:'25px'}}>
             {formatTime(timeLeft)}
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex justify-center items-center gap-4 mb-8">
+        <div className="flex justify-center items-center gap-4 mb-8" style={{gap:'20px',display:'flex',left:'100px'}}>
           <button
             onClick={toggleTimer}
             className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-full p-4 transition-all"
+            style={{marginLeft:'520px'}}
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
           </button>

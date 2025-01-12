@@ -1,8 +1,8 @@
 /* Basic styling for chat page */
   
   .chat-page {
-    max-width: 600px;
-    margin: 50px auto;
+    width: 100%;
+    height: 100%;
     background-color: #222;
     padding: 20px;
     border-radius: 8px;
@@ -23,13 +23,17 @@
   
   .unread-count {
     font-size: 14px;
-    color: #f44336;
+    color: lightgreen;
+    width: 100px;
   }
   
   .message-container {
     max-height: 400px;
     overflow-y: auto;
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+
   }
   
   .message-pehla {
@@ -38,8 +42,14 @@
     margin: 5px 0;
     border-radius: 5px;
     color: white;
+    width: fit-content;
   }
-  
+  .message-you{
+    align-self: flex-end;
+  }
+.message-other{
+    align-self: flex-start;
+  }
   .sender {
     font-weight: bold;
   }

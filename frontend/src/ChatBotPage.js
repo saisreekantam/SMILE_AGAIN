@@ -141,12 +141,6 @@ const ChatBotPage = () => {
     <div>
       <div className="chatbot-page">
         <NavAfterLogin />
-        <div className="quote-container">
-          <h1>Find Your Smile Again</h1>
-          <p className="quote">
-            "A smile doesn't always mean you're happy. Sometimes it just means you're strong."
-          </p>
-        </div>
 
         <div className="chat-section">
           {/* Language Selector */}
@@ -173,6 +167,7 @@ const ChatBotPage = () => {
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                         role="menuitem"
+                        style={{width:'350px',height:'50px',color:'white'}}
                       >
                         {name}
                       </button>
@@ -245,7 +240,7 @@ const ChatBotPage = () => {
               rows="1"
               className="chat-input"
             />
-            <div className="input-buttons">
+            <div className="input-buttons" style={{zIndex:'100'}}>
               <SpeechInput 
                 onSpeechInput={(text) => setInput(text)}
                 isDisabled={isLoading}
@@ -257,8 +252,9 @@ const ChatBotPage = () => {
               disabled={isLoading || !input.trim()}
               className="send-button"
               aria-label="Send message"
+              style={{width:'100px',backgroundColor:'#4444cc'}}
             >
-              {isLoading ? <FaSpinner className="spinner" /> : <FaPaperPlane />}
+              {isLoading ? <FaSpinner className="spinner" /> : "Send"}
             </button>
           </div>
         </div>

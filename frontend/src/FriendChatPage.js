@@ -15,6 +15,7 @@ const FriendChatPage = ({ friend }) => {
       try {
         const response = await axios.get(`http://localhost:8000/chats/friends/chat/${friend.id}`);
         setMessages(response.data || []);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching chat history", error);
       } finally {
@@ -54,7 +55,7 @@ const FriendChatPage = ({ friend }) => {
   return (
     <div className="chat-page">
       <div className="chat-header">
-        <h2>Chat with {friend.id}</h2>
+        <h2>Chat with {friend.name}</h2>
         <span className="unread-count">
           {unreadCounts.find(count => count.friend_id === friend.id)?.unread_count || 0} Unread Messages
         </span>
@@ -65,7 +66,7 @@ const FriendChatPage = ({ friend }) => {
           <div>Loading...</div>
         ) : (
           messages.map((msg, index) => (
-            <div key={index} className={`message-pehla`}>
+            <div key={index} className={`message-pehla ${msg.sender_name === friend.name ? 'message-other' : 'message-you'}`}>
               <div className="sender">{msg.sender_name}</div>
               <div className="content">{msg.content}</div>
               <div className="timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</div>

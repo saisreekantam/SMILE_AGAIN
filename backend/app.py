@@ -1,16 +1,148 @@
 # app.py
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import os
 import logging
+import smtplib
 from typing import Optional
 from flask import Flask, request, jsonify, Blueprint, make_response, send_from_directory
 from flask_cors import CORS
 from flask_login import LoginManager
 from mood import create_mood_routes
-from models import init_auth,User
+from models import ReminderLog, StressAssessment, init_auth,User
 from extensions import db, bcrypt, socketio, login_manager
-from datetime import timedelta
+from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+from flask_apscheduler import APScheduler
 
+scheduler = APScheduler()
+def send_reminder_email(email):
+    """Send reminder email to user for weekly stress assessment."""
+    try:
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = "your-email@gmail.com"  # Configure with your email
+        sender_password = "your-app-password"   # Use app-specific password
+        
+        msg = MIMEMultipart()
+        msg["Subject"] = "Time for Your Weekly Stress Assessment"
+        msg["From"] = sender_email
+        msg["To"] = email
+        
+        # Create HTML email content
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #6B46C1;">Weekly Stress Check-In</h2>
+                    
+                    <p>Hi there,</p>
+                    
+                    <p>It's time for your weekly stress assessment. Regular check-ins help you:</p>
+                    
+                    <ul>
+                        <li>Track your emotional well-being</li>
+                        <li>Identify stress patterns</li>
+                        <li>Get personalized recommendations</li>
+                        <li>Monitor your progress</li>
+                    </ul>
+                    
+                    <p>Take 5 minutes to complete your assessment:</p>
+                    
+                    <a href="http://localhost:3000/stress-assessment" 
+                       style="background-color: #6B46C1; color: white; padding: 10px 20px; 
+                              text-decoration: none; border-radius: 5px; display: inline-block; 
+                              margin: 20px 0;">
+                        Start Assessment
+                    </a>
+                    
+                    <p>Remember, your mental health matters. We're here to support you.</p>
+                    
+                    <p>Best regards,<br>The Smile Again Team</p>
+                    
+                    <hr style="margin: 20px 0;">
+                    <p style="font-size: 12px; color: #666;">
+                        If you wish to unsubscribe from these reminders, please visit your profile settings.
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(html_content, 'html'))
+        
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+            
+        logger.info(f"Reminder email sent successfully to {email}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send reminder email to {email}: {str(e)}")
+        return False
+
+# Also update the schedule_assessment_reminders function to handle email failures
+def schedule_assessment_reminders():
+    """Schedule and send weekly assessment reminders to users."""
+    with app.app_context():
+        try:
+            users = User.query.filter_by(is_active=True).all()
+            current_time = datetime.utcnow()
+            
+            for user in users:
+                # Check last assessment
+                last_assessment = StressAssessment.query.filter_by(
+                    user_id=user.id
+                ).order_by(StressAssessment.assessment_date.desc()).first()
+                
+                # Send reminder if no assessment in past week
+                if not last_assessment or (
+                    current_time - last_assessment.assessment_date > timedelta(days=7)
+                ):
+                    success = send_reminder_email(user.email)
+                    
+                    # Log reminder status
+                    reminder_log = ReminderLog(
+                        user_id=user.id,
+                        email_sent=success,
+                        error_message=None if success else "Failed to send email"
+                    )
+                    db.session.add(reminder_log)
+            
+            db.session.commit()
+            logger.info("Assessment reminders scheduled and sent successfully")
+            
+        except Exception as e:
+            logger.error(f"Error in reminder scheduling: {str(e)}")
+            db.session.rollback()
+def schedule_assessment_reminders():
+    with app.app_context():
+        users = User.query.all()
+        current_time = datetime.utcnow()
+        
+        for user in users:
+            last_assessment = StressAssessment.query.filter_by(
+                user_id=user.id
+            ).order_by(StressAssessment.assessment_date.desc()).first()
+            
+            if not last_assessment or (
+                current_time - last_assessment.assessment_date > timedelta(days=7)
+            ):
+                send_reminder_email(user.email)
+
+def init_scheduler(app):
+    scheduler.init_app(app)
+    scheduler.add_job(
+        id='assessment_reminder',
+        func=schedule_assessment_reminders,
+        trigger='cron',
+        day_of_week='mon',
+        hour=9,
+        minute=0
+    )
+    scheduler.start()
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 

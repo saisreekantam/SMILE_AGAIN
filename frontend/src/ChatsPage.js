@@ -35,7 +35,7 @@ const ChatsPage = () => {
           className={`nav-button ${activeSection === 'groups' ? 'active' : ''}`}
           onClick={() => setActiveSection('groups')}
         >
-        Communities
+        Community
         </button>
       </nav>
 
