@@ -232,7 +232,7 @@ python init_db.py  # Loads initial data
 ├── README.md
 ├── .gitignore
 └── requirements.txt
-```bash
+```
 
 
 ##API Documentation 📚
