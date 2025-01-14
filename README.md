@@ -18,7 +18,7 @@ Smile Again is an innovative mental health support platform that provides anonym
 - **Stress Level Monitoring**: Personalized support recommendations based on user state
 
 ### A glimpse of our project
-![image_alt][https://github.com/saisreekantam/SMILE_AGAIN/blob/b93b7b00c43cf5a3ab9f8cdce8588fe8949229ac/WhatsApp%20Image%202025-01-14%20at%2010.36.10.jpeg]
+![image alt][https://github.com/saisreekantam/SMILE_AGAIN/blob/b93b7b00c43cf5a3ab9f8cdce8588fe8949229ac/WhatsApp%20Image%202025-01-14%20at%2010.36.10.jpeg]
 
 ## Technology Stack 💻
 
