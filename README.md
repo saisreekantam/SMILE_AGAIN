@@ -234,33 +234,32 @@ python init_db.py  # Loads initial data
 └── requirements.txt
 ```
 
+## API Documentation 📚
 
-##API Documentation 📚
-
-###Authentication Endpoints
+### Authentication Endpoints
 - POST /auth/register - User registration
 - POST /auth/login - User login
 - POST /auth/logout - User logout
 
-###Chat Endpoints
+### Chat Endpoints
 
 - POST /bot/chat - Send message to AI bot
 - GET /chat/history - Retrieve chat history
 
-###Community Endpoints
+### Community Endpoints
 
 - GET /groups - List available groups
 - POST /groups - Create new group
 - POST /groups/<id>/join - Join specific group
 
-###User Management Endpoints
+### User Management Endpoints
 
 - GET /profile - Get user profile
 - PUT /profile - Update user profile
 - GET /friends - List friends
 - POST /friend-request - Send friend request
 
-###Contributing 🤝
+### Contributing 🤝
 
 - Fork the repository
 - Create your feature branch (git checkout -b feature/AmazingFeature)
@@ -268,25 +267,25 @@ python init_db.py  # Loads initial data
 - Push to the branch (git push origin feature/AmazingFeature)
 - Open a Pull Request
 
-##Core Features Implementation Details 🔧
+## Core Features Implementation Details 🔧
 
-##Multi lingual AI Chatbot Capabilities
-###Anonymous User System
-###Unique identifier generation
-###Privacy-focused data storage
-###Secure session management
+## Multi lingual AI Chatbot Capabilities
+### Anonymous User System
+### Unique identifier generation
+### Privacy-focused data storage
+### Secure session management
 ###Emotional state detection
-###Crisis intervention protocols
-###Contextual response generation
-###Conversation history management
-###Community Management
-###Stress Tracking System
-###User stress level monitoring
-###Intervention triggers
-###Progress visualization
-###Milestone achievement system
+### Crisis intervention protocols
+### Contextual response generation
+### Conversation history management
+### Community Management
+### Stress Tracking System
+### stress level monitoring
+### Intervention triggers
+### Progress visualization
+### Milestone achievement system
 
-##Security Considerations 🔒
+## Security Considerations 🔒
 
 -All sensitive data is encrypted at rest
 -Regular security audits
@@ -295,13 +294,13 @@ python init_db.py  # Loads initial data
 -XSS and CSRF protection
 -Regular dependency updates
 
-###License 📄
+### License 📄
 -Distributed under the MIT License. See LICENSE for more information.
-###Support 💡
+### Support 💡
 -For support, email support@smileagain.com or join our Slack channel.
 Acknowledgments 🙏
 -Open source community
 -All contributors and supporters
 
 
-###Built with ❤️ by the Smile Again Team
+### Built with ❤️ by the Smile Again Team
