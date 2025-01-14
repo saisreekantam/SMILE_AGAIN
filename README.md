@@ -20,11 +20,11 @@ Smile Again is an innovative mental health support platform that provides anonym
 ### A glimpse of our project
 - **Video demo of our project**:
   [(https://www.youtube.com/watch?v=YKSTFULJbwc)]
-- **Response of Bot in telugu and kannada**:
+- **Response of Bot in Hindi**:
   
 ![image alt](https://github.com/saisreekantam/SMILE_AGAIN/blob/62b935613c08de30f65448127d017507e3f5367a/WhatsApp%20Image%202025-01-14%20at%2010.36.20.jpeg)
 
-- **Response of Bot in telugu and kannada**:
+- **Response of Bot in Telugu and Kannada**:
   
 ![image alt](https://github.com/saisreekantam/SMILE_AGAIN/blob/b93b7b00c43cf5a3ab9f8cdce8588fe8949229ac/WhatsApp%20Image%202025-01-14%20at%2010.36.10.jpeg)
 
