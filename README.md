@@ -7,13 +7,18 @@ Smile Again is an innovative mental health support platform that provides anonym
 
 ### Key Features 🎯
 
+- **MultiLingual AI Chatbot Support**: Empathetic conversation partner available 24/7 and talk in 7 indian languages with same emotion 
 - **Anonymous Registration & Authentication**: Secure, privacy-focused user accounts
-- **Community Building**: Auto-generated support groups based on shared experiences
-- **AI Chatbot Support**: Empathetic conversation partner available 24/7
+- **Chat with Anounymous persons**: A user can send friend request to another user and discuss about thier problems
+- **Community Building**: Auto-generated support groups based on problem of user and we generate smile path for bettermet
+- **Blogs related to smile reason**: Users can post blogs related to differet issues and other users can like comment and also connect with author 
 - **Professional Counselor Connection**: Direct access to mental health professionals
 - **Milestone System**: Community-wide progress tracking with visual transformations
 - **Real-time Interactions**: Live chat and community discussions
 - **Stress Level Monitoring**: Personalized support recommendations based on user state
+
+### A glimpse of our project
+
 
 ## Technology Stack 💻
 
@@ -274,7 +279,7 @@ python init_db.py  # Loads initial data
 ### Unique identifier generation
 ### Privacy-focused data storage
 ### Secure session management
-###Emotional state detection
+### Emotional state detection
 ### Crisis intervention protocols
 ### Contextual response generation
 ### Conversation history management
