@@ -1,221 +1,342 @@
 .mood-tracker-page {
-    min-height: 100vh;
-    background-color: #f5f5f5;
-    background-image: url('./assets/Artificial\ Intelligence\ wave\ for\ Natural\ AI\ by\ fantasy\ for\ Brain[1].gif');
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-  
-  .mood-journal-container {
-    max-width: 90vw;
-    margin: 40px 20px;
-    padding: 10px;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .mood-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .mood-header h1 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  .mood-level-section {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    gap: 10px;
-  }
-  
-  .mood-button {
-    /* flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    background: rgb(186, 11, 186);
-    cursor: pointer;
-    transition: all 0.3s ease; */
-    
-  }
+  min-height: 100vh;
+  background: linear-gradient(125deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
 
-/* CSS */
-.mood-button{
-  align-items: center;
-  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
-  border: 0;
-  border-radius: 8px;
-  /* box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px; */
-  box-sizing: border-box;
-  color: #FFFFFF;
-  display: flex;
-  font-family: Phantomsans, sans-serif;
-  flex-direction: column;
-  height: 80px;
-  align-items: center;
-  font-size: 20px;
-  justify-content: center;
-  line-height: 1em;
-  max-width: 100%;
-  min-width: 140px;
-  padding: 3px;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  white-space: nowrap;
+.mood-tracker-page::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle at center, rgba(175, 64, 255, 0.15) 0%, transparent 70%);
+  top: -25%;
+  left: -25%;
+  animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.3; }
+}
+
+.mood-journal-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 3rem;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideUp 0.8s ease-out forwards;
+}
+
+@keyframes slideUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mood-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+}
+
+.mood-header::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #AF40FF, transparent);
+}
+
+.mood-header h1 {
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #AF40FF, #5B42F3, #00DDEB);
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+  background-size: 200% 100%;
+  z-index: 1000;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.mood-header p {
+  color: #a0a0b0;
+  font-size: 1.2rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.4s forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.mood-level-section {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.6s forwards;
+}
+
+.mood-button {
+  position: relative;
+  padding: 2rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  color: white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-.mood-button:active,
+.mood-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, #AF40FF, #5B42F3, #00DDEB);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
 .mood-button:hover {
-  outline: 0;
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(175, 64, 255, 0.2);
 }
 
-.mood-button span {
-  /* background-color: rgb(5, 6, 45); */
-  padding: 0;
-  border-radius: 6px;
+.mood-button.selected {
+  background: linear-gradient(135deg, rgba(175, 64, 255, 0.2), rgba(91, 66, 243, 0.2));
+  transform: scale(1.05);
+}
+
+.mood-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.8rem;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.mood-button:hover .mood-number {
+  transform: scale(1.1);
+}
+
+.mood-label {
+  font-size: 1rem;
+  color: #a0a0b0;
+  transition: color 0.3s ease;
+}
+
+.mood-button:hover .mood-label {
+  color: #fff;
+}
+
+.emotions-section {
+  margin-bottom: 4rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.8s forwards;
+}
+
+.emotions-section h3 {
+  color: #fff;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.emotions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  perspective: 1000px;
+}
+
+.emotion-tag {
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a0a0b0;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+  transform-style: preserve-3d;
+}
+
+.emotion-tag:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  transform: translateZ(20px);
+  box-shadow: 0 8px 24px rgba(175, 64, 255, 0.2);
+}
+
+.emotion-tag.selected {
+  background: linear-gradient(135deg, #AF40FF, #5B42F3);
+  color: #fff;
+  transform: translateZ(30px);
+  box-shadow: 0 12px 32px rgba(175, 64, 255, 0.3);
+}
+
+.notes-section {
+  margin-bottom: 4rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 1s forwards;
+}
+
+.notes-section h3 {
+  color: #fff;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.notes-section textarea {
   width: 100%;
-  height: 25px;
-  transition: 300ms;
-  color: white;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  font-size: 1.1rem;
+  min-height: 180px;
+  resize: vertical;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mood-button:hover span {
-  background: none;
+.notes-section textarea:focus {
+  outline: none;
+  border-color: #5B42F3;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(91, 66, 243, 0.2);
 }
 
-@media (min-width: 768px) {
-  .mood-button {
-    font-size: 24px;
-    min-width: 196px;
-  }
+.submit-button {
+  width: 100%;
+  padding: 1.5rem;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #AF40FF, #5B42F3);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 1.2s forwards;
+  position: relative;
+  overflow: hidden;
 }
 
-  
-  /* .mood-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  } */
-  
-  /* .mood-button.selected {
-    border-color: #4CAF50;
-    background-color: #E8F5E9;
-  } */
-  
-  .mood-number {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 5px;
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.submit-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(91, 66, 243, 0.3);
+}
+
+.submit-button:hover::before {
+  left: 100%;
+}
+
+.submit-button:disabled {
+  background: #2a2a3a;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-message {
+  color: #ff4d4d;
+  text-align: center;
+  margin: 1rem 0;
+  padding: 1.2rem;
+  border-radius: 15px;
+  background: rgba(255, 77, 77, 0.1);
+  backdrop-filter: blur(10px);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@media (max-width: 768px) {
+  .mood-tracker-page {
+    padding: 1rem;
   }
-  
-  .mood-label {
-    font-size: 14px;
-    color: #666;
-    padding: 0px;
+
+  .mood-journal-container {
+    padding: 2rem;
+    margin: 20px auto;
   }
-  
-  .emotions-section {
-    margin-bottom: 30px;
+
+  .mood-level-section {
+    grid-template-columns: repeat(3, 1fr);
   }
-  
-  .emotions-section h3 {
-    margin-bottom: 15px;
-    color: #333;
-  }
-  
+
   .emotions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .emotion-tag {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    background: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: white;
+
+  .mood-header h1 {
+    font-size: 2.2rem;
   }
-  
-  .emotion-tag:hover {
-    background-color: #f5f5f5;
+
+  .mood-button {
+    padding: 1.5rem 1rem;
   }
-  
-  .emotion-tag.selected {
-    background-color: #2196F3;
-    color: white;
-    border-color: #2196F3;
+
+  .mood-number {
+    font-size: 1.6rem;
   }
-  
-  .notes-section {
-    margin-bottom: 30px;
+}
+
+@media (max-width: 480px) {
+  .mood-level-section {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .notes-section h3 {
-    margin-bottom: 15px;
-    color: #333;
+
+  .emotions-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .notes-section textarea {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    resize: vertical;
-    min-height: 120px;
-    font-family: inherit;
-  }
-  
-  .submit-button {
-    width: 100%;
-    padding: 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .submit-button:hover {
-    background-color: #45a049;
-  }
-  
-  .submit-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  .error-message {
-    color: #f44336;
-    margin: 10px 0;
-    text-align: center;
-  }
-  
-  @media (max-width: 600px) {
-    .mood-level-section {
-      flex-direction: column;
-    }
-    
-    .emotions-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .mood-journal-container {
-      padding: 20px;
-      margin: 20px auto;
-    }
-  }
+}

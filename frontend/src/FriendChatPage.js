@@ -82,7 +82,7 @@ const FriendChatPage = ({ friend }) => {
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
         />
-        <button onClick={handleSendMessage}>Send</button>
+        <button onClick={handleSendMessage} style={{height:'70px'}}>Send</button>
       </div>
     </div>
   );

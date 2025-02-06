@@ -181,7 +181,7 @@ const ChatBotPage = () => {
           {/* Chat Container */}
           <div className="chat-container" ref={chatContainerRef}>
             {/* Welcome message */}
-            <div className="message bot-message">
+            <div className="message bot-message-main">
               <div className="message-content">
                 Hi! I'm here to listen and help. How are you feeling today?
                 <BotSpeech message="Hi! I'm here to listen and help. How are you feeling today?" language={selectedLanguage} />
@@ -195,7 +195,7 @@ const ChatBotPage = () => {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`message ${message.sender}-message ${message.isError ? 'error-message' : ''}`}
+                className={`message-m ${message.sender}-message-main ${message.isError ? 'error-message' : ''}`}
               >
                 <div className="message-content">
                   {message.text}

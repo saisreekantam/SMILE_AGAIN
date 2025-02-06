@@ -11,17 +11,18 @@
   margin: 0;
   color: #e0e0e0;
   /* background:  url('./assets/ChatsBg.jpg'); */
-  background-color: black;
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
   
 }
 .chats-page .navContainer{
   width: 100%;
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
 }
 
 .navigation {
   display: flex;
   justify-content: center;
-  background-color: rgba(33, 0, 77, 0.9); /* Dark purple with slight transparency */
+  background: linear-gradient(125deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
   padding: 10px 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   border-bottom: 1px solid #3e00b7;

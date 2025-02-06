@@ -76,7 +76,6 @@ const BotSpeech = ({ message, language = 'en' }) => {
     try {
       if (!speechSupported) return;
 
-      window.speechSynthesis.cancel();
       const cleanedText = removeEmojis(text);
       const utterance = new SpeechSynthesisUtterance(cleanedText);
 
@@ -88,10 +87,10 @@ const BotSpeech = ({ message, language = 'en' }) => {
       } else if (selectedVoice) {
         utterance.voice = selectedVoice;
         utterance.rate = 1.0;
-        utterance.pitch = 1.0;
+        utterance.pitch = 1.2;
       }
 
-      utterance.volume = 1.0;
+      utterance.volume = 0.9;
 
       utterance.onstart = () => setSpeaking(true);
       utterance.onend = () => setSpeaking(false);
@@ -100,7 +99,10 @@ const BotSpeech = ({ message, language = 'en' }) => {
         setSpeaking(false);
       };
 
-      window.speechSynthesis.speak(utterance);
+      // Don't cancel current speech to avoid premature stopping
+      if (!window.speechSynthesis.speaking) {
+        window.speechSynthesis.speak(utterance);
+      }
     } catch (error) {
       console.error('Speech synthesis failed:', error);
       setSpeaking(false);

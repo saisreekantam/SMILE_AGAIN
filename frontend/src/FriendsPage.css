@@ -3,12 +3,13 @@
   display: flex;
   height: calc(100vh - 60px); /* Full height minus navigation bar */
   width: 100%;
+  border: none;
 }
 
 /* Friends list styles */
 .friend-list {
   flex: 1; /* 1/4th width */
-  background-color: black; 
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
   padding: 1rem;
   border-right: 1px solid #ddd; /* Separate with a border */
   overflow-y: auto; /* Scrollable list */
@@ -18,8 +19,9 @@
   padding: 0.5rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  border: 1px solid grey;
+  /* border: 1px solid grey; */
   border-radius: 5px;
+  margin-bottom: 10px;
 }
 
 .friend-item:hover,
@@ -33,7 +35,7 @@
   flex: 3; /* 3/4th width */
   padding: 0;
   color: white;
-  background-color: black; /* White background for chat */
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
   overflow-y: auto; /* Scrollable chat section */
   display: flex;
   flex-direction: column;

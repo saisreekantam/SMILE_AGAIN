@@ -85,10 +85,11 @@
   .message-input button {
     padding: 10px;
     border: none;
-    background-color: #f44336;
+    background-color: purple;
     color: #fff;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 0px;
   }
   
   .message-input button:hover {

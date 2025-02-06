@@ -4,7 +4,7 @@
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -22,7 +22,8 @@
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Soft shadow */
     width: 90%;
-    max-width: 600px;
+    max-width: 800px;
+    height: 500px;
   }
   
   .add-blog-form input,
@@ -43,7 +44,7 @@
   }
   
   .add-blog-form button {
-    background-color: #333; /* Dark button background */
+    background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%); /* Dark button background */
     color: #fff; /* White text */
     border: none;
     border-radius: 8px;

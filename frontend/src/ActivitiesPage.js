@@ -42,7 +42,8 @@ const EnhancedActivityDashboard = () => {
     // { name: "Thu", mood: 8 },
     // { name: "Fri", mood: 7.5 },
     // { name: "Sat", mood: 8.5 },
-    { name: "Sun", mood: 9 },
+    { name: "Sat", mood: 9 },
+    { name: "Sun", mood: 8.5}
   ];
 
   return (
@@ -62,19 +63,19 @@ const EnhancedActivityDashboard = () => {
           <div className="card">
             <Calendar className="w-6 h-6 text-white mb-3" />
             <h3 className="card-title">Current Streak</h3>
-            <p className="text-3xl font-bold text-green-500">1 day</p>
+            <p className="text-3xl font-bold text-green-500">2 days</p>
           </div>
 
           <div className="card">
             <Activity className="w-6 h-6 text-white mb-3" />
             <h3 className="card-title">Total Activities</h3>
-            <p className="text-3xl font-bold text-green-500">2</p>
+            <p className="text-3xl font-bold text-green-500">4</p>
           </div>
 
           <div className="card">
             <Heart className="w-6 h-6 text-white mb-3" />
             <h3 className="card-title">Mood Improvement</h3>
-            <p className="text-3xl font-bold text-green-500">+15%</p>
+            <p className="text-3xl font-bold text-green-500">+20%</p>
           </div>
         </div>
 

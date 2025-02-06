@@ -55,27 +55,33 @@ function LoginPage() {
                 />
             </div>
             <div className="login-form-container">
+                <div className="Logo">
+                    <span className="Smile">Smile</span>
+                    <span className="Again">Again</span>
+                </div>
                 <h2>Login Page</h2>
-                <form onSubmit={handleSubmit} className="login-form">
-                    <input
-                        type="text"
-                        name="email"
-                        placeholder="Email"
-                        required
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        required
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button type="submit">Login</button>
-                </form>
-                <div className="login-links">
-                    <Link to="/register">Not registered? Register here</Link>
-                    <Link to="/">Go back to homepage</Link>
+                <div className="login-form-support">
+                    <form onSubmit={handleSubmit} className="login-form">
+                        <input
+                            type="text"
+                            name="email"
+                            placeholder="Email"
+                            required
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            required
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button type="submit">Login</button>
+                    </form>
+                    <div className="login-links">
+                        <Link to="/register">Not registered? Register here</Link>
+                        <Link to="/">Go back to homepage</Link>
+                    </div>
                 </div>
             </div>
         </div>

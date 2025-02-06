@@ -60,9 +60,9 @@ const ProfilePage = () => {
           />
           <div className="profile-details">
             <h1 className="profile-name">{profile.name}</h1>
-            <p className="profile-email">Email: {profile.email}</p>
-            <p className="profile-gender">Gender: {profile.gender}</p>
-            <p className="profile-description">About: {profile.description}</p>
+            <h3 className="profile-email">Email: {profile.email}</h3>
+            <h3 className="profile-gender">Gender: {profile.gender}</h3>
+            <h3 className="profile-description">About: {profile.description}</h3>
           </div>
         </div>
         <div className="friends-link">

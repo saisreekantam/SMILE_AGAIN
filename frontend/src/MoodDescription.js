@@ -83,7 +83,7 @@ const MoodTrackerPage = () => {
       
       <div className="mood-journal-container">
         <div className="mood-header">
-          <h1 style={{color:'white'}}>Mood Journal</h1>
+          <h1>Mood Journal</h1>
           <p style={{color:'white'}}>How are you feeling today?</p>
         </div>
 

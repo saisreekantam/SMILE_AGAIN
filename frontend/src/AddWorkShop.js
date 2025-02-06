@@ -159,6 +159,7 @@ const CreateWorkshop = () => {
                     type="submit" 
                     disabled={loading}
                     className={loading ? 'loading' : ''}
+                    style={{backgroundColor:'purple'}}
                 >
                     {loading ? 'Creating...' : 'Create Workshop'}
                 </button>

@@ -80,14 +80,14 @@ const SpeechInput = ({ onSpeechInput, isDisabled = false }) => {
 
   const toggleListening = useCallback(() => {
     if (isListening) {
-      recognitionRef.current?.stop();
+      void recognitionRef.current?.stop();
       clearTimeout(stopTimeoutRef.current);
     } else {
       try {
         if (!recognitionRef.current) {
           recognitionRef.current = initializeSpeechRecognition();
         }
-        recognitionRef.current?.start();
+       void recognitionRef.current?.start();
       } catch (err) {
         setError('Error starting speech recognition');
         console.error('Speech recognition error:', err);
@@ -99,7 +99,7 @@ const SpeechInput = ({ onSpeechInput, isDisabled = false }) => {
     setSelectedLanguage(langCode);
     setShowLanguageMenu(false);
     if (isListening) {
-      recognitionRef.current?.stop();
+      void recognitionRef.current?.stop();
       clearTimeout(stopTimeoutRef.current);
     }
   };
@@ -118,6 +118,7 @@ const SpeechInput = ({ onSpeechInput, isDisabled = false }) => {
             ? 'bg-red-100 text-red-600 hover:bg-red-200'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         }`}
+        style={{ width:'50px'}}
       >
         {isListening ? (
           <Loader2 className="w-5 h-5 animate-spin" />

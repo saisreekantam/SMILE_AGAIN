@@ -1,8 +1,9 @@
 /* Container for the navigation bar */
 .navContainer {
-  background: linear-gradient(135deg, #6a11cb, #2575fc); /* Bluish-purple gradient */
+  /* background: linear-gradient(135deg, #6a11cb, #2575fc); Bluish-purple gradient */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   left: 300px;
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
 }
 
 /* Top navigation bar styling */
@@ -13,6 +14,7 @@
   padding: 15px 20px;
   font-family: "Arial", sans-serif;
   left: 300px;
+  background: linear-gradient(135deg, #1a1b2e 0%, #2d1b4d 50%, #1a1b2e 100%);
 }
 
 /* Logo styling */
