@@ -1,7 +1,7 @@
 # smileagain_meenarashi
 # Smile Again 🌟
 
-About The Project
+## About The Project
 
 Smile Again is an innovative mental health support platform that provides anonymous peer support, professional counseling connections, and AI-powered emotional assistance. The platform is designed to create a safe space where users can share their struggles, connect with others facing similar challenges, and track their journey toward better mental well-being.
 
