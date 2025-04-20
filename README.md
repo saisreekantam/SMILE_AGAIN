@@ -11,7 +11,7 @@ Smile Again is an innovative mental health support platform that provides anonym
 - **Anonymous Registration & Authentication**: Secure, privacy-focused user accounts
 - **Chat with Anounymous persons**: A user can send friend request to another user and discuss about thier problems
 - **Community Building**: Auto-generated support groups based on problem of user and we generate smile path for bettermet
-- **Blogs related to smile reason**: Users can post blogs related to differet issues and other users can like comment and also connect with author 
+- **Blogs related to smile reason**: Users can post blogs related to differet issues and other users can like comment and also connect with author  
 - **Professional Counselor Connection**: Direct access to mental health professionals
 - **Milestone System**: Community-wide progress tracking with visual transformations
 - **Real-time Interactions**: Live chat and community discussions
